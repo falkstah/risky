@@ -50,7 +50,7 @@ def evaluate_trade(p_entry, p_TP, p_SL, lvg):
 #volatility-dependent margin liquidation buffer
 # terminal setup installation for ATR calculation: (delete # for first run)
 #!pip install ccxt pandas pandas-ta
-exchange = ccxt.bybit()
+#exchange = ccxt.bybit()
 k = 1.5 # sicherheitsmultiplikator
 #live atr erstmal überbrückt, weil bybit google IP-Anfragrn blockiert
 #used to match the liq price to current volatility:
