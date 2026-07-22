@@ -1,7 +1,16 @@
+<<<<<<< HEAD
 text
 
 math
 streamlit
 Pandas
 ccxt
+=======
+text
+
+math
+streamlit
+Pandas
+ccxt
+>>>>>>> 5515cba39c45387296becc26aa0434ab4ca7b872
 pandas_ta
