@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import math
-import ccxt
 import pandas as pd
-import pandas_ta as ta
+#import ccxt
+#import pandas_ta as ta
 
 #margins
 #receive fom DEX
