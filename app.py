@@ -138,7 +138,7 @@ risk = 10
 def get_trade_parameters():
   print("Enter parameters: ")
   p_entry = max( float(st.number_input("entry: ", min_value = 0.01, step = 0.01)), 0)
-  p_SL = max( float(st.number_input("SL: ", min_value = 0.01, step = 0.01)), 0)
+  p_SL = max( float(st.number_input("SL: ", min_value = 0.00, step = 0.01)), 0)
   return p_entry, p_SL
 
 def get_TP():
@@ -172,8 +172,12 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
   try:
     # Unten 0, Oben TP oder Entry
     balken_unten = 0.0
-    if p_TP > 0:
-        balken_oben = max(p_TP, p_entry, p_SL, p_liquidation)  #covers short and long case
+    if p_TP > 0:  #hence, tp exists
+      if SL_delta > 0 and p_TP > p_entry:  # long case
+        balken_oben = max(p_TP, p_entry)  
+        tp_aktiv = True
+      elif SL_delta < 0 and p_TP < p_entry:  # short case
+        balken_oben = max(p_SL, p_liquidation)  
         tp_aktiv = True
     else:
         balken_oben = max(p_entry, p_SL, p_liquidation)  #covers short and long case
