@@ -170,8 +170,7 @@ def current_direction_label(current_direction):
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
-def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
-  #table1:
+def fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
   with st.container(border=True):
   
   
@@ -186,7 +185,9 @@ def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
         col4.metric("n_pos_value", f"{round(n_pos_value, 2)} $")
   
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
-  
+
+def overview_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
+  t#table1
   with st.container(border=True):
 
       st.subheader("📊 Overview")
@@ -361,8 +362,9 @@ print(f"""
 p_TP = get_TP()
 rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(p_entry, p_TP, p_SL, lvg)
 
-parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
+fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
 visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation)
+overview_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
 
 print(f"""
   Input Check:
