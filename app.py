@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 
-"""Margins1"""
-
+#margins
 #receive fom DEX
 #maintainance_margin_rate  # = minimaler rel. Anteil an Positionsgröße, der als Eigenkapital stets verfügbar sein muss, sonst Zwangsliquidation (rel. Pendant zur absoluten Mainainance  Margin); oft nicht so hoch, worst case Annahme
 #maintainance_deduction       # "0" ist konsevativ
@@ -32,8 +31,7 @@ def calculate_maintainance_margin(n_pos_value, maintainance_margin, maintainance
 def calculate_rel_maintainance_margin(maintainance_margin, n_pos_value):
   return maintainance_margin / n_pos_value # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
-"""safety calculus"""
-
+#safety calculus
 #evaluating trading setups
 def evaluate_trade(p_entry, p_TP, p_SL, lvg):
   rel_asset_gain_at_TP = (p_TP - p_entry)/p_entry
@@ -63,8 +61,7 @@ print(f"""
       """)
 '''
 
-"""volatility-dependent margin liquidation buffer"""
-
+#volatility-dependent margin liquidation buffer
 # terminal setup installation for ATR calculation: (delete # for first run)
 #!pip install ccxt pandas pandas-ta
 
@@ -100,7 +97,7 @@ buffer = k
 
 #lvg = buffer...
 
-"""management-dependent calulations (here: simplicity biased)"""
+#management-dependent calulations (here: simplicity biased)
 
 #conservatively hardcoded liq buffer to skip API-task
 def match_liquidation_price_to_SL(p_entry, p_SL):
@@ -109,7 +106,7 @@ def match_liquidation_price_to_SL(p_entry, p_SL):
 def match_lvg_to_liquidation_price(p_entry, p_SL, p_liquidation, maintainance_margin_rate):
   return 1 / (1 + maintainance_margin_rate - p_liquidation * (1 + maintainance_margin_rate) / p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
 
-"""risk correction functions"""
+#risk correction functions
 
 def check_lvg(lvg):
   if lvg > 10:
@@ -151,7 +148,7 @@ def test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq
     valid_caluclation = False
   return valid_caluclation
 
-"""main"""
+#main
 
 #risk standard:
 global risk
@@ -223,7 +220,7 @@ print(f"""
 
       """)
 
-"""Output"""
+#Output
 
 #risk feedback
 p_TP = get_TP()
