@@ -167,17 +167,16 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
   direction_text = "LONG 🟢" if is_long else "SHORT 🔴"
 
   try:
-    # Unten 0, Oben TP oder Entry
     balken_unten = 0.0
     if p_TP > 0:  #hence, tp exists
       if SL_delta > 0 and p_TP > p_entry:  # long case
         balken_oben = max(p_TP, p_entry)  
         tp_aktiv = True
       elif SL_delta < 0 and p_TP < p_entry:  # short case
-        balken_oben = max(p_SL, p_liquidation)  
+        balken_oben = max(p_liquidation)  
         tp_aktiv = True
     else:
-        balken_oben = max(p_entry, p_SL, p_liquidation)  #covers short and long case
+        balken_oben = max(p_entry, p_liquidation)  #covers short and long case
         tp_aktiv = False
 
     # Daten fürs Chart zusammenbauen
