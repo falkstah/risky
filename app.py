@@ -237,7 +237,8 @@ except:
   print("SL_delta is zero. Please check your input parameters.")
   st.stop()
 
-  rel_risk = calculate_rel_risk(p_entry, p_SL)
+rel_risk = calculate_rel_risk(p_entry, p_SL)
+
 #UI view:
 current_direction = get_trade_direction(calculate_SL_delta(p_entry, p_SL))
 current_direction_label(current_direction)
