@@ -135,12 +135,12 @@ risk = 10
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  p_entry = float(st.number_input("entry: "))
-  p_SL = float(st.number_input("SL: "))
+  p_entry = float(st.number_input("entry: ", min_value = 0.01, step = 0.01))
+  p_SL = float(st.number_input("SL: ", min_value = 0.01, step = 0.01))
   return p_entry, p_SL
 
 def get_TP():
-  p_TP = float(input("TP: "))
+  p_TP = float(st.number_input("TP: ", min_value = 0.01, step = 0.01))
   return p_TP
 
 #at the moment, one time input for fixed parameters:
