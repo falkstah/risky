@@ -16,10 +16,9 @@ st.text("Opimized for execution speed.")
 
 #initial margin calculation
 def calculate_SL_delta(p_entry, p_SL):
-  try: 
-    return p_entry - p_SL
-  except ValueError("Entry = SL. Check parameters."):
-    pass
+  if p_entry == p_SL:
+    raise ValueError("p_entry = p_SL. Check parameters")
+  return p_entry - p_SL
 
 def calculate_rel_risk(p_entry, p_SL):
   return abs(p_entry-p_SL)/p_entry
