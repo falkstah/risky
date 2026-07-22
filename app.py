@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import math
+import ccxt
+import pandas as pd
+import pandas_ta as ta
 
 #margins
 #receive fom DEX
@@ -65,17 +68,12 @@ print(f"""
 # terminal setup installation for ATR calculation: (delete # for first run)
 #!pip install ccxt pandas pandas-ta
 
-'''
-import ccxt
-import pandas as pd
-import pandas_ta as ta
-
 exchange = ccxt.bybit()
-'''
+
 k = 1.5 # sicherheitsmultiplikator
 
 #live atr erstmal überbrückt, weil bybit google IP-Anfragrn blockiert
-'''
+
 #used to match the liq price to current volatility:
 def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
   #ohlcv = "open, high, low, close, volume", fetch = retrieve
@@ -90,11 +88,8 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
   #returning only the latest atr of the generated atr list
   return atr.iloc[-1]
 
-buffer = k * get_live_ATR('BTC/USDT', '4h', 14)
-'''
-
-buffer = k
-
+#buffer = k * get_live_ATR('BTC/USDT', '4h', 14)
+#buffer = k
 #lvg = buffer...
 
 #management-dependent calulations (here: simplicity biased)
