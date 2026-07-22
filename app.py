@@ -331,6 +331,7 @@ print(f"""
 p_TP = get_TP()
 rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(p_entry, p_TP, p_SL, lvg)
 
+parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP)
 visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation)
 
 print(f"""
