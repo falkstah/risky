@@ -231,9 +231,8 @@ risk = 10
 #at the moment, one time input for fixed parameters:
 p_entry, p_SL = get_trade_parameters()
 #Calculating basic parameters
-try:  #manages case: SL_delta == 0, which would lead to division by zero in the following calculations
-  SL_delta = calculate_SL_delta(p_entry, p_SL)
-except:
+SL_delta = calculate_SL_delta(p_entry, p_SL)
+if SL_delta == 0: #this would lead to division by zero in the following calculations
   print("SL_delta is zero. Please check your input parameters.")
   st.stop()
 
