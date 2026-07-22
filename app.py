@@ -13,7 +13,7 @@ st.text("Opimized for execution speed.")
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  liq_delta_to_SL_delta_ratio = max(float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4, mn_value = 1.5, step = 0.25)), 1)
+  liq_delta_to_SL_delta_ratio = max(float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4, min_value = 1.5, step = 0.25)), 1)
   risk = max(float(st.number_input("risk: ", value = 10, step = 1)), 0)
   maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", value = 0.02, step = 0.001)), 0)
   maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", value = 0.0, step = 0.001)), 0)
@@ -58,7 +58,7 @@ def fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
   
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-def overview_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
+def overview_table(risk, rel_risk, p_entry, p_SL, p_TP, SL_delta, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
   #table1
   with st.container(border=True):
 
@@ -171,4 +171,4 @@ current_direction_label(current_direction)
 
 fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
 visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation)
-overview_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
+overview_table(risk, rel_risk, p_entry, p_SL, p_TP, SL_delta, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
