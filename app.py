@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
+st.text("Opimized for execution speed.")
 #margins
 #receive fom DEX
 #maintainance_margin_rate  # = minimaler rel. Anteil an Positionsgröße, der als Eigenkapital stets verfügbar sein muss, sonst Zwangsliquidation (rel. Pendant zur absoluten Mainainance  Margin); oft nicht so hoch, worst case Annahme
@@ -136,15 +137,35 @@ risk = 10
 def get_trade_parameters():
   print("Enter parameters: ")
   p_entry = float(st.number_input("entry: ", min_value = 0.01, step = 0.01))
-  p_SL = float(st.number_input("SL: ", min_value = 0.01, step = 0.01))
+  p_SL = float(st.number_input("SL: "))
   return p_entry, p_SL
 
 def get_TP():
   p_TP = float(st.number_input("TP: ", min_value = 0.01, step = 0.01))
   return p_TP
 
+def get_trade_direction(SL_delta):
+  if SL_delta > 0:
+    return "long"
+  elif SL_delta < 0:
+    return "short"
+  else:
+    print("Trade direction not consistent. Please check your input parameters.")
+    return None
+
+def current_direction_label(current_direction):
+  if current_direction == "long":
+    st.success("Long")
+  elif current_direction == "short":
+    st.error("Short")
+  else:
+    st.warning("Trade direction not consistent. Please check your input parameters.")
+
 #at the moment, one time input for fixed parameters:
 p_entry, p_SL = get_trade_parameters()
+#UI view:
+current_direction = get_trade_direction(calculate_SL_delta(p_entry, p_SL))
+current_direction_label(current_direction)
 
 valid_parameters = False
 while not valid_parameters:
