@@ -159,7 +159,7 @@ def current_direction_label(current_direction):
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
-def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP):
+def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
   #table1:
   with st.container(border=True):
   
