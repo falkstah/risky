@@ -175,6 +175,8 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
       elif SL_delta < 0 and p_TP < p_entry:  # short case
         balken_oben = max(p_liquidation)  
         tp_aktiv = True
+      else:
+        tp_aktiv = False
     else:
         balken_oben = max(p_entry, p_liquidation)  #covers short and long case
         tp_aktiv = False
