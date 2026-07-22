@@ -60,10 +60,10 @@ k = 1.5 # sicherheitsmultiplikator
 #used to match the liq price to current volatility:
 def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
   #ohlcv = "open, high, low, close, volume", fetch = retrieve
-  ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit = length + 1)  # +1, weil ATR_formel schon für die TR der ersten Kerze Referenzwert von vorheriger Kerze braucht
+  #ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit = length + 1)  # +1, weil ATR_formel schon für die TR der ersten Kerze Referenzwert von vorheriger Kerze braucht
 
   #Umwandeln in DataFrame
-  df = pd.DataFrame(ohlcv, columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+  #df = pd.DataFrame(ohlcv, columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
   #ATR Calculation
   #atr = ta.atr(df['high'], df['low'], df['close'], length = length)
@@ -161,6 +161,11 @@ def current_direction_label(current_direction):
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
+def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
+  bar = st.progress(0)
+  bar.progress(int((p_entry - p_SL) / (p_TP - p_SL) * 100))
+  return bar
+
 #at the moment, one time input for fixed parameters:
 p_entry, p_SL = get_trade_parameters()
 #UI view:
@@ -224,6 +229,8 @@ print(f"""
 #risk feedback
 p_TP = get_TP()
 rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(p_entry, p_TP, p_SL, lvg)
+
+bar = visualize_trade(p_entry, p_TP, p_SL, p_liquidation)
 
 print(f"""
   Input Check:
