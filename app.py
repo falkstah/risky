@@ -163,9 +163,67 @@ def current_direction_label(current_direction):
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
 def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
-  bar = st.progress(0)
-  bar.progress(int((p_entry - p_SL) / (p_TP - p_SL) * 100))
-  return bar
+  st.title("Trade Visualizer Pro")
+
+  # --- 1. DEINE EINGABEFELDER (Machst du einmal ganz am Anfang) ---
+  entry_price = st.number_input("Entry Preis", value=50000.0, min_value=0.01, step=10.0)
+  stop_loss = st.number_input("Stop Loss (SL)", value=49000.0, min_value=0.01, step=10.0)
+  take_profit = st.number_input("Take Profit (TP) [Optional]", value=0.0, min_value=0.0, step=10.0)
+
+
+  # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
+  is_long = entry_price > stop_loss
+  direction_text = "LONG 🟢" if is_long else "SHORT 🔴"
+
+  # Unten 0, Oben TP oder Entry
+  balken_unten = 0.0
+  if take_profit > 0:
+      balken_oben = take_profit
+      tp_aktiv = True
+  else:
+      balken_oben = entry_price
+      tp_aktiv = False
+
+  # Daten fürs Chart zusammenbauen
+  zone_data = pd.DataFrame({
+      'y_min': [balken_unten],
+      'y_max': [balken_oben],
+      'Zone': ['Preisbereich']
+  })
+
+  preise = [entry_price, stop_loss]
+  labels = ['Entry', 'Stop Loss']
+  typen = ['entry', 'sl']
+
+  if tp_aktiv:
+      preise.append(take_profit)
+      labels.append('Take Profit')
+      typen.append('tp')
+
+  lines_data = pd.DataFrame({
+      'Preis': preise,
+      'Label': labels,
+      'Typ': typen
+  })
+
+  # Chart zeichnen
+  base = alt.Chart(zone_data).encode(x=alt.X('Zone', title=None, axis=None))
+  area = base.mark_rect(opacity=0.2, color='#3b82f6').encode(
+      y=alt.Y('y_min', title='Preis in USDT', scale=alt.Scale(domain=[0, balken_oben * 1.05])),
+      y2='y_max'
+  )
+  rule = alt.Chart(lines_data).mark_rule(strokeWidth=2).encode(
+      y=alt.Y('Preis'),
+      color=alt.Color('Typ', scale={'domain': ['entry', 'sl', 'tp'], 'range': ['#10b981', '#ef4444', '#3b82f6']}, legend=None),
+      tooltip=['Label', 'Preis']
+  )
+  text = rule.mark_text(align='left', dx=5, dy=-5).encode(text='Label')
+
+  chart = alt.layer(area, rule, text).properties(height=500, width=200).interactive()
+
+  # In Streamlit anzeigen
+  st.altair_chart(chart, use_container_width=True)
+
 
 #at the moment, one time input for fixed parameters:
 p_entry, p_SL = get_trade_parameters()
