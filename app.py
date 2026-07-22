@@ -62,10 +62,11 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
   df = pd.DataFrame(ohlcv, columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
   #ATR Calculation
-  atr = ta.atr(df['high'], df['low'], df['close'], length = length)
+  #atr = ta.atr(df['high'], df['low'], df['close'], length = length)
 
   #returning only the latest atr of the generated atr list
-  return atr.iloc[-1]
+  return 0
+  #return atr.iloc[-1]
 
 #buffer = k * get_live_ATR('BTC/USDT', '4h', 14)
 #buffer = k
