@@ -166,22 +166,22 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
   st.title("Trade Visualizer Pro")
 
   # --- 1. DEINE EINGABEFELDER (Machst du einmal ganz am Anfang) ---
-  entry_price = st.number_input("Entry Preis", value=50000.0, min_value=0.01, step=10.0)
-  stop_loss = st.number_input("Stop Loss (SL)", value=49000.0, min_value=0.01, step=10.0)
-  take_profit = st.number_input("Take Profit (TP) [Optional]", value=0.0, min_value=0.0, step=10.0)
+  #entry_price = st.number_input("Entry Preis", value=50000.0, min_value=0.01, step=10.0)
+  #stop_loss = st.number_input("Stop Loss (SL)", value=49000.0, min_value=0.01, step=10.0)
+  #take_profit = st.number_input("Take Profit (TP) [Optional]", value=0.0, min_value=0.0, step=10.0)
 
 
   # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
-  is_long = entry_price > stop_loss
+  is_long = p_entry > p_SL
   direction_text = "LONG 🟢" if is_long else "SHORT 🔴"
 
   # Unten 0, Oben TP oder Entry
   balken_unten = 0.0
-  if take_profit > 0:
-      balken_oben = take_profit
+  if p_TP > 0:
+      balken_oben = p_TP
       tp_aktiv = True
   else:
-      balken_oben = entry_price
+      balken_oben = p_entry
       tp_aktiv = False
 
   # Daten fürs Chart zusammenbauen
@@ -191,12 +191,12 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
       'Zone': ['Preisbereich']
   })
 
-  preise = [entry_price, stop_loss]
+  preise = [p_entry, p_SL]
   labels = ['Entry', 'Stop Loss']
   typen = ['entry', 'sl']
 
   if tp_aktiv:
-      preise.append(take_profit)
+      preise.append(p_TP)
       labels.append('Take Profit')
       typen.append('tp')
 
