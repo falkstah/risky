@@ -230,6 +230,14 @@ global risk
 risk = 10
 #at the moment, one time input for fixed parameters:
 p_entry, p_SL = get_trade_parameters()
+#Calculating basic parameters
+try:  #manages case: SL_delta == 0, which would lead to division by zero in the following calculations
+  SL_delta = calculate_SL_delta(p_entry, p_SL)
+except ValueError as e:
+  print(f"Error in calculating SL delta: {e}")
+  st.stop()
+
+  rel_risk = calculate_rel_risk(p_entry, p_SL)
 #UI view:
 current_direction = get_trade_direction(calculate_SL_delta(p_entry, p_SL))
 current_direction_label(current_direction)
@@ -240,15 +248,6 @@ while not valid_parameters:
   Liq_Delta_to_SL_Delta_ratio = 4 #means the primitive buffer (Liq distance is et to 4 times SL distance to prevent liq from high volatility whicks)
   maintainance_margin_rate = 0.02
   maintainance_deduction = 0
-
-  #Calculating basic parameters
-  try:  #manages case: SL_delta == 0, which would lead to division by zero in the following calculations
-    SL_delta = calculate_SL_delta(p_entry, p_SL)
-  except ValueError as e:
-    print(f"Error in calculating SL delta: {e}")
-    continue
-
-  rel_risk = calculate_rel_risk(p_entry, p_SL)
 
   #Calculating Final Parameters to input in exchange menu
   p_liquidation = match_liquidation_price_to_SL(p_entry, p_SL)
