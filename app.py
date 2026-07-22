@@ -230,6 +230,7 @@ p_entry, p_SL = get_trade_parameters()
 #UI view:
 current_direction = get_trade_direction(calculate_SL_delta(p_entry, p_SL))
 current_direction_label(current_direction)
+visualize_trade(p_entry, p_TP, p_SL, p_liquidation)
 
 valid_parameters = False
 while not valid_parameters:
