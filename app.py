@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import math
-import pandas as pd
-#import ccxt
-#import pandas_ta as ta
-
 import streamlit as st
 import altair as alt
+
+#logic functions
+import trading_logic
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
 st.text("Opimized for execution speed.")
