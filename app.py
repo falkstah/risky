@@ -137,12 +137,12 @@ risk = 10
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  p_entry = float(st.number_input("entry: ", min_value = 0.01, step = 0.01))
-  p_SL = float(st.number_input("SL: "))
+  p_entry = max( float(st.number_input("entry: ", min_value = 0.01, step = 0.01)), 0)
+  p_SL = max( float(st.number_input("SL: ", min_value = 0.01, step = 0.01)), 0)
   return p_entry, p_SL
 
 def get_TP():
-  p_TP = float(st.number_input("TP: ", min_value = 0.01, step = 0.01))
+  p_TP = max(float(st.number_input("TP: ", min_value = 0.01, step = 0.01)), 0)
   return p_TP
 
 def get_trade_direction(SL_delta):
