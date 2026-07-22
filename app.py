@@ -42,38 +42,17 @@ def evaluate_trade(p_entry, p_TP, p_SL, lvg):
   potential_profit = risk * rrr
   return rel_asset_gain_at_TP, rrr, potential_profit
 
-'''
-
+#cases:
 #Liquidation_through_Hard_Stop: p_SL
-
 #Maintainance_Margin_Liquidation
 
-1. Loss(P_liq) = (P_liq - P_entry) * n_asset_units
-2. equity = initial_margin - Loss(P_liq)
-equation (Liq triggers when equity == maintainance_margin) -> formula results
-
-long_liquidation_price = p_entry * (1 - 1 / lvg + maintainance_deduction / n_pos_value) / (1 - maintainance_margin_rate)
-short_liquidation_price = p_entry * (1 + 1 / lvg + maintainance_deduction / n_pos_value) / (1 + maintainance_margin_rate)
-
-print(f"""
-  rel_asset_gain_at_TP:     {round(rel_asset_gain_at_TP * 100, 2)}%
-  rrr:                      {round(rrr, 2)}
-  potential_profit:         {round(potential_profit, 2)}$
-  long_liquidation_price:   {round(long_liquidation_price, 2)}$
-  short_liquidation_price:  {round(short_liquidation_price, 2)}$
-      """)
-'''
 
 #volatility-dependent margin liquidation buffer
 # terminal setup installation for ATR calculation: (delete # for first run)
 #!pip install ccxt pandas pandas-ta
-
 exchange = ccxt.bybit()
-
 k = 1.5 # sicherheitsmultiplikator
-
 #live atr erstmal überbrückt, weil bybit google IP-Anfragrn blockiert
-
 #used to match the liq price to current volatility:
 def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
   #ohlcv = "open, high, low, close, volume", fetch = retrieve
