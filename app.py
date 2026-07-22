@@ -134,11 +134,11 @@ def test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  risk = max(float(st.number_input("risk: ", min_value = 0.01, step = 0.01)), 0)
-  maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", min_value = 0.001, step = 0.001)), 0)
-  maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", min_value = 0.001, step = 0.001)), 0)
-  p_entry = max( float(st.number_input("entry: ", min_value = 0.01, step = 0.01)), 0)
-  p_SL = max( float(st.number_input("SL: ", min_value = 0.00, step = 0.01)), 0)
+  risk = max(float(st.number_input("risk: ", initialValue = 10, min_value = 0.01, step = 0.01)), 0)
+  maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", initialValue = 0.02, min_value = 0.001, step = 0.001)), 0)
+  maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", initialValue = 0.0, min_value = 0.001, step = 0.001)), 0)
+  p_entry = max( float(st.number_input("entry: ", initialValue = None, min_value = 0.01, step = 0.01)), 0)
+  p_SL = max( float(st.number_input("SL: ", initialValue = None, min_value = 0.00, step = 0.01)), 0)
   return risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL
 
 def get_TP():
