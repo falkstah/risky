@@ -4,6 +4,9 @@ import pandas as pd
 #import ccxt
 #import pandas_ta as ta
 
+import streamlit as st
+
+st.title("Too_Risky - Crypto live lvg and liquidation manager")
 #margins
 #receive fom DEX
 #maintainance_margin_rate  # = minimaler rel. Anteil an Positionsgröße, der als Eigenkapital stets verfügbar sein muss, sonst Zwangsliquidation (rel. Pendant zur absoluten Mainainance  Margin); oft nicht so hoch, worst case Annahme
