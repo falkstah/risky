@@ -168,18 +168,28 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
 
   try:
     balken_unten = 0.0
+
+    #ba top
+    tp_aktiv = False
     if p_TP > 0:  #hence, tp exists
-      if SL_delta > 0 and p_TP > p_entry:  # long case
-        balken_oben = max(p_TP, p_entry)  
-        tp_aktiv = True
-      elif SL_delta < 0 and p_TP < p_entry:  # short case
-        balken_oben = max(p_liquidation)  
-        tp_aktiv = True
+      if SL_delta > 0:  # long case
+        if p_TP > p_entry:  #valid TP
+          balken_oben = p_TP 
+          tp_aktiv = True
+        else: #invalid TP
+          balken_oben = p_entry
+
+      elif SL_delta < 0:  # short case
+        if p_TP < p_entry:  #valid TP
+          balken_oben = p_TP
+          tp_aktiv = True
+        else: invalid TP
+          balken_oben = p_entry
       else:
-        tp_aktiv = False
+        balken_oben = p_liquidation  
+        tp_aktiv = True
     else:
         balken_oben = max(p_entry, p_liquidation)  #covers short and long case
-        tp_aktiv = False
 
     # Daten fürs Chart zusammenbauen
     zone_data = pd.DataFrame({
