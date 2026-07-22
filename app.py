@@ -286,7 +286,7 @@ def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
 
 
 #at the moment, one time input for fixed parameters:
-risk, maintainance_margin_rate, maintainance_deduction p_entry, p_SL= get_trade_parameters()
+risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL= get_trade_parameters()
 #Calculating basic parameters
 SL_delta = calculate_SL_delta(p_entry, p_SL)
 if SL_delta == 0: #this would lead to division by zero in the following calculations
