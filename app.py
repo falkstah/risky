@@ -2,6 +2,8 @@
 import streamlit as st
 import altair as alt
 
+import pandas as pd
+
 #logic functions
 import trading_logic
 
