@@ -233,8 +233,8 @@ p_entry, p_SL = get_trade_parameters()
 #Calculating basic parameters
 try:  #manages case: SL_delta == 0, which would lead to division by zero in the following calculations
   SL_delta = calculate_SL_delta(p_entry, p_SL)
-except ValueError as e:
-  print(f"Error in calculating SL delta: {e}")
+except:
+  print("SL_delta is zero. Please check your input parameters.")
   st.stop()
 
   rel_risk = calculate_rel_risk(p_entry, p_SL)
