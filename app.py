@@ -165,39 +165,41 @@ def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
   
   
   
-        st.subheader("📊 Fast Order Parameters")
+        st.subheader("📊 Fast Order Table")
         
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         col1.metric("lvg", f"{lvg} x")
         col2.metric("isolated margin", f"{initial_margin} $")
         col3.metric("p_liquidation", f"{p_liquidation} $")
-        col1.metric("n_pos_value", f"{n_pos_value} $")
+        col4.metric("n_pos_value", f"{n_pos_value} $")
   
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
   
   with st.container(border=True):
 
-      st.subheader("📊 Handels-Parameter")
+      st.subheader("📊 Overview")
       
       # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
-      col1, col2, col3 = st.columns(3)
+      col1, col2, col3, col4 = st.columns(5)
       col1.metric("SL Delta", f"{SL_delta} $")
       col2.metric("Risk", f"{risk} $")
       col3.metric("Relative Risk", f"{rel_risk} $")
-      col1.metric("Initial Margin", f"{initial_margin} $")
+      col4.metric("Initial Margin", f"{initial_margin} $")
+      col5.metric("potential_profit", f"{potential_profit} $")
 
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
   #table2:
   with st.container(border=True):
-      st.subheader("💰 Risiko & Position")
+      st.subheader("💰 Risk Feedback")
       
-      col1, col2, col3, col4 = st.columns(4)
+      col1, col2, col3, col4, col5 = st.columns(5)
       col1.metric("Risiko", f"{risk} €")
-      col2.metric("Positionsgröße", f"{n_pos_value}")
-      col3.metric("Initial Margin", f"{initial_margin} €")
+      col2.metric("rrr", f"{rrr}")
+      col3.metric("relative Gain", f"{rel_asset_gain_at_TP * 100:.2f}%")
       col4.metric("Wartungsmarge", f"{maintainance_margin} €")
+      col5.metric("rel asset gain at TP", f"{rel_asset_gain_at_TP * 100:.2f}%")
 
   st.divider()
 
