@@ -163,7 +163,7 @@ def current_direction_label(current_direction):
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
 def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
-  st.title("Trade Visualizer Pro")
+  st.title("Trade Visualizer")
 
   # --- 1. DEINE EINGABEFELDER (Machst du einmal ganz am Anfang) ---
   #entry_price = st.number_input("Entry Preis", value=50000.0, min_value=0.01, step=10.0)
