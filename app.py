@@ -13,7 +13,7 @@ st.text("Opimized for execution speed.")
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  liq_delta_to_SL_delta_ratio = max(float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4, step = 0.25)), 1)
+  liq_delta_to_SL_delta_ratio = max(float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4, mn_value = 1.5, step = 0.25)), 1)
   risk = max(float(st.number_input("risk: ", value = 10, step = 1)), 0)
   maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", value = 0.02, step = 0.001)), 0)
   maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", value = 0.0, step = 0.001)), 0)
@@ -164,9 +164,9 @@ def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
 
 
 #main
-risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL = get_trade_parameters()
+liq_delta_to_SL_delta_ratio, p_entry, risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL = get_trade_parameters()
 p_TP = get_TP()
-SL_delta, rel_risk, current_direction, p_liquidation, lvg, initial_margin, n_pos_value, maintainance_margin, rel_maintainance_margin, rel_asset_gain_at_TP, rrr, potential_profit = calculate_all(liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, Maintainance_deduction, p_entry, p_SL)
+SL_delta, rel_risk, current_direction, p_liquidation, lvg, initial_margin, n_pos_value, maintainance_margin, rel_maintainance_margin, rel_asset_gain_at_TP, rrr, potential_profit = calculate_all(liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL, p_TP)
 current_direction_label(current_direction)
 
 fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
