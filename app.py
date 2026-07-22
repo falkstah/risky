@@ -13,7 +13,7 @@ st.text("Opimized for execution speed.")
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  liq_delta_to_SL_delta_ratio = max(float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4, min_value = 1.5, step = 0.25)), 1)
+  liq_delta_to_SL_delta_ratio = float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4, min_value = 1.5, step = 0.25))
   risk = max(float(st.number_input("risk: ", value = 10, step = 1)), 0)
   maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", value = 0.02, step = 0.001)), 0)
   maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", value = 0.0, step = 0.001)), 0)
