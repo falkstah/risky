@@ -5,7 +5,7 @@ import altair as alt
 import pandas as pd
 
 #logic functions
-import trading_logic
+from trading_logic import calculate_all
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
 st.text("Opimized for execution speed.")
@@ -24,6 +24,7 @@ def get_trade_parameters():
   p_SL = st.number_input("SL: ", value = None, min_value = 0.00, step = 0.01)
   if p_SL is None or p_SL < 0:
     p_SL = 0.00
+    
   return risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL
 
 def get_TP():
@@ -162,100 +163,11 @@ def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
 
 
 #main
-
-
-#at the moment, one time input for fixed parameters:
-risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL= get_trade_parameters()
-#Calculating basic parameters
-SL_delta = calculate_SL_delta(p_entry, p_SL)
-if SL_delta == 0: #this would lead to division by zero in the following calculations
-  print("SL_delta is zero. Please check your input parameters.")
-  st.stop()
-
-rel_risk = calculate_rel_risk(p_entry, p_SL)
-
-#UI view:
-current_direction = get_trade_direction(calculate_SL_delta(p_entry, p_SL))
-current_direction_label(current_direction)
-
-valid_parameters = False
-while not valid_parameters:
-  #hardcoded paramteres for simplicity
-  Liq_Delta_to_SL_Delta_ratio = 4 #means the primitive buffer (Liq distance is et to 4 times SL distance to prevent liq from high volatility whicks)
-  maintainance_margin_rate = 0.02
-  maintainance_deduction = 0
-
-  #Calculating Final Parameters to input in exchange menu
-  p_liquidation = match_liquidation_price_to_SL(p_entry, p_SL)
-  lvg = match_lvg_to_liquidation_price(p_entry, p_SL, p_liquidation, maintainance_margin_rate)
-
-  #lvg Correction
-  lvg = check_lvg(lvg)
-
-  #Calculating Margins
-  initial_margin = calculate_initial_margin(risk, rel_risk, lvg)
-
-  #correcting risk too limit initial_margin
-  old_risk = risk
-  risk = check_initial_margin(risk, initial_margin)
-  if risk != old_risk:  # rechnet nur weiter, wenn risk unverändert, sonst beginnt Prozess von vorne, ist ineffizient, weil Entry und Sl ja eigtl nicth nochmal neu gebraucht werden
-    continue
-
-  n_pos_value = calculate_n_pos_value(lvg, initial_margin)  #bought USDC-amount
-
-  maintainance_margin = calculate_maintainance_margin(n_pos_value, maintainance_margin_rate, maintainance_deduction)
-  rel_maintainance_margin = calculate_rel_maintainance_margin(maintainance_margin, n_pos_value)
-
-  #input ends, when all risks killed (i.e. code run through until here without while continuation)
-  valid_parameters = True
-
-#fast Order Output:
-print(f"""
-  Input Check:
-  p_entry:              {round(p_entry, 2)}
-  p_SL:                 {round(p_SL, 2)}
-
-  Calculated Parameters:
-  lvg:                  {round(lvg, 2)}
-  n_pos_value:          {round(n_pos_value, 2)}
-
-  Management:
-  risk:                 {round(risk, 2)}
-  initial_margin:       {round(initial_margin, 2)}
-  maintainance_margin:  {round(maintainance_margin, 2)}
-
-      """)
-
-#Output
-
-#risk feedback
+risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL = get_trade_parameters()
 p_TP = get_TP()
-rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(p_entry, p_TP, p_SL, lvg)
+SL_delta, rel_risk, current_direction, p_liquidation, lvg, initial_margin, n_pos_value, maintainance_margin, rel_maintainance_margin, rel_asset_gain_at_TP, rrr, potential_profit = calculate_all(risk, maintainance_margin_rate, Maintainance_deduction, p_entry, p_SL)
+current_direction_label(current_direction)
 
 fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
 visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation)
 overview_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
-
-print(f"""
-  Input Check:
-  p_entry:              {round(p_entry, 2)}
-  p_SL:                 {round(p_SL, 2)}
-  p_TP:                 {round(p_TP, 2)}
-
-  Calculated Parameters:
-  lvg:                  {round(lvg, 2)}
-  n_pos_value:          {round(n_pos_value, 2)}
-
-  Management:
-  initial_margin:       {round(initial_margin, 2)}
-  maintainance_margin:  {round(maintainance_margin, 2)}
-  p_liquidation:        {round(p_liquidation, 2)}
-
-  rrr:                  {round(rrr, 2)}
-  rel_asset_gain_at_TP: {round(rel_asset_gain_at_TP * 100, 2)}%
-  equity at liquidation: {round(calculate_equity(p_entry, p_SL, n_pos_value, maintainance_margin, p_liquidation), 2)}
-
-      """)
-
-valid_calculations = test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq_Delta_to_SL_Delta_ratio)
-print("valid calculations: ", valid_calculations)

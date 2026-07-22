@@ -1,8 +1,63 @@
 #for calculations
 import math
+from streamlit import st
 import pandas as pd
 #import ccxt
 #import pandas_ta as ta
+
+def calculate_all(risk, maintainancemargin_rate, Maintainance_deduction, p_entry, p_SL):
+    #main
+
+    #Calculating basic parameters
+    SL_delta = calculate_SL_delta(p_entry, p_SL)
+    if SL_delta == 0: #this would lead to division by zero in the following calculations
+        print("SL_delta is zero. Please check your input parameters.")
+        st.stop()
+
+    rel_risk = calculate_rel_risk(p_entry, p_SL)
+
+    #UI view:
+    current_direction = get_trade_direction(calculate_SL_delta(p_entry, p_SL))
+    
+
+
+    #hardcoded paramteres for simplicity
+    Liq_Delta_to_SL_Delta_ratio = 4 #means the primitive buffer (Liq distance is et to 4 times SL distance to prevent liq from high volatility whicks)
+    maintainance_margin_rate = 0.02
+    maintainance_deduction = 0
+
+    #Calculating Final Parameters to input in exchange menu
+    p_liquidation = match_liquidation_price_to_SL(p_entry, p_SL)
+    lvg = match_lvg_to_liquidation_price(p_entry, p_SL, p_liquidation, maintainance_margin_rate)
+
+    #lvg Correction
+    lvg = check_lvg(lvg)
+
+    #Calculating Margins
+    initial_margin = calculate_initial_margin(risk, rel_risk, lvg)
+
+    #correcting risk too limit initial_margin
+    old_risk = risk
+    risk = check_initial_margin(risk, initial_margin)
+    if risk != old_risk:  # rechnet nur weiter, wenn risk unverändert, sonst beginnt Prozess von vorne, ist ineffizient, weil Entry und Sl ja eigtl nicth nochmal neu gebraucht werden
+        st.stop()
+
+    n_pos_value = calculate_n_pos_value(lvg, initial_margin)  #bought USDC-amount
+
+    maintainance_margin = calculate_maintainance_margin(n_pos_value, maintainance_margin_rate, maintainance_deduction)
+    rel_maintainance_margin = calculate_rel_maintainance_margin(maintainance_margin, n_pos_value)
+
+    #input ends, when all risks killed (i.e. code run through until here without while continuation)
+    valid_parameters = True
+
+    #risk feedback
+    rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(risk, p_entry, p_TP, p_SL, lvg)
+
+    valid_calculations = test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq_Delta_to_SL_Delta_ratio)
+    print("valid calculations: ", valid_calculations)
+    
+    return SL_delta, rel_risk, current_direction, p_liquidation, lvg, initial_margin, n_pos_value, maintainance_margin, rel_maintainance_margin, rel_asset_gain_at_TP, rrr, potential_profit
+
 
 #margins
 #receive fom DEX
@@ -47,7 +102,7 @@ def calculate_rel_maintainance_margin(maintainance_margin, n_pos_value):
 
 #safety calculus
 #evaluating trading setups
-def evaluate_trade(p_entry, p_TP, p_SL, lvg):
+def evaluate_trade(risk, p_entry, p_TP, p_SL, lvg):
   rel_asset_gain_at_TP = (p_TP - p_entry)/p_entry
   rrr = (p_TP - p_entry) / (p_entry - p_SL)
   potential_profit = risk * rrr
