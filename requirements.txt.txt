@@ -1,0 +1,7 @@
+text
+
+math
+streamlit
+Pandas
+ccxt
+pandas_ta
