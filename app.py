@@ -187,7 +187,7 @@ def fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
 def overview_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
-  t#table1
+  #table1
   with st.container(border=True):
 
       st.subheader("📊 Overview")
