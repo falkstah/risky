@@ -134,9 +134,9 @@ def test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  risk = max(float(st.number_input("risk: ", value = 10, min_value = 1, step = 1)), 0)
-  maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.001, step = 0.001)), 0)
-  maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.001, step = 0.001)), 0)
+  risk = max(float(st.number_input("risk: ", value = 10, step = 1)), 0)
+  maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", value = 0.02, step = 0.001)), 0)
+  maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", value = 0.0, step = 0.001)), 0)
   p_entry = max( float(st.number_input("entry: ", value = None, min_value = 0.01, step = 0.01)), 0)
   p_SL = max( float(st.number_input("SL: ", value = None, min_value = 0.00, step = 0.01)), 0)
   return risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL
