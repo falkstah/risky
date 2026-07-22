@@ -137,9 +137,11 @@ def get_trade_parameters():
   risk = max(float(st.number_input("risk: ", value = 10, step = 1)), 0)
   maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", value = 0.02, step = 0.001)), 0)
   maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", value = 0.0, step = 0.001)), 0)
+
   p_entry = st.number_input("entry: ", value = None, min_value = 0.01, step = 0.01)
   if p_entry is None or p_entry < 0:
     p_entry = 0.01
+
   p_SL = st.number_input("SL: ", value = None, min_value = 0.00, step = 0.01)
   if p_SL is None or p_SL < 0:
     p_SL = 0.00
@@ -178,10 +180,10 @@ def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
         
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("lvg", f"{lvg} x")
-        col2.metric("isolated margin", f"{initial_margin} $")
-        col3.metric("p_liquidation", f"{p_liquidation} $")
-        col4.metric("n_pos_value", f"{n_pos_value} $")
+        col1.metric("lvg", f"{round(lvg, 0)} x")
+        col2.metric("isolated margin", f"{round(initial_margin, 2)} $")
+        col3.metric("p_liquidation", f"{round(p_liquidation, 2)} $")
+        col4.metric("n_pos_value", f"{round(n_pos_value, 2)} $")
   
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
   
@@ -191,11 +193,11 @@ def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
       
       # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("SL Delta", f"{SL_delta} $")
-      col2.metric("Risk", f"{risk} $")
-      col3.metric("Relative Risk", f"{rel_risk} $")
-      col4.metric("Initial Margin", f"{initial_margin} $")
-      col5.metric("potential_profit", f"{potential_profit} $")
+      col1.metric("SL Delta", f"{round(SL_delta, 2)} $")
+      col2.metric("Risk", f"{round(risk, 2)} $")
+      col3.metric("Relative Risk", f"{round(rel_risk, 2)} $")
+      col4.metric("Initial Margin", f"{round(initial_margin, 2)} $")
+      col5.metric("potential_profit", f"{round(potential_profit, 2)} $")
 
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
@@ -204,11 +206,11 @@ def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
       st.subheader("💰 Risk Feedback")
       
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("Risiko", f"{risk} €")
-      col2.metric("rrr", f"{rrr}")
-      col3.metric("relative Gain", f"{rel_asset_gain_at_TP * 100:.2f}%")
-      col4.metric("Wartungsmarge", f"{maintainance_margin} €")
-      col5.metric("rel asset gain at TP", f"{rel_asset_gain_at_TP * 100:.2f}%")
+      col1.metric("Risiko", f"{round(risk, 2)} €")
+      col2.metric("rrr", f"{round(rrr, 1)}")
+      col3.metric("relative Gain", f"{round(rel_asset_gain_at_TP * 100, 2)}%")
+      col4.metric("Wartungsmarge", f"{round(maintainance_margin, 2)} €")
+      col5.metric("rel asset gain at TP", f"{round(rel_asset_gain_at_TP * 100, 2)}%")
 
   st.divider()
 
