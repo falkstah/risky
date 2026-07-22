@@ -1,6 +1,5 @@
 #for calculations
 import math
-from streamlit import st
 import pandas as pd
 #import ccxt
 #import pandas_ta as ta
@@ -11,8 +10,7 @@ def calculate_all(liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, m
     #Calculating basic parameters
     SL_delta = calculate_SL_delta(p_entry, p_SL)
     if SL_delta == 0: #this would lead to division by zero in the following calculations
-        print("SL_delta is zero. Please check your input parameters.")
-        st.stop()
+        raise ValueError("SL_delta = 0")
 
     rel_risk = calculate_rel_risk(p_entry, p_SL)
 
@@ -37,7 +35,7 @@ def calculate_all(liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, m
     old_risk = risk
     risk = check_initial_margin(risk, initial_margin)
     if risk != old_risk:  # rechnet nur weiter, wenn risk unverändert, sonst beginnt Prozess von vorne, ist ineffizient, weil Entry und Sl ja eigtl nicth nochmal neu gebraucht werden
-        st.stop()
+        raise ValueError("Risk was primitively reduced. Please re-enter parameters.")
 
     n_pos_value = calculate_n_pos_value(lvg, initial_margin)  #bought USDC-amount
 
