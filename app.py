@@ -134,9 +134,12 @@ def test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
+  risk = max(float(st.number_input("risk: ", min_value = 0.01, step = 0.01)), 0)
+  maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", min_value = 0.001, step = 0.001)), 0)
+  maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", min_value = 0.001, step = 0.001)), 0)
   p_entry = max( float(st.number_input("entry: ", min_value = 0.01, step = 0.01)), 0)
   p_SL = max( float(st.number_input("SL: ", min_value = 0.00, step = 0.01)), 0)
-  return p_entry, p_SL
+  return risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL
 
 def get_TP():
   p_TP = max(float(st.number_input("TP: ", min_value = 0.01, step = 0.01)), 0)
@@ -181,7 +184,7 @@ def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
       st.subheader("📊 Overview")
       
       # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
-      col1, col2, col3, col4 = st.columns(5)
+      col1, col2, col3, col4, col5 = st.columns(5)
       col1.metric("SL Delta", f"{SL_delta} $")
       col2.metric("Risk", f"{risk} $")
       col3.metric("Relative Risk", f"{rel_risk} $")
@@ -281,11 +284,9 @@ def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
 
 #main
 
-#risk standard:
-global risk
-risk = 10
+
 #at the moment, one time input for fixed parameters:
-p_entry, p_SL = get_trade_parameters()
+risk, maintainance_margin_rate, maintainance_deduction p_entry, p_SL= get_trade_parameters()
 #Calculating basic parameters
 SL_delta = calculate_SL_delta(p_entry, p_SL)
 if SL_delta == 0: #this would lead to division by zero in the following calculations
