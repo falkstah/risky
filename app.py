@@ -178,10 +178,10 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
   # Unten 0, Oben TP oder Entry
   balken_unten = 0.0
   if p_TP > 0:
-      balken_oben = max(p_TP, p_entry, p_SL)  #covers short and long case
+      balken_oben = max(p_TP, p_entry, p_SL, p_liquidation)  #covers short and long case
       tp_aktiv = True
   else:
-      balken_oben = max(p_entry, p_SL)  #covers short and long case
+      balken_oben = max(p_entry, p_SL, p_liquidation)  #covers short and long case
       tp_aktiv = False
 
   # Daten fürs Chart zusammenbauen
@@ -191,8 +191,8 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
       'Zone': ['Preisbereich']
   })
 
-  preise = [p_entry, p_SL]
-  labels = ['Entry', 'Stop Loss']
+  preise = [p_entry, p_SL, p_liquidation]
+  labels = ['Entry', 'Stop Loss', 'Liquidation']
   typen = ['entry', 'sl']
 
   if tp_aktiv:
