@@ -160,25 +160,44 @@ def current_direction_label(current_direction):
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
 def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP):
-  # --- ABSCHNITT 1: Handels-Parameter ---
+  #table1:
   with st.container(border=True):
+  
+  
+  
+        st.subheader("📊 Fast Order Parameters")
+        
+        # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
+        col1, col2, col3 = st.columns(3)
+        col1.metric("lvg", f"{lvg} x")
+        col2.metric("isolated margin", f"{initial_margin} $")
+        col3.metric("p_liquidation", f"{p_liquidation} $")
+        col1.metric("n_pos_value", f"{n_pos_value} $")
+  
+  st.divider() # Visuelle Trennlinie zwischen den Abschnitten
+  
+  with st.container(border=True):
+
       st.subheader("📊 Handels-Parameter")
       
       # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
       col1, col2, col3 = st.columns(3)
-      col1.metric("Entry Price", f"{p_entry} $")
-      col2.metric("Stop Loss", f"{p_SL} $")
-      col3.metric("SL Delta", f"{SL_delta} $")
+      col1.metric("SL Delta", f"{SL_delta} $")
+      col2.metric("Risk", f"{risk} $")
+      col3.metric("Relative Risk", f"{rel_risk} $")
+      col1.metric("Initial Margin", f"{initial_margin} $")
 
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-  # --- ABSCHNITT 2: Risiko & Position ---
+  #table2:
   with st.container(border=True):
       st.subheader("💰 Risiko & Position")
       
-      col1, col2 = st.columns(2)
+      col1, col2, col3, col4 = st.columns(4)
       col1.metric("Risiko", f"{risk} €")
       col2.metric("Positionsgröße", f"{n_pos_value}")
+      col3.metric("Initial Margin", f"{initial_margin} €")
+      col4.metric("Wartungsmarge", f"{maintainance_margin} €")
 
   st.divider()
 
