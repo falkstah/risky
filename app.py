@@ -17,7 +17,7 @@ st.text("Opimized for execution speed.")
 #initial margin calculation
 def calculate_SL_delta(p_entry, p_SL):
   if p_entry == p_SL:
-    raise ValueError("p_entry = p_SL. Check parameters")
+    print("Entry and SL are equal. Please check your input parameters.")
   return p_entry - p_SL
 
 def calculate_rel_risk(p_entry, p_SL):
@@ -130,11 +130,6 @@ def test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq
     valid_caluclation = False
   return valid_caluclation
 
-#main
-
-#risk standard:
-global risk
-risk = 10
 
 #trade specific values
 def get_trade_parameters():
@@ -228,6 +223,11 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
     st.warning("Error in visualizing trade. Please check your input parameters.")
 
 
+#main
+
+#risk standard:
+global risk
+risk = 10
 #at the moment, one time input for fixed parameters:
 p_entry, p_SL = get_trade_parameters()
 #UI view:
@@ -242,7 +242,12 @@ while not valid_parameters:
   maintainance_deduction = 0
 
   #Calculating basic parameters
-  SL_delta = calculate_SL_delta(p_entry, p_SL)
+  try:  #manages case: SL_delta == 0, which would lead to division by zero in the following calculations
+    SL_delta = calculate_SL_delta(p_entry, p_SL)
+  except ValueError as e:
+    print(f"Error in calculating SL delta: {e}")
+    continue
+
   rel_risk = calculate_rel_risk(p_entry, p_SL)
 
   #Calculating Final Parameters to input in exchange menu
