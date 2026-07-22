@@ -159,7 +159,31 @@ def current_direction_label(current_direction):
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
-def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
+def parameters_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP):
+  # --- ABSCHNITT 1: Handels-Parameter ---
+  with st.container(border=True):
+      st.subheader("📊 Handels-Parameter")
+      
+      # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
+      col1, col2, col3 = st.columns(3)
+      col1.metric("Entry Price", f"{p_entry} $")
+      col2.metric("Stop Loss", f"{p_SL} $")
+      col3.metric("SL Delta", f"{SL_delta} $")
+
+  st.divider() # Visuelle Trennlinie zwischen den Abschnitten
+
+  # --- ABSCHNITT 2: Risiko & Position ---
+  with st.container(border=True):
+      st.subheader("💰 Risiko & Position")
+      
+      col1, col2 = st.columns(2)
+      col1.metric("Risiko", f"{risk} €")
+      col2.metric("Positionsgröße", f"{n_pos_value}")
+
+  st.divider()
+
+
+def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
   st.title("Trade Visualizer")
 
   # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
@@ -307,7 +331,7 @@ print(f"""
 p_TP = get_TP()
 rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(p_entry, p_TP, p_SL, lvg)
 
-visualize_trade(p_entry, p_TP, p_SL, p_liquidation)
+visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation)
 
 print(f"""
   Input Check:
