@@ -5,7 +5,7 @@ import pandas as pd
 #import ccxt
 #import pandas_ta as ta
 
-def calculate_all(risk, maintainancemargin_rate, Maintainance_deduction, p_entry, p_SL):
+def calculate_all(liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL):
     #main
 
     #Calculating basic parameters
@@ -22,13 +22,11 @@ def calculate_all(risk, maintainancemargin_rate, Maintainance_deduction, p_entry
 
 
     #hardcoded paramteres for simplicity
-    Liq_Delta_to_SL_Delta_ratio = 4 #means the primitive buffer (Liq distance is et to 4 times SL distance to prevent liq from high volatility whicks)
-    maintainance_margin_rate = 0.02
-    maintainance_deduction = 0
+    liq_delta_to_SL_delta_ratio = 4 #means the primitive buffer (Liq distance is et to 4 times SL distance to prevent liq from high volatility whicks)
 
     #Calculating Final Parameters to input in exchange menu
-    p_liquidation = match_liquidation_price_to_SL(p_entry, p_SL)
-    lvg = match_lvg_to_liquidation_price(p_entry, p_SL, p_liquidation, maintainance_margin_rate)
+    p_liquidation = match_liquidation_price_to_SL(liq_delta_to_SL_delta_ratio, p_entry, SL_delta)
+    lvg = match_lvg_to_liquidation_price(p_entry, p_liquidation, maintainance_margin_rate)
 
     #lvg Correction
     lvg = check_lvg(lvg)
@@ -51,9 +49,9 @@ def calculate_all(risk, maintainancemargin_rate, Maintainance_deduction, p_entry
     valid_parameters = True
 
     #risk feedback
-    rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(risk, p_entry, p_TP, p_SL, lvg)
+    rel_asset_gain_at_TP, rrr, potential_profit = evaluate_trade(risk, p_entry, p_TP, p_SL)
 
-    valid_calculations = test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq_Delta_to_SL_Delta_ratio)
+    valid_calculations = test_liquidation_behaviour(liq_delta_to_SL_delta_ratio, p_entry, p_SL, p_liquidation, initial_margin)
     print("valid calculations: ", valid_calculations)
     
     return SL_delta, rel_risk, current_direction, p_liquidation, lvg, initial_margin, n_pos_value, maintainance_margin, rel_maintainance_margin, rel_asset_gain_at_TP, rrr, potential_profit
@@ -102,7 +100,7 @@ def calculate_rel_maintainance_margin(maintainance_margin, n_pos_value):
 
 #safety calculus
 #evaluating trading setups
-def evaluate_trade(risk, p_entry, p_TP, p_SL, lvg):
+def evaluate_trade(risk, p_entry, p_TP, p_S):
   rel_asset_gain_at_TP = (p_TP - p_entry)/p_entry
   rrr = (p_TP - p_entry) / (p_entry - p_SL)
   potential_profit = risk * rrr
@@ -141,10 +139,10 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 #management-dependent calulations (here: simplicity biased)
 
 #conservatively hardcoded liq buffer to skip API-task
-def match_liquidation_price_to_SL(p_entry, p_SL):
-    return max(p_entry - Liq_Delta_to_SL_Delta_ratio * SL_delta, 0) #SL_delta VZ berücksichtigt long/short; max-Funtion, weil Liquidations-Preis minimal bei 0 sein kann, da Preis >= 0
+def match_liquidation_price_to_SL(liq_delta_to_SL_delta_ratio, p_entry, SL_delta):
+    return max(p_entry - liq_delta_to_SL_delta_ratio * SL_delta, 0) #SL_delta VZ berücksichtigt long/short; max-Funtion, weil Liquidations-Preis minimal bei 0 sein kann, da Preis >= 0
 
-def match_lvg_to_liquidation_price(p_entry, p_SL, p_liquidation, maintainance_margin_rate):
+def match_lvg_to_liquidation_price(p_entry, p_liquidation, maintainance_margin_rate):
   return 1 / (1 + maintainance_margin_rate - p_liquidation * (1 + maintainance_margin_rate) / p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
 
 #risk correction functions
@@ -158,7 +156,7 @@ def check_lvg(lvg):
     lvg = 1
   return lvg
 
-def check_initial_margin(old_risk, initial_margin):
+def check_initial_margin(risk, initial_margin):
   if initial_margin > 100:
     print("margin-demand too high. Lower the risk!")
     new_risk = float(input("new risk: "))
@@ -170,18 +168,18 @@ def check_rrr(rrr):
   if rrr < 2:
     print("rrr is small.")
 
-def calulate_profit_at_price_p(p_entry, p):
+def calulate_profit_at_price_p(p_entry, p, n_pos_value):
   return (p - p_entry) / p_entry * n_pos_value #for long and short (pos value)
 
-def calculate_equity(p_entry, p_SL, n_pos_value, maintainance_margin, loss):
+def calculate_equity(initial_margin, loss):
   return initial_margin - loss
 
-def test_liquidation_behaviour(p_entry, p_SL, p_liquidation, initial_margin, Liq_Delta_to_SL_Delta_ratio):
-  loss_at_p_liquidation = -1 * calulate_profit_at_price_p(p_entry, p_liquidation)
+def test_liquidation_behaviour(liq_delta_to_SL_delta_ratio, p_entry, p_SL, n_pos_value, p_liquidation, initial_margin, maintainance_margin_rate):
+  loss_at_p_liquidation = -1 * calulate_profit_at_price_p(p_entry, p_liquidation, n_pos_value)
   print("loss at liquidation price: ", loss_at_p_liquidation, " - should be a little more than 4 times the risk, bc of liq buffer. But of course maximum is full initial_margin whe lvg = 1")
   maintainance_margin_at_p_liquidation = initial_margin - loss_at_p_liquidation
 
-  if maintainance_margin_at_p_liquidation >  maintainance_margin_rate* n_pos_value and round(loss_at_p_liquidation, 0) == round(risk, 0):
+  if maintainance_margin_at_p_liquidation >  maintainance_margin_rate * n_pos_value and round(loss_at_p_liquidation, 0) == round(risk, 0):
     print("Calculation success.")
     valid_caluclation = True
   else:
