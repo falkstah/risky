@@ -169,54 +169,57 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
   is_long = p_entry > p_SL
   direction_text = "LONG 🟢" if is_long else "SHORT 🔴"
 
-  # Unten 0, Oben TP oder Entry
-  balken_unten = 0.0
-  if p_TP > 0:
-      balken_oben = max(p_TP, p_entry, p_SL, p_liquidation)  #covers short and long case
-      tp_aktiv = True
-  else:
-      balken_oben = max(p_entry, p_SL, p_liquidation)  #covers short and long case
-      tp_aktiv = False
+  try:
+    # Unten 0, Oben TP oder Entry
+    balken_unten = 0.0
+    if p_TP > 0:
+        balken_oben = max(p_TP, p_entry, p_SL, p_liquidation)  #covers short and long case
+        tp_aktiv = True
+    else:
+        balken_oben = max(p_entry, p_SL, p_liquidation)  #covers short and long case
+        tp_aktiv = False
 
-  # Daten fürs Chart zusammenbauen
-  zone_data = pd.DataFrame({
-      'y_min': [balken_unten],
-      'y_max': [balken_oben],
-      'Zone': ['Preisbereich']
-  })
+    # Daten fürs Chart zusammenbauen
+    zone_data = pd.DataFrame({
+        'y_min': [balken_unten],
+        'y_max': [balken_oben],
+        'Zone': ['Preisbereich']
+    })
 
-  preise = [p_entry, p_SL, p_liquidation]
-  labels = ['Entry', 'Stop Loss', 'Liquidation']
-  typen = ['entry', 'sl', 'liq']
+    preise = [p_entry, p_SL, p_liquidation]
+    labels = ['Entry', 'Stop Loss', 'Liquidation']
+    typen = ['entry', 'sl', 'liq']
 
-  if tp_aktiv:
-      preise.append(p_TP)
-      labels.append('Take Profit')
-      typen.append('tp')
+    if tp_aktiv:
+        preise.append(p_TP)
+        labels.append('Take Profit')
+        typen.append('tp')
 
-  lines_data = pd.DataFrame({
-      'Preis': preise,
-      'Label': labels,
-      'Typ': typen
-  })
+    lines_data = pd.DataFrame({
+        'Preis': preise,
+        'Label': labels,
+        'Typ': typen
+    })
 
-  # Chart zeichnen
-  base = alt.Chart(zone_data).encode(x=alt.X('Zone', title=None, axis=None))
-  area = base.mark_rect(opacity=0.2, color='#3b82f6').encode(
-      y=alt.Y('y_min', title='Preis in USDT', scale=alt.Scale(domain=[0, balken_oben * 1.05])),
-      y2='y_max'
-  )
-  rule = alt.Chart(lines_data).mark_rule(strokeWidth=2).encode(
-      y=alt.Y('Preis'),
-      color=alt.Color('Typ', scale={'domain': ['entry', 'sl', 'tp'], 'range': ['#10b981', '#ef4444', '#3b82f6']}, legend=None),
-      tooltip=['Label', 'Preis']
-  )
-  text = rule.mark_text(align='left', dx=5, dy=-5).encode(text='Label')
+    # Chart zeichnen
+    base = alt.Chart(zone_data).encode(x=alt.X('Zone', title=None, axis=None))
+    area = base.mark_rect(opacity=0.2, color='#3b82f6').encode(
+        y=alt.Y('y_min', title='Preis in USDT', scale=alt.Scale(domain=[0, balken_oben * 1.05])),
+        y2='y_max'
+    )
+    rule = alt.Chart(lines_data).mark_rule(strokeWidth=2).encode(
+        y=alt.Y('Preis'),
+        color=alt.Color('Typ', scale={'domain': ['entry', 'sl', 'tp'], 'range': ['#10b981', '#ef4444', '#3b82f6']}, legend=None),
+        tooltip=['Label', 'Preis']
+    )
+    text = rule.mark_text(align='left', dx=5, dy=-5).encode(text='Label')
 
-  chart = alt.layer(area, rule, text).properties(height=500, width=200).interactive()
+    chart = alt.layer(area, rule, text).properties(height=500, width=200).interactive()
 
-  # In Streamlit anzeigen
-  st.altair_chart(chart, use_container_width=True)
+    # In Streamlit anzeigen
+    st.altair_chart(chart, use_container_width=True)
+  except:
+    st.warning("Error in visualizing trade. Please check your input parameters.")
 
 
 #at the moment, one time input for fixed parameters:
