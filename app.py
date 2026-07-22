@@ -183,7 +183,7 @@ def visualize_trade(p_entry, p_TP, p_SL, p_liquidation):
         if p_TP < p_entry:  #valid TP
           balken_oben = p_TP
           tp_aktiv = True
-        else: invalid TP
+        else: #invalid TP
           balken_oben = p_entry
       else:
         balken_oben = p_liquidation  
