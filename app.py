@@ -135,8 +135,8 @@ risk = 10
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  p_entry = float(input("entry: "))
-  p_SL = float(input("SL: "))
+  p_entry = float(st.number_input("entry: "))
+  p_SL = float(st.number_input("SL: "))
   return p_entry, p_SL
 
 def get_TP():
