@@ -5,6 +5,7 @@ import altair as alt
 import pandas as pd
 
 #logic functions
+from classes import TradeParameters
 from trading_logic import calculate_all
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
@@ -42,7 +43,7 @@ def current_direction_label(current_direction):
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
-def fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
+def fast_order_table(params: TradeParameters):
   with st.container(border=True):
   
   
@@ -51,14 +52,14 @@ def fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initi
         
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("lvg", f"{round(lvg, 0)} x")
-        col2.metric("isolated margin", f"{round(initial_margin, 2)} $")
-        col3.metric("p_liquidation", f"{round(p_liquidation, 2)} $")
-        col4.metric("n_pos_value", f"{round(n_pos_value, 2)} $")
+        col1.metric("lvg", f"{round(params.lvg, 0)} x")
+        col2.metric("isolated margin", f"{round(params.initial_margin, 2)} $")
+        col3.metric("p_liquidation", f"{round(params.p_liquidation, 2)} $")
+        col4.metric("n_pos_value", f"{round(params.n_pos_value, 2)} $")
   
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-def overview_table(risk, rel_risk, p_entry, p_SL, p_TP, SL_delta, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit):
+def overview_table(params: TradeParameters):
   #table1
   with st.container(border=True):
 
@@ -66,11 +67,11 @@ def overview_table(risk, rel_risk, p_entry, p_SL, p_TP, SL_delta, p_liquidation,
       
       # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("SL Delta", f"{round(SL_delta, 2)} $")
-      col2.metric("Risk", f"{round(risk, 2)} $")
-      col3.metric("Relative Risk", f"{round(rel_risk, 2)} $")
-      col4.metric("Initial Margin", f"{round(initial_margin, 2)} $")
-      col5.metric("potential_profit", f"{round(potential_profit, 2)} $")
+      col1.metric("SL Delta", f"{round(params.sl_delta, 2)} $")
+      col2.metric("Risk", f"{round(params.risk, 2)} $")
+      col3.metric("Relative Risk", f"{round(params.rel_risk, 2)} $")
+      col4.metric("Initial Margin", f"{round(params.initial_margin, 2)} $")
+      col5.metric("potential_profit", f"{round(params.potential_profit, 2)} $")
 
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
@@ -79,46 +80,33 @@ def overview_table(risk, rel_risk, p_entry, p_SL, p_TP, SL_delta, p_liquidation,
       st.subheader("💰 Risk Feedback")
       
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("Risiko", f"{round(risk, 2)} €")
-      col2.metric("rrr", f"{round(rrr, 1)}")
-      col3.metric("relative Gain", f"{round(rel_asset_gain_at_TP * 100, 2)}%")
-      col4.metric("Wartungsmarge", f"{round(maintainance_margin, 2)} €")
-      col5.metric("rel asset gain at TP", f"{round(rel_asset_gain_at_TP * 100, 2)}%")
+      col1.metric("Risiko", f"{round(params.risk, 2)} €")
+      col2.metric("rrr", f"{round(params.rrr, 1)}")
+      col3.metric("relative Gain", f"{round(params.rel_asset_gain_at_TP * 100, 2)}%")
+      col4.metric("Wartungsmarge", f"{round(params.maintainance_margin, 2)} €")
+      col5.metric("rel asset gain at TP", f"{round(params.rel_asset_gain_at_TP * 100, 2)}%")
 
   st.divider()
 
 
-def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
+def visualize_trade(params: TradeParameters):
   st.title("Trade Visualizer")
+  st.write(f"Direction: {params.current_direction.capitalize()}" if params.current_direction else "Direction unknown")
 
   # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
-  is_long = p_entry > p_SL
-  direction_text = "LONG 🟢" if is_long else "SHORT 🔴"
-
   try:
     balken_unten = 0.0
 
     #ba top
-    tp_aktiv = False
-    if p_TP > 0:  #hence, tp exists
-      if SL_delta > 0:  # long case
-        if p_TP > p_entry:  #valid TP
-          balken_oben = p_TP 
-          tp_aktiv = True
-        else: #invalid TP
-          balken_oben = p_entry
-
-      elif SL_delta < 0:  # short case
-        if p_TP < p_entry:  #valid TP
-          balken_oben = p_TP
-          tp_aktiv = True
-        else: #invalid TP
-          balken_oben = p_entry
+    if params.p_TP > 0:  # hence, tp exists
+      if params.sl_delta > 0:  # long case
+        balken_oben = params.p_TP if params.tp_active else params.p_entry
+      elif params.sl_delta < 0:  # short case
+        balken_oben = params.p_TP if params.tp_active else params.p_entry
       else:
-        balken_oben = p_liquidation  
-        tp_aktiv = True
+        balken_oben = params.p_liquidation
     else:
-        balken_oben = max(p_entry, p_liquidation)  #covers short and long case
+        balken_oben = max(params.p_entry, params.p_liquidation)  # covers short and long case
 
     # Daten fürs Chart zusammenbauen
     zone_data = pd.DataFrame({
@@ -127,12 +115,12 @@ def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
         'Zone': ['Preisbereich']
     })
 
-    preise = [p_entry, p_SL, p_liquidation]
+    preise = [params.p_entry, params.p_SL, params.p_liquidation]
     labels = ['Entry', 'Stop Loss', 'Liquidation']
     typen = ['entry', 'sl', 'liq']
 
-    if tp_aktiv:
-        preise.append(p_TP)
+    if params.tp_active:
+        preise.append(params.p_TP)
         labels.append('Take Profit')
         typen.append('tp')
 
@@ -159,16 +147,15 @@ def visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation):
 
     # In Streamlit anzeigen
     st.altair_chart(chart, use_container_width=True)
-  except:
-    st.warning("Error in visualizing trade. Please check your input parameters.")
+  except Exception as exc:
+    st.warning(f"Error in visualizing trade: {exc}")
 
 
 #main
-liq_delta_to_SL_delta_ratio, p_entry, risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL = get_trade_parameters()
-p_TP = get_TP()
-SL_delta, rel_risk, current_direction, p_liquidation, lvg, initial_margin, n_pos_value, maintainance_margin, rel_maintainance_margin, rel_asset_gain_at_TP, rrr, potential_profit = calculate_all(liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL, p_TP)
-current_direction_label(current_direction)
+params = TradeParameters(*get_trade_parameters(), p_TP=get_TP())
+params = calculate_all(params)
+current_direction_label(params.current_direction)
 
-fast_order_table(p_entry, p_SL, p_TP, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
-visualize_trade(p_entry, p_TP, p_SL, current_direction, p_liquidation)
-overview_table(risk, rel_risk, p_entry, p_SL, p_TP, SL_delta, p_liquidation, lvg, n_pos_value, initial_margin, maintainance_margin, rrr, rel_asset_gain_at_TP, potential_profit)
+fast_order_table(params)
+visualize_trade(params)
+overview_table(params)
