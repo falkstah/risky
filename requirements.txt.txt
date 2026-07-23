@@ -1,8 +1,0 @@
-text
-
-math
-streamlit
-altair
-Pandas
-ccxt
-pandas_ta

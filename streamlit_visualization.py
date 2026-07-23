@@ -149,13 +149,3 @@ def visualize_trade(params: TradeParameters):
     st.altair_chart(chart, use_container_width=True)
   except Exception as exc:
     st.warning(f"Error in visualizing trade: {exc}")
-
-
-#main
-params = TradeParameters(*get_trade_parameters(), p_TP=get_TP())
-params = calculate_all(params)
-current_direction_label(params.current_direction)
-
-fast_order_table(params)
-visualize_trade(params)
-overview_table(params)
