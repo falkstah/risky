@@ -6,10 +6,9 @@ import pandas as pd
 
 #logic functions
 from classes import TradeParameters
-from trading_logic import calculate_all
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
-st.text("Opimized for execution speed.")
+st.text("Optimized for execution speed.")
 
 #trade specific values
 def get_trade_parameters():
