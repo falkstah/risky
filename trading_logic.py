@@ -8,10 +8,13 @@ from classes import TradeParameters
 def calculate_all(params: TradeParameters):
     # 1) Directional basics
     params.dirsign = calculate_dirsign(params)
-    params.sl_delta = calculate_SL_delta(params)
+
     if params.p_entry is None or params.p_SL is None:
+        raise ValueError("Entry price or Stop Loss price is not set")
+    else:
+      params.sl_delta = calculate_SL_delta(params)
       if params.sl_delta == 0:  # this would lead to division by zero in the following calculations
-          raise ValueError("SL_delta = 0")
+                raise ValueError("SL_delta = 0")
 
     params.rel_risk = calculate_rel_risk(params)
     params.current_direction = get_trade_direction(params)
