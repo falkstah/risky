@@ -98,9 +98,9 @@ def visualize_trade(params: TradeParameters):
 
     #ba top
     if params.p_TP > 0:  # hence, tp exists
-      if params.sl_delta > 0:  # long case
+      if params.dirsign > 0:  # long case
         balken_oben = params.p_TP if params.tp_active else params.p_entry
-      elif params.sl_delta < 0:  # short case
+      elif params.dirsign < 0:  # short case
         balken_oben = params.p_TP if params.tp_active else params.p_entry
       else:
         balken_oben = params.p_liquidation

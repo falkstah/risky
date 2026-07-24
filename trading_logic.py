@@ -9,6 +9,7 @@ def calculate_all(params: TradeParameters):
     # main
 
     # Calculating basic parameters
+    params.dirsign = calculate_dirsign(params)
     params.sl_delta = calculate_SL_delta(params)
     if params.sl_delta == 0: # this would lead to division by zero in the following calculations
         raise ValueError("SL_delta = 0")
@@ -44,9 +45,6 @@ def calculate_all(params: TradeParameters):
     # risk feedback
     params.rel_asset_gain_at_TP, params.rrr, params.potential_profit = evaluate_trade(params)
 
-    valid_calculations = test_liquidation_behaviour(params, params.initial_margin)
-    print("valid calculations: ", valid_calculations)
-
     return params
 
 
@@ -56,15 +54,24 @@ def calculate_all(params: TradeParameters):
 #maintainance_deduction       # "0" ist konsevativ
 
 #initial margin calculation
-def calculate_SL_delta(params: TradeParameters):
-  if params.p_entry == params.p_SL:
+def calculate_dirsign(params: TradeParameters):
+  if params.p_entry > params.p_SL:
+    return 1
+  elif params.p_entry < params.p_SL:
+    return -1
+  else:
     print("Entry and SL are equal. Please check your input parameters.")
-  return params.p_entry - params.p_SL
+    return 0
+
+
+def calculate_SL_delta(params: TradeParameters):
+  return abs(params.p_entry - params.p_SL)
+
 
 def get_trade_direction(params: TradeParameters):
-  if params.sl_delta > 0:
+  if params.dirsign > 0:
     return "long"
-  elif params.sl_delta < 0:
+  elif params.dirsign < 0:
     return "short"
   else:
     print("Trade direction not consistent. Please check your input parameters.")
@@ -81,30 +88,45 @@ def calculate_initial_margin_rate(lvg):
 
 #live calculation
 def calculate_n_pos_value(params: TradeParameters):
-  return params.initial_margin * params.lvg
+  return params.dirsign * params.risk / params.rel_risk # = initial_margin * lvg - koppelt somit lvg und initial_margin; n_pos_value < 0 <==> short
+
+def calculate_max_lvg(params: TradeParameters):
+  return 1 / params.maintainance_margin_rate
+
+def max_lvg_for_given_liquidation(params: TradeParameters):
+  return params.p_entry / (params.p_entry - params.p_liquidation) * (1 + params.maintainance_margin_rate) - params.maintainance_margin_rate
+
+def find_max_lvg(params: TradeParameters):
+  max_allowed_lvg = calculate_max_lvg(params)
+  max_lvg_liq = max_lvg_for_given_liquidation(params)
+  #both formulas give upper lvg limits, hence the smaller one has to be chosen:
+  return min(max_allowed_lvg, max_lvg_liq)
+
+def p_liq_exchange_forced(params: TradeParameters):
+  return params.p_entry * (1 - params.maintainance_margin)
 
 #Risiko: wenn Kurs gegen mich läuft sinkt mein Kontostand = hinterlegte Margin schrumpft -> bei maintainance margin <= 2%*n_pos_value: Zwangsliquidation
 #->live updates für folgende Werte nötig:
 def calculate_maintainance_margin(params: TradeParameters, n_pos_value):
-  return n_pos_value * params.maintainance_margin_rate + params.maintainance_deduction # Deduction-Abzug ist ein Entgegenkommen des Brokers für effizientere Liquidation
+  return abs(n_pos_value) * params.maintainance_margin_rate + params.maintainance_deduction # Maintenance margin is a positive requirement; direction is already encoded in n_pos_value
 
 def calculate_rel_maintainance_margin(params: TradeParameters):
-  return params.maintainance_margin / params.n_pos_value # = maintainance_margin_rate if maintainance_margin_deduction == 0
+  return params.maintainance_margin / abs(params.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
 #safety calculus
 #evaluating trading setups
 def evaluate_trade(params: TradeParameters):
   rel_asset_gain_at_TP = (params.p_TP - params.p_entry) / params.p_entry
-  rrr = (params.p_TP - params.p_entry) / (params.p_entry - params.p_SL)
+  rrr = (params.p_TP - params.p_entry) / (params.dirsign * params.sl_delta)
   potential_profit = params.risk * rrr
   return rel_asset_gain_at_TP, rrr, potential_profit
 
 def calculate_tp_active(params: TradeParameters):
   if params.p_TP <= 0:
     return False
-  if params.sl_delta > 0:
+  if params.dirsign > 0:
     return params.p_TP > params.p_entry
-  if params.sl_delta < 0:
+  if params.dirsign < 0:
     return params.p_TP < params.p_entry
   return False
 
@@ -134,7 +156,7 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 
 #conservatively hardcoded liq buffer to skip API-task
 def match_liquidation_price_to_SL(params: TradeParameters):
-    return max(params.p_entry - params.liq_delta_to_SL_delta_ratio * params.sl_delta, 0) #SL_delta VZ berücksichtigt long/short; max-Funtion, weil Liquidations-Preis minimal bei 0 sein kann, da Preis >= 0
+    return max(params.p_entry - params.liq_delta_to_SL_delta_ratio * params.sl_delta * params.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
 
 def match_lvg_to_liquidation_price(params: TradeParameters):
   return 1 / (1 + params.maintainance_margin_rate - params.p_liquidation * (1 + params.maintainance_margin_rate) / params.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
@@ -167,16 +189,3 @@ def calulate_profit_at_price_p(params: TradeParameters, p):
 
 def calculate_equity(initial_margin, loss):
   return initial_margin - loss
-
-def test_liquidation_behaviour(params: TradeParameters, initial_margin):
-  loss_at_p_liquidation = -1 * calulate_profit_at_price_p(params, params.p_liquidation)
-  print("loss at liquidation price: ", loss_at_p_liquidation, " - should be a little more than 4 times the risk, bc of liq buffer. But of course maximum is full initial_margin whe lvg = 1")
-  maintainance_margin_at_p_liquidation = initial_margin - loss_at_p_liquidation
-
-  if maintainance_margin_at_p_liquidation > params.maintainance_margin_rate * params.n_pos_value and round(loss_at_p_liquidation, 0) == round(params.risk, 0):
-    print("Calculation success.")
-    valid_caluclation = True
-  else:
-    print("Calculation Error.")
-    valid_caluclation = False
-  return valid_caluclation

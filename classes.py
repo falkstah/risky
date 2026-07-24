@@ -18,6 +18,7 @@ class TradeParameters:
     
     # Calculated Values
     sl_delta: float = 0.0
+    dirsign: float = 0.0
     n_pos_value: float = 0.0
     lvg: float = 0.0
     initial_margin: float = 0.0
