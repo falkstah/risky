@@ -1,5 +1,6 @@
 #for calculations
 import math
+import numbers
 import pandas as pd
 from classes import TradeParameters
 #import ccxt
@@ -7,14 +8,20 @@ from classes import TradeParameters
 
 def calculate_all(params: TradeParameters):
     # 1) Directional basics
-    params.dirsign = calculate_dirsign(params)
-
     if params.p_entry is None or params.p_SL is None:
         raise ValueError("Entry price or Stop Loss price is not set")
-    else:
-      params.sl_delta = calculate_SL_delta(params)
-      if params.sl_delta == 0:  # this would lead to division by zero in the following calculations
-                raise ValueError("SL_delta = 0")
+
+    try:
+        params.p_entry = float(params.p_entry)
+        params.p_SL = float(params.p_SL)
+    except (TypeError, ValueError):
+        raise TypeError("Entry price and Stop Loss price must be numeric values.")
+
+    params.dirsign = calculate_dirsign(params)
+
+    params.sl_delta = calculate_SL_delta(params)
+    if params.sl_delta == 0:  # this would lead to division by zero in the following calculations
+        raise ValueError("SL_delta = 0")
 
     params.rel_risk = calculate_rel_risk(params)
     params.current_direction = get_trade_direction(params)
@@ -54,7 +61,7 @@ def calculate_dirsign(params: TradeParameters):
 
   if p_entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
-  if not isinstance(p_entry, (int, float)) or not isinstance(p_SL, (int, float)):
+  if not isinstance(p_entry, numbers.Real) or not isinstance(p_SL, numbers.Real):
     raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
   if p_entry > p_SL:
