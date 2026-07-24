@@ -137,7 +137,7 @@ def visualize_trade(params: TradeParameters):
     )
     rule = alt.Chart(lines_data).mark_rule(strokeWidth=2).encode(
         y=alt.Y('Preis'),
-        color=alt.Color('Typ', scale={'domain': ['entry', 'sl', 'tp'], 'range': ['#10b981', '#ef4444', '#3b82f6']}, legend=None),
+        color=alt.Color('Typ', scale={'domain': ['entry', 'sl', 'liq', 'tp'], 'range': ['#10b981', '#ef4444', '#8b5cf6', '#3b82f6']}, legend=None),
         tooltip=['Label', 'Preis']
     )
     text = rule.mark_text(align='left', dx=5, dy=-5).encode(text='Label')
