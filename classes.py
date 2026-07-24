@@ -11,6 +11,8 @@ class TradeParameters:
     p_entry: float
     p_SL: float
     p_TP: float
+    max_leverage: float = 10.0
+    max_margin: float = 100.0
     p_liquidation: float = 0.0
     p: float = 0.0
     risiko_euro: float = 0.0

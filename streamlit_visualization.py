@@ -14,9 +14,11 @@ st.text("Optimized for execution speed.")
 def get_trade_parameters():
   print("Enter parameters: ")
   liq_delta_to_SL_delta_ratio = float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25))
-  risk = max(float(st.number_input("risk: ", value = 10, step = 1)), 0)
-  maintainance_margin_rate = max(float(st.number_input("maintainance_margin_rate: ", value = 0.02, step = 0.001)), 0)
-  maintainance_deduction = max(float(st.number_input("maintainance_deduction: ", value = 0.0, step = 0.001)), 0)
+  risk = float(st.number_input("risk: ", value = 10, min_value = 0, step = 1))
+  maintainance_margin_rate = float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001))
+  maintainance_deduction = float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001))
+  max_leverage = float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5))
+  max_margin = float(st.number_input("max_margin: ", value = 100.0, min_value = 1.0, step = 1.0))
 
   p_entry = st.number_input("entry: ", value = None, min_value = 0.01, step = 0.01)
   if p_entry is None or p_entry < 0:
@@ -26,7 +28,7 @@ def get_trade_parameters():
   if p_SL is None or p_SL < 0:
     p_SL = 0.00
 
-  return liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, maintainance_deduction, p_entry, p_SL
+  return liq_delta_to_SL_delta_ratio, risk, maintainance_margin_rate, maintainance_deduction, max_leverage, max_margin, p_entry, p_SL
 
 def get_TP():
   p_TP = st.number_input("TP: ", value = None, step = 0.01)

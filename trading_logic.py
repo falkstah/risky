@@ -6,43 +6,33 @@ from classes import TradeParameters
 #import pandas_ta as ta
 
 def calculate_all(params: TradeParameters):
-    # main
-
-    # Calculating basic parameters
+    # 1) Directional basics
     params.dirsign = calculate_dirsign(params)
     params.sl_delta = calculate_SL_delta(params)
-    if params.sl_delta == 0: # this would lead to division by zero in the following calculations
+    if params.sl_delta == 0:  # this would lead to division by zero in the following calculations
         raise ValueError("SL_delta = 0")
 
-    rel_risk = calculate_rel_risk(params)
-    params.rel_risk = rel_risk
-
-    # UI view:
+    params.rel_risk = calculate_rel_risk(params)
     params.current_direction = get_trade_direction(params)
     params.tp_active = calculate_tp_active(params)
 
-    # hardcoded paramteres for simplicity
-    params.liq_delta_to_SL_delta_ratio = 4 # means the primitive buffer (Liq distance is set to 4 times SL distance to prevent liq from high volatility whicks)
-
-    # Calculating Final Parameters to input in exchange menu
+    # 2) Desired liquidation price from entry and SL
     params.p_liquidation = match_liquidation_price_to_SL(params)
-    params.lvg = match_lvg_to_liquidation_price(params)
-    params.lvg = check_lvg(params.lvg)
 
+    # 3) Derive leverage from the liquidation target and apply constraints
+    params.lvg = calculate_lvg(params)
+
+    # 4) Initial margin and maintenance margin
+    params.initial_margin = calculate_initial_margin(params)
+    params.risk = check_initial_margin(params, params.initial_margin)
     params.initial_margin = calculate_initial_margin(params)
 
-    # correcting risk to limit initial_margin
-    old_risk = params.risk
-    params.risk = check_initial_margin(params, params.initial_margin)
-    if params.risk != old_risk:
-        raise ValueError("Risk was primitively reduced. Please re-enter parameters.")
-
+    # 5) Position and maintenance metrics
     params.n_pos_value = calculate_n_pos_value(params)
-
     params.maintainance_margin = calculate_maintainance_margin(params, params.n_pos_value)
     params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
 
-    # risk feedback
+    # 6) Risk feedback evaluation
     params.rel_asset_gain_at_TP, params.rrr, params.potential_profit = evaluate_trade(params)
 
     return params
@@ -96,11 +86,16 @@ def calculate_max_lvg(params: TradeParameters):
 def max_lvg_for_given_liquidation(params: TradeParameters):
   return params.p_entry / (params.p_entry - params.p_liquidation) * (1 + params.maintainance_margin_rate) - params.maintainance_margin_rate
 
+def calculate_lvg(params: TradeParameters):
+  max_lvg = find_max_lvg(params)
+  return check_lvg(max_lvg, params.max_leverage)
+
+
 def find_max_lvg(params: TradeParameters):
   max_allowed_lvg = calculate_max_lvg(params)
   max_lvg_liq = max_lvg_for_given_liquidation(params)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen:
-  return min(max_allowed_lvg, max_lvg_liq)
+  return min(max_allowed_lvg, max_lvg_liq, params.max_leverage)
 
 def p_liq_exchange_forced(params: TradeParameters):
   return params.p_entry * (1 - params.maintainance_margin)
@@ -163,20 +158,20 @@ def match_lvg_to_liquidation_price(params: TradeParameters):
 
 #risk correction functions
 
-def check_lvg(lvg):
-  if lvg > 10:
-    print("Lvg will be stopped at 10")
-    lvg = 10
+def check_lvg(lvg, max_leverage: float = 10.0):
+  if lvg > max_leverage:
+    print(f"Lvg will be stopped at {max_leverage}")
+    lvg = max_leverage
   elif lvg < 1:
     print("Lvg < 1. Spot buy. (Positionsrisiko könnte kleiner als gewünschtes Risiko werden?).")
     lvg = 1
   return lvg
 
 def check_initial_margin(params: TradeParameters, initial_margin):
-  if initial_margin > 100:
-    print("margin-demand too high. Lower the risk!")
-    new_risk = float(input("new risk: "))
-    return new_risk
+  max_margin = max(params.max_margin, 1.0)
+  if initial_margin > max_margin:
+    print(f"margin-demand too high. Reducing risk to fit max_margin={max_margin}")
+    return max_margin * params.rel_risk * params.lvg
   else:
     return params.risk
 
