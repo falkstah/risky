@@ -13,14 +13,6 @@ st.text("Optimized for execution speed.")
 #trade specific values
 def get_trade_parameters():
   print("Enter parameters: ")
-  p_entry = st.number_input("entry: ", value = None, min_value = 0.01, step = 0.01)
-  if p_entry is None or p_entry < 0:
-    p_entry = 0.01
-
-  p_SL = st.number_input("SL: ", value = None, min_value = 0.00, step = 0.01)
-  if p_SL is None or p_SL < 0:
-    p_SL = 0.00
-
   params = TradeParameters(
       liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
       risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
@@ -28,12 +20,24 @@ def get_trade_parameters():
       maintainance_deduction=float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001)),
       max_leverage=float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
       max_margin=float(st.number_input("max_margin: ", value = 100.0, min_value = 1.0, step = 1.0)),
-      p_entry=p_entry,
-      p_SL=p_SL,
+      p_entry=get_entry(),
+      p_SL=get_SL(),
       p_TP = get_TP()
   )
 
   return params
+
+def get_entry():
+  p_entry = st.number_input("entry: ", value = None, min_value = 0.01, step = 0.01)
+  if p_entry is None or p_entry < 0:
+    p_entry = 0.01
+  return p_entry
+
+def get_SL():
+  p_SL = st.number_input("SL: ", value = None, min_value = 0.00, step = 0.01)
+  if p_SL is None or p_SL < 0:
+    p_SL = 0.00
+  return p_SL
 
 def get_TP():
   p_TP = st.number_input("TP: ", value = None, step = 0.01)
