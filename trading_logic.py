@@ -74,8 +74,8 @@ def get_trade_direction(params: TradeParameters):
   elif params.dirsign < 0:
     return "short"
   else:
-    print("Trade direction not consistent. Please check your input parameters.")
-    return None
+      print("Trade direction not consistent. Please check your input parameters.")
+  return None
 
 def calculate_rel_risk(params: TradeParameters):
   return abs(params.p_entry - params.p_SL) / params.p_entry
