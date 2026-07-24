@@ -10,7 +10,6 @@ def main():
     st.text("Opimized for execution speed.")
 
     params = streamlit_visualization.get_trade_parameters()
-    params.p_TP = streamlit_visualization.get_TP()
     params = calculate_all(params)
 
     streamlit_visualization.current_direction_label(params.current_direction)
