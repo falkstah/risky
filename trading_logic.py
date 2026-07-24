@@ -49,29 +49,41 @@ def calculate_all(params: TradeParameters):
 
 #initial margin calculation
 def calculate_dirsign(params: TradeParameters):
-  if params.p_entry is None or params.p_SL is None:
+  p_entry = getattr(params, "p_entry", None)
+  p_SL = getattr(params, "p_SL", None)
+
+  if p_entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
-  if params.p_entry > params.p_SL:
+  if not isinstance(p_entry, (int, float)) or not isinstance(p_SL, (int, float)):
+    raise TypeError("Entry price and Stop Loss price must be numeric values.")
+
+  if p_entry > p_SL:
     return 1
-  elif params.p_entry < params.p_SL:
+  elif p_entry < p_SL:
     return -1
   else:
     raise ValueError("Entry and Stop Loss must not be equal.")
 
 
 def calculate_SL_delta(params: TradeParameters):
-  if params.p_entry is None or params.p_SL is None:
+  p_entry = getattr(params, "p_entry", None)
+  p_SL = getattr(params, "p_SL", None)
+  if p_entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
-  return abs(params.p_entry - params.p_SL)
+  return abs(p_entry - p_SL)
 
 
 def get_trade_direction(params: TradeParameters):
-  if params.dirsign > 0:
+  dirsign = getattr(params, "dirsign", None)
+  if dirsign is None:
+    raise ValueError("dirsign must be calculated before determining trade direction.")
+
+  if dirsign > 0:
     return "long"
-  elif params.dirsign < 0:
+  elif dirsign < 0:
     return "short"
   else:
-      print("Trade direction not consistent. Please check your input parameters.")
+    print("Trade direction not consistent. Please check your input parameters.")
   return None
 
 def calculate_rel_risk(params: TradeParameters):
