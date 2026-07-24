@@ -49,16 +49,19 @@ def calculate_all(params: TradeParameters):
 
 #initial margin calculation
 def calculate_dirsign(params: TradeParameters):
+  if params.p_entry is None or params.p_SL is None:
+    raise ValueError("Entry price and Stop Loss price must both be set.")
   if params.p_entry > params.p_SL:
     return 1
   elif params.p_entry < params.p_SL:
     return -1
   else:
-    print("Entry and SL are equal. Please check your input parameters.")
-    return 0
+    raise ValueError("Entry and Stop Loss must not be equal.")
 
 
 def calculate_SL_delta(params: TradeParameters):
+  if params.p_entry is None or params.p_SL is None:
+    raise ValueError("Entry price and Stop Loss price must both be set.")
   return abs(params.p_entry - params.p_SL)
 
 
