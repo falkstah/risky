@@ -6,7 +6,6 @@ from classes import TradeParameters
 #import ccxt
 #import pandas_ta as ta
 
-
 def sanitize_inputs(params: TradeParameters):
     for field_name in TradeParameters.__dataclass_fields__:
         if field_name in {"current_direction", "tp_active"}:
@@ -154,14 +153,14 @@ def max_lvg_for_given_liquidation(params: TradeParameters):
 
 def calculate_lvg(params: TradeParameters):
   max_lvg = find_max_lvg(params)
-  return check_lvg(max_lvg, params.max_leverage)
+  return check_lvg(params)
 
 
 def find_max_lvg(params: TradeParameters):
   max_allowed_lvg = calculate_max_lvg(params)
   max_lvg_liq = max_lvg_for_given_liquidation(params)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen. But lvg >= 1 with max:
-  return math.floor(max(min(max_allowed_lvg, max_lvg_liq, params.max_leverage), 1)) #extra math.floor, to guarantee that lvg never triggers liq  before wanted liq threshhold
+  return math.floor(max(min(max_allowed_lvg, max_lvg_liq, params.max_lvg), 1)) #extra math.floor, to guarantee that lvg never triggers liq  before wanted liq threshhold
 
 def p_liq_exchange_forced(params: TradeParameters):
   return params.p_entry * (1 - params.maintainance_margin)
@@ -224,14 +223,14 @@ def match_lvg_to_liquidation_price(params: TradeParameters):
 
 #risk correction functions
 
-def check_lvg(lvg, max_leverage: float = 10.0):
-  if lvg > max_leverage:
-    print(f"Lvg will be stopped at {max_leverage}")
-    lvg = max_leverage
-  elif lvg < 1:
+def check_lvg(params: TradeParameters):
+  if params.lvg > params.max_lvg:
+    print(f"Lvg will be stopped at {params.max_lvg}")
+    params.lvg = params.max_lvg
+  elif params.lvg < 1:
     print("Lvg < 1. Spot buy. (Positionsrisiko könnte kleiner als gewünschtes Risiko werden?).")
-    lvg = 1
-  return lvg
+    params.lvg = 1
+  return params.lvg
 
 def check_initial_margin(params: TradeParameters, initial_margin):
   max_margin = max(params.max_margin, 1.0)
@@ -262,7 +261,7 @@ def debug_calculate_all(**overrides):
       "p_entry": 10.0,
       "p_SL": 9.0,
       "p_TP": 20.0,
-      "max_leverage": 10.0,
+      "max_lvg": 10.0,
       "max_margin": 100.0,
   }
   defaults.update(overrides)
@@ -275,7 +274,10 @@ def debug_calculate_all(**overrides):
       p_entry=float(defaults.get("p_entry", 10.0)),
       p_SL=float(defaults.get("p_SL", 9.0)),
       p_TP=float(defaults.get("p_TP", 20.0)),
-      max_leverage=float(defaults.get("max_leverage", 10.0)),
+      max_lvg=float(defaults.get("max_lvg", 10.0)),
       max_margin=float(defaults.get("max_margin", 100.0)),
   )
   return calculate_all(params)
+
+#for debugging run this function with Debugger till Breakpoint:
+debug_calculate_all()
