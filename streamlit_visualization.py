@@ -28,16 +28,18 @@ def get_trade_parameters():
   return params
 
 def get_entry():
-  p_entry = st.number_input("entry: ", value=0.01, min_value=0.01, step=0.01)
-  if p_entry is None or p_entry < 0:
+  p_entry = st.number_input("entry: ", value=0.01, min_value=0.0, step=0.01) #nicht params-p_entry, weil die Zuordnung in get_trade_parameters() erfolgt
+  if p_entry is None or p_entry <= 0:
     p_entry = 0.01
   return float(p_entry)
 
+
 def get_SL():
-  p_SL = st.number_input("SL: ", value=0.00, min_value=0.00, step=0.01)
+  p_SL = st.number_input("SL: ", value=0.0, min_value=0.0, step=0.01)
   if p_SL is None or p_SL < 0:
-    p_SL = 0.00
+    p_SL = 0.0
   return float(p_SL)
+
 
 def get_TP():
   p_TP = st.number_input("TP: ", value=0.0, min_value=0.0, step=0.01)
