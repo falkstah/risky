@@ -250,3 +250,32 @@ def calulate_profit_at_price_p(params: TradeParameters, p):
 
 def calculate_equity(initial_margin, loss):
   return initial_margin - loss
+
+
+def debug_calculate_all(**overrides):
+  #Create a TradeParameters object with default inputs and run calculate_all for debugging.
+  defaults = {
+      "liq_delta_to_SL_delta_ratio": 4.0,
+      "risk": 10.0,
+      "maintainance_margin_rate": 0.02,
+      "maintainance_deduction": 0.0,
+      "p_entry": 100.0,
+      "p_SL": 95.0,
+      "p_TP": 110.0,
+      "max_leverage": 10.0,
+      "max_margin": 100.0,
+  }
+  defaults.update(overrides)
+
+  params = TradeParameters(
+      liq_delta_to_SL_delta_ratio=float(defaults.get("liq_delta_to_SL_delta_ratio", 4.0)),
+      risk=float(defaults.get("risk", 10.0)),
+      maintainance_margin_rate=float(defaults.get("maintainance_margin_rate", 0.02)),
+      maintainance_deduction=float(defaults.get("maintainance_deduction", 0.0)),
+      p_entry=float(defaults.get("p_entry", 100.0)),
+      p_SL=float(defaults.get("p_SL", 95.0)),
+      p_TP=float(defaults.get("p_TP", 110.0)),
+      max_leverage=float(defaults.get("max_leverage", 10.0)),
+      max_margin=float(defaults.get("max_margin", 100.0)),
+  )
+  return calculate_all(params)
