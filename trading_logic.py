@@ -43,8 +43,8 @@ def calculate_all(params: TradeParameters):
     sanitize_inputs(params)
 
     # 1) Directional basics
-    if params.p_entry == 0.0 or params.p_SL == 0.0:
-        raise ValueError("Entry price or Stop Loss price is not set")
+    if params.p_entry == 0.0:
+        raise ValueError("Entry price is not set")
 
     try:
         params.p_entry = float(params.p_entry)
