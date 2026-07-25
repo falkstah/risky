@@ -145,10 +145,10 @@ def calculate_n_pos_value(params: TradeParameters):
   return params.dirsign * params.risk / params.rel_risk # = initial_margin * lvg - koppelt somit lvg und initial_margin; n_pos_value < 0 <==> short
 
 def calculate_max_lvg(params: TradeParameters):
-  return 1 / params.maintainance_margin_rate
+  return math.floor(1 / params.maintainance_margin_rate)
 
 def max_lvg_for_given_liquidation(params: TradeParameters):
-  return params.p_entry / (params.p_entry - params.p_liquidation) * (1 + params.maintainance_margin_rate) - params.maintainance_margin_rate
+  return math.floor(params.p_entry / (params.p_entry - params.p_liquidation) * (1 + params.maintainance_margin_rate) - params.maintainance_margin_rate)
 
 def calculate_lvg(params: TradeParameters):
   max_lvg = find_max_lvg(params)
@@ -159,7 +159,7 @@ def find_max_lvg(params: TradeParameters):
   max_allowed_lvg = calculate_max_lvg(params)
   max_lvg_liq = max_lvg_for_given_liquidation(params)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen:
-  return min(max_allowed_lvg, max_lvg_liq, params.max_leverage)
+  return math.floor(min(max_allowed_lvg, max_lvg_liq, params.max_leverage)) #extra math.floor, to guarantee that lvg is never bigger than liq threshhold
 
 def p_liq_exchange_forced(params: TradeParameters):
   return params.p_entry * (1 - params.maintainance_margin)
