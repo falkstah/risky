@@ -18,7 +18,7 @@ def get_trade_parameters():
       risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
       maintainance_margin_rate=float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001)),
       maintainance_deduction=float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001)),
-      max_leverage=float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
+      max_lvg=float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
       max_margin=float(st.number_input("max_margin: ", value = 100.0, min_value = 1.0, step = 1.0)),
       p_entry=get_entry(),
       p_SL=get_SL(),
