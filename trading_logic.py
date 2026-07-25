@@ -45,7 +45,7 @@ def calculate_all(params: TradeParameters):
     # 1) Directional basics
     if params.p_entry == 0.0:
       print("P_Entry is 0.0, cannot calculate trade parameters.")
-      return
+      return params #Ojekt muss wegen Struktur zurückgegeben werden, auch wenn Daten wertlos sind
 
     try:
         params.p_entry = float(params.p_entry)
@@ -148,7 +148,9 @@ def calculate_max_lvg(params: TradeParameters):
   return math.floor(1 / params.maintainance_margin_rate)
 
 def max_lvg_for_given_liquidation(params: TradeParameters):
-  return math.floor(1 / (1 + params.maintainance_margin_rate+ params.maintainance_deduction - params.p_liquidation / params.p_entry))  # = general p_liq formula solved for lvg; formula can get < 1
+  print(params.maintainance_margin_rate, params.maintainance_deduction, params.p_liquidation, params.p_entry)
+  return math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / params.p_entry))  # = general p_liq formula solved for lvg; formula can get < 1
+
 
 def calculate_lvg(params: TradeParameters):
   max_lvg = find_max_lvg(params)
