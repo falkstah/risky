@@ -58,7 +58,7 @@ def calculate_all(params: TradeParameters):
     if params.sl_delta == 0:  # this would lead to division by zero in the following calculations
         raise ValueError("SL_delta = 0")
 
-    params.rel_risk = calculate_rel_risk(params)
+    
     params.current_direction = get_trade_direction(params)
     params.tp_active = calculate_tp_active(params)
 
@@ -66,9 +66,12 @@ def calculate_all(params: TradeParameters):
     params.p_liquidation = match_liquidation_price_to_SL(params)
 
     # 3) Derive leverage from the liquidation target and apply constraints
-    params.lvg = calculate_lvg(params)
+    params.rel_risk = calculate_rel_risk(params)
+    params.lvg, params.risk = find_max_lvg(params)
+
 
     # 4) Initial margin and maintenance margin
+    params.max_margin = find_max_margin(params)
     params.initial_margin = calculate_initial_margin(params)
     params.risk = check_initial_margin(params, params.initial_margin)
     params.initial_margin = calculate_initial_margin(params)
@@ -151,19 +154,28 @@ def max_lvg_for_given_liquidation(params: TradeParameters):
   return math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / params.p_entry))  # = general p_liq formula solved for lvg; formula can get < 1
 
 
-def calculate_lvg(params: TradeParameters):
-  max_lvg = find_max_lvg(params)
-  return check_lvg(params)
-
-
 def find_max_lvg(params: TradeParameters):
   max_allowed_lvg = calculate_max_lvg(params)
   max_lvg_liq = max_lvg_for_given_liquidation(params)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen. But lvg >= 1 with max:
-  return math.floor(max(min(max_allowed_lvg, max_lvg_liq, params.max_lvg), 1)) #extra math.floor, to guarantee that lvg never triggers liq  before wanted liq threshhold
+  lvg = math.floor(min(max_allowed_lvg, max_lvg_liq)) #floor guarantees that lvg does not force early liq
+  return check_lvg(lvg, params.risk, params)
 
-def p_liq_exchange_forced(params: TradeParameters):
-  return params.p_entry * (1 - params.maintainance_margin)
+#risk correction functions
+def check_lvg(lvg, risk, params):
+  if lvg > params.max_lvg:  # Assuming params.max_lvg is 10
+    print(f"Warning: Calculated leverage {lvg} exceeds {params.max_lvg}. Risk will be made smaller to adjust.")
+    lvg = params.max_lvg
+    risk = reduce_risk(lvg, risk, params)
+
+  if lvg < 1:
+    print("lvg < 1. Over secuing already guaranteed by find_max_margin. hence, buffer is too big. Risk too small.")
+    lvg = 1
+  return lvg, risk
+
+def reduce_risk(lvg, risk, params):
+   return params.max_margin * params.max_lvg * params.rel_risk
+
 
 #Risiko: wenn Kurs gegen mich läuft sinkt mein Kontostand = hinterlegte Margin schrumpft -> bei maintainance margin <= 2%*n_pos_value: Zwangsliquidation
 #->live updates für folgende Werte nötig:
@@ -173,14 +185,11 @@ def calculate_maintainance_margin(params: TradeParameters, n_pos_value):
 def calculate_rel_maintainance_margin(params: TradeParameters):
   return params.maintainance_margin / abs(params.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
-#safety calculus
-#evaluating trading setups
-def evaluate_trade(params: TradeParameters):
-  rel_asset_gain_at_TP = (params.p_TP - params.p_entry) / params.p_entry
-  rrr = (params.p_TP - params.p_entry) / (params.dirsign * params.sl_delta)
-  potential_profit = params.risk * rrr
-  return rel_asset_gain_at_TP, rrr, potential_profit
+def p_liq_exchange_forced(params: TradeParameters):
+  return params.p_entry * (1 - params.maintainance_margin)
 
+
+#Strategy Feedback
 def calculate_tp_active(params: TradeParameters):
   if params.p_TP <= 0:
     return False
@@ -190,8 +199,16 @@ def calculate_tp_active(params: TradeParameters):
     return params.p_TP < params.p_entry
   return False
 
+#safety calculus
+#evaluating trading setups
+def evaluate_trade(params: TradeParameters):
+  rel_asset_gain_at_TP = (params.p_TP - params.p_entry) / params.p_entry
+  rrr = (params.p_TP - params.p_entry) / (params.dirsign * params.sl_delta)
+  potential_profit = params.risk * rrr
+  return rel_asset_gain_at_TP, rrr, potential_profit
+
 #exchange = ccxt.bybit()
-k = 1.5 # sicherheitsmultiplikator
+#k = 1.5  sicherheitsmultiplikator
 #live atr erstmal überbrückt, weil bybit google IP-Anfragrn blockiert
 #used to match the liq price to current volatility:
 def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
@@ -221,17 +238,8 @@ def match_liquidation_price_to_SL(params: TradeParameters):
 def match_lvg_to_liquidation_price(params: TradeParameters):
   return 1 / (1 + params.maintainance_margin_rate - params.p_liquidation * (1 + params.maintainance_margin_rate) / params.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
 
-#risk correction functions
-
-def check_lvg(params: TradeParameters):
-  if params.lvg > params.max_lvg:
-    print(f"Lvg will be stopped at {params.max_lvg}")
-    params.lvg = params.max_lvg
-  elif params.lvg < 1:
-    print("Lvg < 1. Spot buy. (Positionsrisiko könnte kleiner als gewünschtes Risiko werden?).")
-    params.lvg = 1
-  return params.lvg
-
+def find_max_margin(params):
+   return 0.9 * params.max_margin #forces over securing margin, to avoid margin calls and forced liquidation
 def check_initial_margin(params: TradeParameters, initial_margin):
   max_margin = max(params.max_margin, 1.0)
   if initial_margin > max_margin:
