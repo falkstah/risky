@@ -6,9 +6,44 @@ from classes import TradeParameters
 #import ccxt
 #import pandas_ta as ta
 
+
+def sanitize_inputs(params: TradeParameters):
+    for field_name in TradeParameters.__dataclass_fields__:
+        if field_name in {"current_direction", "tp_active"}:
+            continue
+
+        value = getattr(params, field_name, None)
+        if value is None:
+            setattr(params, field_name, 0.0)
+            continue
+
+        if isinstance(value, str):
+            if not value.strip():
+                setattr(params, field_name, 0.0)
+                continue
+            try:
+                setattr(params, field_name, float(value.strip()))
+            except ValueError:
+                setattr(params, field_name, 0.0)
+            continue
+
+        if isinstance(value, bool):
+            continue
+
+        if isinstance(value, numbers.Real):
+            continue
+
+        try:
+            setattr(params, field_name, float(value))
+        except (TypeError, ValueError):
+            setattr(params, field_name, 0.0)
+
+
 def calculate_all(params: TradeParameters):
+    sanitize_inputs(params)
+
     # 1) Directional basics
-    if params.p_entry is None or params.p_SL is None:
+    if params.p_entry == 0.0 or params.p_SL == 0.0:
         raise ValueError("Entry price or Stop Loss price is not set")
 
     try:
@@ -56,6 +91,7 @@ def calculate_all(params: TradeParameters):
 
 #initial margin calculation
 def calculate_dirsign(params: TradeParameters):
+  sanitize_inputs(params)
   p_entry = getattr(params, "p_entry", None)
   p_SL = getattr(params, "p_SL", None)
 
@@ -73,6 +109,7 @@ def calculate_dirsign(params: TradeParameters):
 
 
 def calculate_SL_delta(params: TradeParameters):
+  sanitize_inputs(params)
   p_entry = getattr(params, "p_entry", None)
   p_SL = getattr(params, "p_SL", None)
   if p_entry is None or p_SL is None:
