@@ -44,7 +44,8 @@ def calculate_all(params: TradeParameters):
 
     # 1) Directional basics
     if params.p_entry == 0.0:
-        raise ValueError("Entry price is not set")
+print("P_Entry is 0.0, cannot calculate trade parameters.")
+        return
 
     try:
         params.p_entry = float(params.p_entry)
