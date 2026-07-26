@@ -175,8 +175,13 @@ def calculate_buffered_tp1_close_percent(trade: Trade):
   if params.current_direction == "short" and buffer_SL <= p_entry:
     raise ValueError("Buffer SL must be above entry for a short trade.")
 
+  #profit(TP1) = close_fraction * n_pos_value * (TP1 - p_entry)
+  #unclosed_pos_rest = (1 - x) * n_pos_value
+  #Loss(buffer_SL) = uncloses_pos_rest * n_pos_value * (p_entry - buffer_SL)
+  #Profit(TP1) == Loss(buffer_SL)  -> solve for close_fraction: close_fraction = buffer_delta / (TP1 - buffer_SL)
+  #with TP1 - buffer_SL = TP_delta + buffer_delta:
   close_fraction = buffer_delta / (TP_delta + buffer_delta)
-  return float(close_fraction * 100.0)
+  return float(close_fraction)
 
 
 def get_trade_direction(params: TradeParameters):

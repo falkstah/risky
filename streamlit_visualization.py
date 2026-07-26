@@ -42,7 +42,7 @@ def remove_entry_target():
 
 
 def add_tp_target():
-    st.session_state.tp_targets.append({"price": 0.0, "close_percent": 0.0})
+    st.session_state.tp_targets.append({"price": 0.0, "close_percent": 50.0})
 
 
 def remove_tp_target():
@@ -83,7 +83,7 @@ def get_SL():
 
 
 def get_TP():
-  p_TP = st.number_input("TP: ", value=0.0, min_value=0.0, step=0.01)
+  p_TP = st.number_input("TP: ", value=st.session_state.get("p_TP", 0.0), min_value=0.0, step=0.01, key="p_TP")
   if p_TP is None or p_TP <= 0:
     p_TP = 0.0
   return float(p_TP)
@@ -167,6 +167,9 @@ def render_trade_controls(trade: Trade):
             st.session_state.entry_levels[index] = {"price": price, "margin_percent": margin_pct}
             entry_levels.append(EntryLevel(price=price, margin_percent=margin_pct))
 
+        if st.session_state.tp_targets:
+            st.session_state.tp_targets[0]["price"] = st.session_state.get("p_TP", trade.parameters.p_TP)
+
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
             price_key = f"tp_price_{index}"
@@ -178,6 +181,9 @@ def render_trade_controls(trade: Trade):
                 step=0.01,
                 key=price_key,
             )
+            if index == 0:
+                st.session_state["p_TP"] = price
+                trade.parameters.p_TP = price
             close_pct = st.number_input(
                 f"TP {index + 1} Schließung (%):",
                 value=target["close_percent"],
@@ -264,8 +270,13 @@ def render_trade_controls(trade: Trade):
         if tp_targets:
             st.markdown("**Aktuelle TP Targets:**")
             for target in tp_targets:
+                tp_profit = 0.0
+                if trade.parameters.p_entry and trade.parameters.n_pos_value:
+                    profit = (trade.parameters.dirsign * (target.price - trade.parameters.p_entry) / trade.parameters.p_entry) * abs(trade.parameters.n_pos_value)
+                    tp_profit = target.close_percent / 100.0 * profit
                 status = "✅ Erreicht" if target.triggered else "– offen"
                 st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung ({status})")
+                st.caption(f"Partial profit: ${round(tp_profit, 2)}")
 
         if trade.trailing_sl_enabled:
             st.info(f"Trailing SL ist aktiviert: {trade.trailing_SL_percent}%")
