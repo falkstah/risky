@@ -1,5 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
+
+@dataclass
+class TakeProfitTarget:
+    price: float = 0.0
+    close_percent: float = 0.0
 
 @dataclass
 class TradeParameters:
@@ -18,7 +23,7 @@ class TradeParameters:
     p: float = 0.0
     risiko_euro: float = 0.0
     rel_risk: float = 0.0
-    
+
     # Calculated Values
     sl_delta: float = 0.0
     TP_delta: float = 0.0
@@ -35,3 +40,11 @@ class TradeParameters:
     tp_active: bool = False
     loss: float = 0.0
     equity: float = 0.0
+
+@dataclass
+class Trade:
+    parameters: TradeParameters
+    tp_targets: list[TakeProfitTarget] = field(default_factory=list)
+    trailing_SL_percent: float = 0.0
+    trailing_sl_enabled: bool = False
+    current_sl_price: float = 0.0

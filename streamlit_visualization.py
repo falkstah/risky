@@ -5,27 +5,41 @@ import altair as alt
 import pandas as pd
 
 #logic functions
-from classes import TradeParameters
+from classes import TradeParameters, Trade, TakeProfitTarget
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
 st.text("Optimized for execution speed.")
 
 #trade specific values
-def get_trade_parameters():
-  print("Enter parameters: ")
-  params = TradeParameters(
-      liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
-      risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
-      maintainance_margin_rate=float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001)),
-      maintainance_deduction=float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001)),
-      max_lvg=float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
-      max_margin=float(st.number_input("max_margin: ", value = 100.0, min_value = 1.0, step = 1.0)),
-      p_entry=get_entry(),
-      p_SL=get_SL(),
-      p_TP = get_TP()
-  )
 
-  return params
+def init_trade_inputs():
+    if "tp_targets" not in st.session_state:
+        st.session_state.tp_targets = [{"price": 0.0, "close_percent": 0.0}]
+    if "trailing_SL_percent" not in st.session_state:
+        st.session_state.trailing_SL_percent = 0.0
+
+
+def add_tp_target():
+    st.session_state.tp_targets.append({"price": 0.0, "close_percent": 0.0})
+
+
+def get_trade_parameters():
+    print("Enter parameters: ")
+    init_trade_inputs()
+
+    params = TradeParameters(
+        liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
+        risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
+        maintainance_margin_rate=float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001)),
+        maintainance_deduction=float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001)),
+        max_lvg=float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
+        max_margin=float(st.number_input("max_margin: ", value = 100.0, min_value = 1.0, step = 1.0)),
+        p_entry=get_entry(),
+        p_SL=get_SL(),
+        p_TP=get_TP()
+    )
+
+    return Trade(parameters=params)
 
 def get_entry():
   p_entry = st.number_input("entry: ", value=0.01, min_value=0.0, step=0.01) #nicht params-p_entry, weil die Zuordnung in get_trade_parameters() erfolgt
@@ -55,11 +69,9 @@ def current_direction_label(current_direction):
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
-def fast_order_table(params: TradeParameters):
-  with st.container(border=True):
-  
-  
-  
+def fast_order_table(trade: Trade):
+    params = trade.parameters
+    with st.container(border=True):
         st.subheader("📊 Fast Order Table")
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
         col1, col2, col3, col4 = st.columns(4)
@@ -67,10 +79,75 @@ def fast_order_table(params: TradeParameters):
         col2.metric("isolated margin", f"{round(params.isolated_margin, 2)} $")
         col3.metric("p_liquidation", f"{round(params.p_liquidation, 2)} $")
         col4.metric("n_pos_value", f"{round(params.n_pos_value, 2)} $")
-  
-  st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-def overview_table(params: TradeParameters):
+    st.divider() # Visuelle Trennlinie zwischen den Abschnitten
+
+
+def render_trade_controls(trade: Trade):
+    init_trade_inputs()
+
+    with st.container(border=True):
+        st.subheader("🎯 Trade Ziele & Trailing SL")
+
+        if st.button("Weitere TP hinzufügen", key="add_tp_button"):
+            add_tp_target()
+
+        tp_targets: list[TakeProfitTarget] = []
+        for index, target in enumerate(st.session_state.tp_targets):
+            price_key = f"tp_price_{index}"
+            pct_key = f"tp_close_pct_{index}"
+            price = st.number_input(
+                f"TP {index + 1} Preis:",
+                value=target["price"],
+                min_value=0.0,
+                step=0.01,
+                key=price_key,
+            )
+            close_pct = st.number_input(
+                f"TP {index + 1} Schließung (%):",
+                value=target["close_percent"],
+                min_value=0.0,
+                max_value=100.0,
+                step=1.0,
+                key=pct_key,
+            )
+            st.session_state.tp_targets[index] = {"price": price, "close_percent": close_pct}
+            tp_targets.append(TakeProfitTarget(price=price, close_percent=close_pct))
+
+        trailing_SL_percent = st.number_input(
+            "Trailing SL (%):",
+            value=st.session_state.trailing_SL_percent,
+            min_value=0.0,
+            step=0.1,
+            key="trailing_SL_percent",
+        )
+        st.session_state.trailing_SL_percent = float(trailing_SL_percent)
+        current_sl_price = st.number_input(
+            "Aktueller SL Preis:",
+            value=trade.parameters.p_SL,
+            min_value=0.0,
+            step=0.01,
+            key="current_sl_price",
+        )
+
+        trade.tp_targets = tp_targets
+        trade.trailing_SL_percent = st.session_state.trailing_SL_percent
+        trade.trailing_sl_enabled = st.session_state.trailing_SL_percent > 0.0
+        trade.current_sl_price = float(current_sl_price)
+
+        if tp_targets:
+            st.markdown("**Aktuelle TP Targets:**")
+            for target in tp_targets:
+                st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung")
+
+        if trade.trailing_sl_enabled:
+            st.info(f"Trailing SL ist aktiviert: {trade.trailing_SL_percent}%")
+
+    return trade
+
+
+def overview_table(trade: Trade):
+  params = trade.parameters
   #table1
   with st.container(border=True):
 
@@ -100,7 +177,8 @@ def overview_table(params: TradeParameters):
   st.divider()
 
 
-def visualize_trade(params: TradeParameters):
+def visualize_trade(trade: Trade):
+  params = trade.parameters
   st.title("Trade Visualizer")
   st.write(f"Direction: {params.current_direction.capitalize()}" if params.current_direction else "Direction unknown")
 

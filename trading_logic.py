@@ -2,9 +2,15 @@
 import math
 import numbers
 import pandas as pd
-from classes import TradeParameters
+from classes import Trade, TradeParameters
 #import ccxt
 #import pandas_ta as ta
+
+def calculate_all(trade: Trade):
+    trade = calculate_initial_risk(trade)
+    trade = calculate_exit_and_tp_structure(trade)
+    trade = calculate_dynamic_state(trade)
+    return trade
 
 def sanitize_inputs(params: TradeParameters):
     for field_name in TradeParameters.__dataclass_fields__:
@@ -38,14 +44,14 @@ def sanitize_inputs(params: TradeParameters):
             setattr(params, field_name, 0.0)
 
 
-def calculate_all(params: TradeParameters):
-    #Formatierung, um wrong inputs abzufangen
+def calculate_initial_risk(trade: Trade):
+    params = trade.parameters
     sanitize_inputs(params)
 
     # 1) Directional basics
     if params.p_entry == 0.0:
       print("P_Entry is 0.0, cannot calculate trade parameters.")
-      return params #Ojekt muss wegen Struktur zurückgegeben werden, auch wenn Daten wertlos sind
+      return trade
 
     try:
         params.p_entry = float(params.p_entry)
@@ -54,39 +60,39 @@ def calculate_all(params: TradeParameters):
         raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
     params.dirsign = calculate_dirsign(params)
-
     params.sl_delta = calculate_SL_delta(params)
-    if params.sl_delta == 0:  # this would lead to division by zero in the following calculations
+    if params.sl_delta == 0:
         raise ValueError("SL_delta = 0")
 
-    
     params.current_direction = get_trade_direction(params)
     params.tp_active = calculate_tp_active(params)
-
-    # 2) Desired liquidation price from entry and SL
-    params.p_liquidation = match_liquidation_price_to_SL(params)
-
-    # 3) Derive leverage from the liquidation target and apply constraints
     params.rel_risk = calculate_rel_risk(params)
+
+    return trade
+
+
+def calculate_exit_and_tp_structure(trade: Trade):
+    params = trade.parameters
+    params.p_liquidation = match_liquidation_price_to_SL(params)
+    params.TP_delta = calculate_TP_delta(params)
+    return trade
+
+
+def calculate_dynamic_state(trade: Trade):
+    params = trade.parameters
     params.lvg, params.risk = find_max_lvg(params)
-
-
-    # 4) Initial margin and maintenance margin
     params.max_margin = find_max_margin(params)
     params.initial_margin = calculate_initial_margin(params)
     params.risk, params.initial_margin = check_initial_margin(params)
 
-    # 5) Position and maintenance metrics
     params.n_pos_value = calculate_n_pos_value(params)
     params.maintainance_margin = calculate_maintainance_margin(params, params.n_pos_value)
     params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
     params.isolated_margin = params.max_margin
 
-    # 6) Risk feedback evaluation
-    params.TP_delta = calculate_TP_delta(params)
     params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params)
+    return trade
 
-    return params
 
 
 #margins
@@ -304,7 +310,8 @@ def debug_calculate_all(**overrides):
       max_lvg=float(defaults.get("max_lvg", 10.0)),
       max_margin=float(defaults.get("max_margin", 100.0)),
   )
-  return calculate_all(params)
+  trade = Trade(parameters=params)
+  return calculate_all(trade)
 
 #for debugging run this function with Debugger till Breakpoint:
 debug_calculate_all()
