@@ -8,6 +8,7 @@ from classes import Trade, TradeParameters
 
 def calculate_all(trade: Trade):
   sanitize_inputs(trade)
+  sanitize_inputs(trade.parameters)
   trade = calculate_initial_risk(trade)
   trade = calculate_exit_and_tp_structure(trade)
   trade = calculate_dynamic_state(trade)
