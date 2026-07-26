@@ -1,6 +1,7 @@
 #for calculations
 import math
 import numbers
+from dataclasses import fields
 import pandas as pd
 from classes import Trade, TradeParameters
 #import ccxt
@@ -14,25 +15,34 @@ def calculate_all(trade: Trade):
   trade = calculate_dynamic_state(trade)
   return trade
 
-def sanitize_inputs(trade):
-  field_names = getattr(trade, "__dataclass_fields__", {})
+def sanitize_inputs(item):
+  if isinstance(item, Trade):
+      field_names = [field.name for field in fields(Trade)]
+      skip_fields = {"parameters", "entry_levels", "tp_targets", "order_type", "current_direction", "tp_active"}
+  elif isinstance(item, TradeParameters):
+      field_names = [field.name for field in fields(TradeParameters)]
+      skip_fields = {"current_direction", "tp_active"}
+  else:
+      field_names = getattr(item, "__dataclass_fields__", {})
+      skip_fields = set()
+
   for field_name in field_names:
-      if field_name in {"current_direction", "tp_active"}:
+      if field_name in skip_fields:
           continue
 
-      value = getattr(trade, field_name, None)
+      value = getattr(item, field_name, None)
       if value is None:
-          setattr(trade, field_name, 0.0)
+          setattr(item, field_name, 0.0)
           continue
 
       if isinstance(value, str):
           if not value.strip():
-              setattr(trade, field_name, 0.0)
+              setattr(item, field_name, 0.0)
               continue
           try:
-              setattr(trade, field_name, float(value.strip()))
+              setattr(item, field_name, float(value.strip()))
           except ValueError:
-              setattr(trade, field_name, 0.0)
+              setattr(item, field_name, 0.0)
           continue
 
       if isinstance(value, bool):
@@ -42,9 +52,9 @@ def sanitize_inputs(trade):
           continue
 
       try:
-          setattr(trade, field_name, float(value))
+          setattr(item, field_name, float(value))
       except (TypeError, ValueError):
-          setattr(trade, field_name, 0.0)
+          setattr(item, field_name, 0.0)
 
 
 def calculate_initial_risk(trade: Trade):
