@@ -73,8 +73,7 @@ def calculate_all(params: TradeParameters):
     # 4) Initial margin and maintenance margin
     params.max_margin = find_max_margin(params)
     params.initial_margin = calculate_initial_margin(params)
-    params.risk = check_initial_margin(params, params.initial_margin)
-    params.initial_margin = calculate_initial_margin(params)
+    params.risk, params.initial_margin = check_initial_margin(params)
 
     # 5) Position and maintenance metrics
     params.n_pos_value = calculate_n_pos_value(params)
@@ -159,21 +158,23 @@ def find_max_lvg(params: TradeParameters):
   max_lvg_liq = max_lvg_for_given_liquidation(params)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen. But lvg >= 1 with max:
   lvg = math.floor(min(max_allowed_lvg, max_lvg_liq)) #floor guarantees that lvg does not force early liq
-  return check_lvg(lvg, params.risk, params)
+  return check_lvg(lvg, params)
 
 #risk correction functions
-def check_lvg(lvg, risk, params):
+def check_lvg(lvg, params):
+  risk = params.risk
   if lvg > params.max_lvg:  # Assuming params.max_lvg is 10
     print(f"Warning: Calculated leverage {lvg} exceeds {params.max_lvg}. Risk will be made smaller to adjust.")
     lvg = params.max_lvg
-    risk = reduce_risk(lvg, risk, params)
+    risk = reduce_risk(params)
 
   if lvg < 1:
     print("lvg < 1. Over secuing already guaranteed by find_max_margin. hence, buffer is too big. Risk too small.")
     lvg = 1
+    #possibly risk has to be fitted
   return lvg, risk
 
-def reduce_risk(lvg, risk, params):
+def reduce_risk(params):
    return params.max_margin * params.max_lvg * params.rel_risk
 
 
@@ -183,6 +184,7 @@ def calculate_maintainance_margin(params: TradeParameters, n_pos_value):
   return abs(n_pos_value) * params.maintainance_margin_rate + params.maintainance_deduction # Maintenance margin is a positive requirement; direction is already encoded in n_pos_value
 
 def calculate_rel_maintainance_margin(params: TradeParameters):
+  #nur im Verlauf des Trades sinnvoll, da sich margin ändert und rel_maintainance_margin dann nicht mhr gleich MMR?
   return params.maintainance_margin / abs(params.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
 def p_liq_exchange_forced(params: TradeParameters):
@@ -240,14 +242,17 @@ def match_lvg_to_liquidation_price(params: TradeParameters):
 
 def find_max_margin(params):
    return 0.9 * params.max_margin #forces over securing margin, to avoid margin calls and forced liquidation
-def check_initial_margin(params: TradeParameters, initial_margin):
+def check_initial_margin(params: TradeParameters):
   max_margin = max(params.max_margin, 1.0)
-  if initial_margin > max_margin:
+  if params.initial_margin > max_margin:
     print(f"margin-demand too high. Reducing risk to fit max_margin={max_margin}")
-    return max_margin * params.rel_risk * params.lvg
+    risk = max_margin * params.rel_risk * params.lvg
+    return risk, calculate_initial_margin(params)
   else:
-    return params.risk
-
+    risk = params.risk
+    initial_margin = params.initial_margin
+    return risk, initial_margin
+  
 def check_rrr(rrr):
   if rrr < 2:
     print("rrr is small.")

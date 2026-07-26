@@ -12,7 +12,7 @@ class TradeParameters:
     p_SL: float
     p_TP: float
     max_lvg: float = 10.0
-    max_margin: float = 100.0
+    max_margin: float = 100.0   #trading logik nutzt nur 80% anteil davon, um Überbesicherung zu erzwingen
     p_liquidation: float = 0.0
     p: float = 0.0
     risiko_euro: float = 0.0
