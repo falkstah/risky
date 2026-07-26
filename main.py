@@ -1,6 +1,7 @@
 import streamlit as st
 
-from classes import Trade
+#"." for relaive addressing, because it guarantees EIndeutigkeit in paths of a packet. Main is directly executed by streamlit
+from .classes import Trade
 from trading_logic import calculate_all
 import streamlit_visualization
 
