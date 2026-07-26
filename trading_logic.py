@@ -258,7 +258,10 @@ def check_rrr(rrr):
     print("rrr is small.")
 
 def calulate_profit_at_price_p(params: TradeParameters, p):
-  return (p - params.p_entry) / params.p_entry * params.n_pos_value #for long and short (pos value)
+  if p >= params.p_entry:
+    return params.dirsign * abs(p - params.p_entry) / params.p_entry * params.n_pos_value #for long and short (pos value)
+  else:
+    return -1 * params.dirsign * abs(p - params.p_entry) / params.p_entry * params.n_pos_value #for long and short (pos value)
 
 def calculate_equity(initial_margin, loss):
   return initial_margin - loss
