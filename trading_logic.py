@@ -8,11 +8,15 @@ from classes import Trade, TradeParameters
 #import pandas_ta as ta
 
 def calculate_all(trade: Trade):
+  #sanitizes trade attributes first and then the attributes in trade-Ojekt params:
   sanitize_inputs(trade)
   sanitize_inputs(trade.parameters)
+
+  #Calculate:
   trade = calculate_initial_risk(trade)
   trade = calculate_exit_and_tp_structure(trade)
   trade = calculate_dynamic_state(trade)
+
   return trade
 
 def sanitize_inputs(item):
@@ -59,7 +63,6 @@ def sanitize_inputs(item):
 
 def calculate_initial_risk(trade: Trade):
   params = trade.parameters
-  sanitize_inputs(params)
 
   # 1) Directional basics
   if params.p_entry == 0.0:
@@ -99,14 +102,12 @@ def calculate_dynamic_state(trade: Trade):
   params.risk, params.initial_margin = check_initial_margin(params)
 
   params.n_pos_value = calculate_n_pos_value(params)
-  params.maintainance_margin = calculate_maintainance_margin(params, params.n_pos_value)
+  params.maintainance_margin = calculate_maintainance_margin(params)
   params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
   params.isolated_margin = params.max_margin
 
   params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params)
   return trade
-
-
 
 #margins
 #receive fom DEX
@@ -197,7 +198,7 @@ def calculate_initial_margin(params: TradeParameters):
 def calculate_initial_margin_rate(lvg):
   return 1 / lvg
 
-#live calculation
+#live calculation; sign matches trade direction, abs(n_pos_value) is used for position calculations that do not depend on direction
 def calculate_n_pos_value(params: TradeParameters):
   return params.dirsign * params.risk / params.rel_risk # = initial_margin * lvg - thus couples lvg and initial_margin; n_pos_value < 0 <==> short
 
@@ -236,8 +237,8 @@ def reduce_risk(params):
 
 #Risk: if price moves against me, my account balance decreases = posted margin shrinks -> if maintenance margin <= 2% * n_pos_value: forced liquidation
 #->live updates necessary for the following values:
-def calculate_maintainance_margin(params: TradeParameters, n_pos_value):
-  return abs(n_pos_value) * params.maintainance_margin_rate + params.maintainance_deduction # Maintenance margin is a positive requirement; direction is already encoded in n_pos_value
+def calculate_maintainance_margin(params: TradeParameters):
+  return abs(params.n_pos_value) * params.maintainance_margin_rate + params.maintainance_deduction # Maintenance margin is a positive requirement; direction is already encoded in n_pos_value
 
 def calculate_rel_maintainance_margin(params: TradeParameters):
   #only useful during the trade, because margin changes and rel_maintainance_margin may no longer equal MMR
@@ -317,9 +318,9 @@ def evaluate_trade(params: TradeParameters):
 
 def calulate_profit_at_price_p(params: TradeParameters, p):
   if p >= params.p_entry:
-    return params.dirsign * abs(p - params.p_entry) / params.p_entry * params.n_pos_value #for long and short (pos value)
+    return params.dirsign * abs(p - params.p_entry) / params.p_entry * abs(params.n_pos_value) #for long and short (pos value)
   else:
-    return -1 * params.dirsign * abs(p - params.p_entry) / params.p_entry * params.n_pos_value #for long and short (pos value)
+    return -1 * params.dirsign * abs(p - params.p_entry) / params.p_entry * abs(params.n_pos_value) #for long and short (pos value)
 
 def calculate_equity(params):
   return params.initial_margin - params.loss
