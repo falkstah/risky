@@ -12,10 +12,11 @@ def main():
     params = streamlit_visualization.get_trade_parameters()
     params = calculate_all(params)
 
-    streamlit_visualization.current_direction_label(params.current_direction)
-    streamlit_visualization.fast_order_table(params)
-    streamlit_visualization.visualize_trade(params)
-    streamlit_visualization.overview_table(params)
+    #st.session_state["params"] prevents overwriting after calculate_all()
+    streamlit_visualization.current_direction_label(st.session_state["params"].current_direction)
+    streamlit_visualization.fast_order_table(st.session_state["params"])
+    streamlit_visualization.visualize_trade(st.session_state["params"])
+    streamlit_visualization.overview_table(st.session_state["params"])
 
 
 if __name__ == "__main__":
