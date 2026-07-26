@@ -34,8 +34,18 @@ def add_entry_target():
     st.session_state.entry_levels.append({"price": 0.0, "margin_percent": 0.0})
 
 
+def remove_entry_target():
+    if len(st.session_state.entry_levels) > 1:
+        st.session_state.entry_levels.pop()
+
+
 def add_tp_target():
     st.session_state.tp_targets.append({"price": 0.0, "close_percent": 0.0})
+
+
+def remove_tp_target():
+    if len(st.session_state.tp_targets) > 1:
+        st.session_state.tp_targets.pop()
 
 
 def get_trade_parameters():
@@ -117,10 +127,21 @@ def render_trade_controls(trade: Trade):
     with st.container(border=True):
         st.subheader("🎯 Trade Ziele & Trailing SL")
 
-        if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
-            add_entry_target()
-        if st.button("Weitere TP hinzufügen", key="add_tp_button"):
-            add_tp_target()
+        entry_col1, entry_col2 = st.columns(2)
+        with entry_col1:
+            if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
+                add_entry_target()
+        with entry_col2:
+            if st.button("Entry entfernen", key="remove_entry_button"):
+                remove_entry_target()
+
+        tp_col1, tp_col2 = st.columns(2)
+        with tp_col1:
+            if st.button("Weitere TP hinzufügen", key="add_tp_button"):
+                add_tp_target()
+        with tp_col2:
+            if st.button("TP entfernen", key="remove_tp_button"):
+                remove_tp_target()
 
         entry_levels: list[EntryTarget] = []
         for index, target in enumerate(st.session_state.entry_levels):
