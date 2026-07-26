@@ -8,7 +8,7 @@ class TakeProfitTarget:
     triggered: bool = False
 
 @dataclass
-class EntryTarget:
+class EntryLevel:
     price: float = 0.0
     margin_percent: float = 0.0
 
@@ -53,7 +53,7 @@ class Trade:
     current_price: float = 0.0
     buffer_SL: float = 0.0
     pull_SL: float = 0.0
-    entry_levels: list[EntryTarget] = field(default_factory=list)
+    entry_levels: list[EntryLevel] = field(default_factory=list)
     tp_targets: list[TakeProfitTarget] = field(default_factory=list)
     order_type: Literal["single limit", "single market", "single post only", "k1m6a box"] = "single limit"
     trailing_SL_percent: float = 0.0

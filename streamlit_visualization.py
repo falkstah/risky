@@ -5,7 +5,7 @@ import altair as alt
 import pandas as pd
 
 #logic functions
-from classes import TradeParameters, Trade, EntryTarget, TakeProfitTarget
+from classes import TradeParameters, Trade, EntryLevel, TakeProfitTarget
 from trading_logic import calculate_buffered_tp1_close_percent
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
@@ -145,7 +145,7 @@ def render_trade_controls(trade: Trade):
             if st.button("TP entfernen", key="remove_tp_button"):
                 remove_tp_target()
 
-        entry_levels: list[EntryTarget] = []
+        entry_levels: list[EntryLevel] = []
         for index, target in enumerate(st.session_state.entry_levels):
             price_key = f"entry_price_{index}"
             pct_key = f"entry_margin_pct_{index}"
@@ -165,7 +165,7 @@ def render_trade_controls(trade: Trade):
                 key=pct_key,
             )
             st.session_state.entry_levels[index] = {"price": price, "margin_percent": margin_pct}
-            entry_levels.append(EntryTarget(price=price, margin_percent=margin_pct))
+            entry_levels.append(EntryLevel(price=price, margin_percent=margin_pct))
 
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
@@ -194,7 +194,7 @@ def render_trade_controls(trade: Trade):
             value=st.session_state.trailing_SL_percent,
             min_value=0.0,
             step=0.1,
-            key="trailing_SL_percent",
+            key="input_trailing_SL_percent",
         )
         st.session_state.trailing_SL_percent = float(trailing_SL_percent)
         pull_SL = st.number_input(
@@ -202,7 +202,7 @@ def render_trade_controls(trade: Trade):
             value=st.session_state.pull_SL,
             min_value=0.0,
             step=0.01,
-            key="pull_SL",
+            key="input_pull_SL",
         )
         st.session_state.pull_SL = float(pull_SL)
         current_price = st.number_input(
@@ -210,21 +210,21 @@ def render_trade_controls(trade: Trade):
             value=st.session_state.current_price,
             min_value=0.0,
             step=0.01,
-            key="current_price",
+            key="input_current_price",
         )
         st.session_state.current_price = float(current_price)
         order_type = st.selectbox(
             "Order Type:",
             ["single limit", "single market", "single post only", "k1m6a box"],
             index=["single limit", "single market", "single post only", "k1m6a box"].index(st.session_state.order_type),
-            key="order_type",
+            key="input_order_type",
         )
         buffer_SL = st.number_input(
             "Buffer SL Preis:",
             value=st.session_state.buffer_SL,
             min_value=0.0,
             step=0.01,
-            key="buffer_SL",
+            key="input_buffer_SL",
         )
         st.session_state.buffer_SL = float(buffer_SL)
         current_sl_price = st.number_input(
@@ -232,7 +232,7 @@ def render_trade_controls(trade: Trade):
             value=trade.parameters.p_SL,
             min_value=0.0,
             step=0.01,
-            key="current_sl_price",
+            key="input_current_sl_price",
         )
 
         if st.button("Berechne TP1 Close% für Buffer SL", key="calc_buffer_tp1"):
