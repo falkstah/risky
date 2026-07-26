@@ -206,9 +206,12 @@ def calculate_max_lvg(params: TradeParameters):
   return math.floor(1 / params.maintainance_margin_rate)
 
 def max_lvg_for_given_liquidation(params: TradeParameters):
-  print(params.maintainance_margin_rate, params.maintainance_deduction, params.p_liquidation, params.p_entry)
-  return math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / params.p_entry))  # = general p_liq formula solved for lvg; formula can get < 1
-
+  if params.current_direction == "long":
+    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / params.p_entry))  # = general p_liq formula solved for lvg; formula can get < 1
+  elif params.current_direction == "short":
+    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction -  params.p_entry / params.p_liquidation))
+  else: lvg = 0
+  return lvg 
 
 def find_max_lvg(params: TradeParameters):
   max_allowed_lvg = calculate_max_lvg(params)
@@ -334,21 +337,22 @@ def debug_calculate_all(**overrides):
       "maintainance_margin_rate": 0.02,
       "maintainance_deduction": 0.0,
       "p_entry": 10.0,
-      "p_SL": 9.0,
-      "p_TP": 20.0,
+      "p_SL": 11.0,
+      "p_TP": 8.0,
       "max_lvg": 10.0,
       "max_margin": 100.0,
   }
   defaults.update(overrides)
 
+  #takes given params with default values as Fallback (in parantheses)
   params = TradeParameters(
       liq_delta_to_SL_delta_ratio=float(defaults.get("liq_delta_to_SL_delta_ratio", 4.0)),
       risk=float(defaults.get("risk", 10.0)),
       maintainance_margin_rate=float(defaults.get("maintainance_margin_rate", 0.02)),
       maintainance_deduction=float(defaults.get("maintainance_deduction", 0.0)),
       p_entry=float(defaults.get("p_entry", 10.0)),
-      p_SL=float(defaults.get("p_SL", 9.0)),
-      p_TP=float(defaults.get("p_TP", 20.0)),
+      p_SL=float(defaults.get("p_SL", 11.0)),
+      p_TP=float(defaults.get("p_TP", 8.0)),
       max_lvg=float(defaults.get("max_lvg", 10.0)),
       max_margin=float(defaults.get("max_margin", 100.0)),
   )
