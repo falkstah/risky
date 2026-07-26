@@ -5,6 +5,7 @@ from typing import Literal
 class TakeProfitTarget:
     price: float = 0.0
     close_percent: float = 0.0
+    triggered: bool = False
 
 @dataclass
 class TradeParameters:
@@ -44,6 +45,7 @@ class TradeParameters:
 @dataclass
 class Trade:
     parameters: TradeParameters
+    current_price: float = 0.0
     tp_targets: list[TakeProfitTarget] = field(default_factory=list)
     trailing_SL_percent: float = 0.0
     trailing_sl_enabled: bool = False

@@ -13,7 +13,8 @@ def calculate_all(trade: Trade):
     return trade
 
 def sanitize_inputs(params: TradeParameters):
-    for field_name in TradeParameters.__dataclass_fields__:
+    field_names = getattr(params, "__dataclass_fields__", {})
+    for field_name in field_names:
         if field_name in {"current_direction", "tp_active"}:
             continue
 

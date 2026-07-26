@@ -16,6 +16,8 @@ def main():
     params = streamlit_visualization.get_trade_parameters()
     trade = Trade(parameters=params)
     trade = calculate_all(trade)
+    trade = streamlit_visualization.render_trade_controls(trade)
+    trade = calculate_all(trade)
 
     # st.session_state["trade"] prevents overwriting after calculate_all()
     st.session_state["trade"] = trade
@@ -23,7 +25,6 @@ def main():
     streamlit_visualization.fast_order_table(st.session_state["trade"])
     streamlit_visualization.visualize_trade(st.session_state["trade"])
     streamlit_visualization.overview_table(st.session_state["trade"])
-    streamlit_visualization.render_trade_controls(st.session_state["trade"])
 
 
 if __name__ == "__main__":

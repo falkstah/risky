@@ -17,6 +17,8 @@ def init_trade_inputs():
         st.session_state.tp_targets = [{"price": 0.0, "close_percent": 0.0}]
     if "trailing_SL_percent" not in st.session_state:
         st.session_state.trailing_SL_percent = 0.0
+    if "current_price" not in st.session_state:
+        st.session_state.current_price = 0.0
 
 
 def add_tp_target():
@@ -68,6 +70,19 @@ def current_direction_label(current_direction):
     st.error("Short")
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
+
+
+def update_tp_targets_triggered(trade: Trade):
+    if not trade.parameters.current_direction:
+        return trade
+
+    for target in trade.tp_targets:
+        if trade.parameters.current_direction == "long":
+            target.triggered = trade.current_price >= target.price
+        elif trade.parameters.current_direction == "short":
+            target.triggered = trade.current_price <= target.price
+    return trade
+
 
 def fast_order_table(trade: Trade):
     params = trade.parameters
@@ -122,6 +137,14 @@ def render_trade_controls(trade: Trade):
             key="trailing_SL_percent",
         )
         st.session_state.trailing_SL_percent = float(trailing_SL_percent)
+        current_price = st.number_input(
+            "Aktueller Asset-Preis:",
+            value=st.session_state.current_price,
+            min_value=0.0,
+            step=0.01,
+            key="current_price",
+        )
+        st.session_state.current_price = float(current_price)
         current_sl_price = st.number_input(
             "Aktueller SL Preis:",
             value=trade.parameters.p_SL,
@@ -131,14 +154,19 @@ def render_trade_controls(trade: Trade):
         )
 
         trade.tp_targets = tp_targets
+        trade.current_price = st.session_state.current_price
+        trade.current_price = st.session_state.current_price
         trade.trailing_SL_percent = st.session_state.trailing_SL_percent
         trade.trailing_sl_enabled = st.session_state.trailing_SL_percent > 0.0
         trade.current_sl_price = float(current_sl_price)
 
+        trade = update_tp_targets_triggered(trade)
+
         if tp_targets:
             st.markdown("**Aktuelle TP Targets:**")
             for target in tp_targets:
-                st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung")
+                status = "✅ Erreicht" if target.triggered else "– offen"
+                st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung ({status})")
 
         if trade.trailing_sl_enabled:
             st.info(f"Trailing SL ist aktiviert: {trade.trailing_SL_percent}%")
@@ -173,6 +201,13 @@ def overview_table(trade: Trade):
       col3.metric("relative Gain", f"{round(params.rel_asset_gain_at_TP * 100, 2)}%")
       col4.metric("Wartungsmarge", f"{round(params.maintainance_margin, 2)} €")
       col5.metric("rel asset gain at TP", f"{round(params.rel_asset_gain_at_TP * 100, 2)}%")
+
+  if trade.tp_targets:
+      with st.container(border=True):
+          st.subheader("🎯 TP-Status")
+          for target in trade.tp_targets:
+              status = "✅ Erreicht" if target.triggered else "– offen"
+              st.write(f"- TP bei {target.price} | {target.close_percent}% Schließung | {status}")
 
   st.divider()
 
