@@ -39,6 +39,7 @@ def sanitize_inputs(params: TradeParameters):
 
 
 def calculate_all(params: TradeParameters):
+    #Formatierung, um wrong inputs abzufangen
     sanitize_inputs(params)
 
     # 1) Directional basics
@@ -81,6 +82,7 @@ def calculate_all(params: TradeParameters):
     params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
 
     # 6) Risk feedback evaluation
+    params.TP_delta = calculate_TP_delta(params)
     params.rel_asset_gain_at_TP, params.rrr, params.potential_profit = evaluate_trade(params)
 
     return params
@@ -111,12 +113,18 @@ def calculate_dirsign(params: TradeParameters):
 
 
 def calculate_SL_delta(params: TradeParameters):
-  sanitize_inputs(params)
   p_entry = getattr(params, "p_entry", None)
   p_SL = getattr(params, "p_SL", None)
   if p_entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
   return abs(p_entry - p_SL)
+
+def calculate_TP_delta(params: TradeParameters):
+  p_entry = getattr(params, "p_entry", None)
+  p_TP = getattr(params, "p_TP", None)
+  if p_entry is None or p_TP is None:
+    raise ValueError("Entry price and Take Profit price must both be set.")
+  return abs(p_entry - p_TP)
 
 
 def get_trade_direction(params: TradeParameters):
@@ -133,7 +141,7 @@ def get_trade_direction(params: TradeParameters):
   return None
 
 def calculate_rel_risk(params: TradeParameters):
-  return abs(params.p_entry - params.p_SL) / params.p_entry
+  return abs(params.sl_delta) / params.p_entry
 
 def calculate_initial_margin(params: TradeParameters):
   return params.risk / (params.rel_risk * params.lvg) # initial margin >= maintainance_margin (immer)
@@ -201,13 +209,6 @@ def calculate_tp_active(params: TradeParameters):
     return params.p_TP < params.p_entry
   return False
 
-#safety calculus
-#evaluating trading setups
-def evaluate_trade(params: TradeParameters):
-  rel_asset_gain_at_TP = (params.p_TP - params.p_entry) / params.p_entry
-  rrr = (params.p_TP - params.p_entry) / (params.dirsign * params.sl_delta)
-  potential_profit = params.risk * rrr
-  return rel_asset_gain_at_TP, rrr, potential_profit
 
 #exchange = ccxt.bybit()
 #k = 1.5  sicherheitsmultiplikator
@@ -257,14 +258,22 @@ def check_rrr(rrr):
   if rrr < 2:
     print("rrr is small.")
 
+#safety calculus
+#evaluating trading setups
+def evaluate_trade(params: TradeParameters):
+  rel_asset_gain_at_TP = params.TP_delta / params.p_entry
+  rrr = params.TP_delta / params.sl_delta
+  potential_profit = params.risk * rrr
+  return rel_asset_gain_at_TP, rrr, potential_profit
+
 def calulate_profit_at_price_p(params: TradeParameters, p):
   if p >= params.p_entry:
     return params.dirsign * abs(p - params.p_entry) / params.p_entry * params.n_pos_value #for long and short (pos value)
   else:
     return -1 * params.dirsign * abs(p - params.p_entry) / params.p_entry * params.n_pos_value #for long and short (pos value)
 
-def calculate_equity(initial_margin, loss):
-  return initial_margin - loss
+def calculate_equity(params):
+  return params.initial_margin - params.loss
 
 
 def debug_calculate_all(**overrides):

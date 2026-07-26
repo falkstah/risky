@@ -20,6 +20,7 @@ class TradeParameters:
     
     # Calculated Values
     sl_delta: float = 0.0
+    TP_delta: float = 0.0
     dirsign: float = 0.0
     n_pos_value: float = 0.0
     lvg: float = 0.0
@@ -31,3 +32,4 @@ class TradeParameters:
     potential_profit: float = 0.0
     current_direction: Literal['long', 'short'] | None = None
     tp_active: bool = False
+    loss: float: 0.0
