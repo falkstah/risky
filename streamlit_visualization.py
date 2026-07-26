@@ -39,7 +39,7 @@ def get_trade_parameters():
         p_TP=get_TP()
     )
 
-    return Trade(parameters=params)
+    return params
 
 def get_entry():
   p_entry = st.number_input("entry: ", value=0.01, min_value=0.0, step=0.01) #nicht params-p_entry, weil die Zuordnung in get_trade_parameters() erfolgt

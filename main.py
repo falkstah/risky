@@ -6,17 +6,18 @@ import streamlit_visualization
 
 
 def main():
-    #init keys:
+    # init keys:
     if "key" not in st.session_state:
         st.session_state["key"] = 0
 
     st.title("Too_Risky - Crypto live lvg and liquidation manager")
     st.text("Opimized for execution speed.")
 
-    trade = streamlit_visualization.get_trade_parameters()
+    params = streamlit_visualization.get_trade_parameters()
+    trade = Trade(parameters=params)
     trade = calculate_all(trade)
 
-    #st.session_state["trade"] prevents overwriting after calculate_all()
+    # st.session_state["trade"] prevents overwriting after calculate_all()
     st.session_state["trade"] = trade
     streamlit_visualization.current_direction_label(st.session_state["trade"].parameters.current_direction)
     streamlit_visualization.fast_order_table(st.session_state["trade"])
