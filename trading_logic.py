@@ -7,92 +7,93 @@ from classes import Trade, TradeParameters
 #import pandas_ta as ta
 
 def calculate_all(trade: Trade):
-    trade = calculate_initial_risk(trade)
-    trade = calculate_exit_and_tp_structure(trade)
-    trade = calculate_dynamic_state(trade)
-    return trade
+  sanitize_inputs(trade)
+  trade = calculate_initial_risk(trade)
+  trade = calculate_exit_and_tp_structure(trade)
+  trade = calculate_dynamic_state(trade)
+  return trade
 
-def sanitize_inputs(params: TradeParameters):
-    field_names = getattr(params, "__dataclass_fields__", {})
-    for field_name in field_names:
-        if field_name in {"current_direction", "tp_active"}:
-            continue
+def sanitize_inputs(trade):
+  field_names = getattr(trade, "__dataclass_fields__", {})
+  for field_name in field_names:
+      if field_name in {"current_direction", "tp_active"}:
+          continue
 
-        value = getattr(params, field_name, None)
-        if value is None:
-            setattr(params, field_name, 0.0)
-            continue
+      value = getattr(trade, field_name, None)
+      if value is None:
+          setattr(trade, field_name, 0.0)
+          continue
 
-        if isinstance(value, str):
-            if not value.strip():
-                setattr(params, field_name, 0.0)
-                continue
-            try:
-                setattr(params, field_name, float(value.strip()))
-            except ValueError:
-                setattr(params, field_name, 0.0)
-            continue
+      if isinstance(value, str):
+          if not value.strip():
+              setattr(trade, field_name, 0.0)
+              continue
+          try:
+              setattr(trade, field_name, float(value.strip()))
+          except ValueError:
+              setattr(trade, field_name, 0.0)
+          continue
 
-        if isinstance(value, bool):
-            continue
+      if isinstance(value, bool):
+          continue
 
-        if isinstance(value, numbers.Real):
-            continue
+      if isinstance(value, numbers.Real):
+          continue
 
-        try:
-            setattr(params, field_name, float(value))
-        except (TypeError, ValueError):
-            setattr(params, field_name, 0.0)
+      try:
+          setattr(trade, field_name, float(value))
+      except (TypeError, ValueError):
+          setattr(trade, field_name, 0.0)
 
 
 def calculate_initial_risk(trade: Trade):
-    params = trade.parameters
-    sanitize_inputs(params)
+  params = trade.parameters
+  sanitize_inputs(params)
 
-    # 1) Directional basics
-    if params.p_entry == 0.0:
-      print("P_Entry is 0.0, cannot calculate trade parameters.")
-      return trade
-
-    try:
-        params.p_entry = float(params.p_entry)
-        params.p_SL = float(params.p_SL)
-    except (TypeError, ValueError):
-        raise TypeError("Entry price and Stop Loss price must be numeric values.")
-
-    params.dirsign = calculate_dirsign(params)
-    params.sl_delta = calculate_SL_delta(params)
-    if params.sl_delta == 0:
-        raise ValueError("SL_delta = 0")
-
-    params.current_direction = get_trade_direction(params)
-    params.tp_active = calculate_tp_active(params)
-    params.rel_risk = calculate_rel_risk(params)
-
+  # 1) Directional basics
+  if params.p_entry == 0.0:
+    print("P_Entry is 0.0, cannot calculate trade parameters.")
     return trade
+
+  try:
+      params.p_entry = float(params.p_entry)
+      params.p_SL = float(params.p_SL)
+  except (TypeError, ValueError):
+      raise TypeError("Entry price and Stop Loss price must be numeric values.")
+
+  params.dirsign = calculate_dirsign(params)
+  params.sl_delta = calculate_SL_delta(params)
+  if params.sl_delta == 0:
+      raise ValueError("SL_delta = 0")
+
+  params.current_direction = get_trade_direction(params)
+  params.tp_active = calculate_tp_active(params)
+  params.rel_risk = calculate_rel_risk(params)
+
+  return trade
 
 
 def calculate_exit_and_tp_structure(trade: Trade):
-    params = trade.parameters
-    params.p_liquidation = match_liquidation_price_to_SL(params)
-    params.TP_delta = calculate_TP_delta(params)
-    return trade
+  params = trade.parameters
+  params.p_liquidation = match_liquidation_price_to_SL(params)
+  params.TP_delta = calculate_TP_delta(params)
+  return trade
 
 
 def calculate_dynamic_state(trade: Trade):
-    params = trade.parameters
-    params.lvg, params.risk = find_max_lvg(params)
-    params.max_margin = find_max_margin(params)
-    params.initial_margin = calculate_initial_margin(params)
-    params.risk, params.initial_margin = check_initial_margin(params)
+  params = trade.parameters
+  params.lvg, params.risk = find_max_lvg(params)
+  params.max_margin = find_max_margin(params)
+  params.initial_margin = calculate_initial_margin(params)
+  params.risk, params.initial_margin = check_initial_margin(params)
 
-    params.n_pos_value = calculate_n_pos_value(params)
-    params.maintainance_margin = calculate_maintainance_margin(params, params.n_pos_value)
-    params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
-    params.isolated_margin = params.max_margin
+  params.n_pos_value = calculate_n_pos_value(params)
+  params.maintainance_margin = calculate_maintainance_margin(params, params.n_pos_value)
+  params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
+  params.isolated_margin = params.max_margin
 
-    params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params)
-    return trade
+  params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params)
+  return trade
 
 
 
@@ -103,7 +104,6 @@ def calculate_dynamic_state(trade: Trade):
 
 #initial margin calculation
 def calculate_dirsign(params: TradeParameters):
-  sanitize_inputs(params)
   p_entry = getattr(params, "p_entry", None)
   p_SL = getattr(params, "p_SL", None)
 
