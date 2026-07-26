@@ -205,6 +205,7 @@ def calculate_n_pos_value(params: TradeParameters):
 def calculate_max_lvg(params: TradeParameters):
   return math.floor(1 / params.maintainance_margin_rate)
 
+#can differ or long and short even for same sl_delta and liq distance, which is against Intuiton; not symmetrical!!! hat's no error
 def max_lvg_for_given_liquidation(params: TradeParameters):
   if params.current_direction == "long":
     lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / params.p_entry))  # = general p_liq formula solved for lvg; formula can get < 1
@@ -290,8 +291,8 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 def match_liquidation_price_to_SL(params: TradeParameters):
     return max(params.p_entry - params.liq_delta_to_SL_delta_ratio * params.sl_delta * params.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
 
-def match_lvg_to_liquidation_price(params: TradeParameters):
-  return 1 / (1 + params.maintainance_margin_rate - params.p_liquidation * (1 + params.maintainance_margin_rate) / params.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
+#def match_lvg_to_liquidation_price(params: TradeParameters):
+#  return 1 / (1 + params.maintainance_margin_rate - params.p_liquidation * (1 + params.maintainance_margin_rate) / params.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
 
 def find_max_margin(params):
    return 0.9 * params.max_margin #forces over securing margin, to avoid margin calls and forced liquidation
