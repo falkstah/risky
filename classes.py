@@ -32,4 +32,5 @@ class TradeParameters:
     potential_profit: float = 0.0
     current_direction: Literal['long', 'short'] | None = None
     tp_active: bool = False
-    loss: float: 0.0
+    loss: float = 0.0
+    equity: float = 0.0

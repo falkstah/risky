@@ -83,7 +83,7 @@ def calculate_all(params: TradeParameters):
 
     # 6) Risk feedback evaluation
     params.TP_delta = calculate_TP_delta(params)
-    params.rel_asset_gain_at_TP, params.rrr, params.potential_profit = evaluate_trade(params)
+    params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params)
 
     return params
 
@@ -264,7 +264,8 @@ def evaluate_trade(params: TradeParameters):
   rel_asset_gain_at_TP = params.TP_delta / params.p_entry
   rrr = params.TP_delta / params.sl_delta
   potential_profit = params.risk * rrr
-  return rel_asset_gain_at_TP, rrr, potential_profit
+  equity = calculate_equity(params)
+  return rel_asset_gain_at_TP, rrr, potential_profit, equity
 
 def calulate_profit_at_price_p(params: TradeParameters, p):
   if p >= params.p_entry:
