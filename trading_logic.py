@@ -135,6 +135,35 @@ def calculate_TP_delta(params: TradeParameters):
   return abs(p_entry - p_TP)
 
 
+def calculate_buffered_tp1_close_percent(trade: Trade):
+  params = trade.parameters
+  p_entry = getattr(params, "p_entry", None)
+  p_TP = getattr(params, "p_TP", None)
+  buffer_SL = getattr(trade, "buffer_SL", None)
+
+  if p_entry is None or p_TP is None or buffer_SL is None:
+    raise ValueError("Entry price, TP price and buffer SL must be set.")
+
+  tp_delta = abs(p_TP - p_entry)
+  buffer_delta = abs(buffer_SL - p_entry)
+
+  if tp_delta == 0.0:
+    raise ValueError("TP price must differ from entry price.")
+  if buffer_delta == 0.0:
+    return 0.0
+
+  # Buffer SL must be on the correct side of entry for the trade direction.
+  if params.dirsign is None:
+    params.dirsign = calculate_dirsign(params)
+  if params.dirsign > 0 and buffer_SL >= p_entry:
+    raise ValueError("Buffer SL must be below entry for a long trade.")
+  if params.dirsign < 0 and buffer_SL <= p_entry:
+    raise ValueError("Buffer SL must be above entry for a short trade.")
+
+  close_fraction = buffer_delta / (tp_delta + buffer_delta)
+  return float(close_fraction * 100.0)
+
+
 def get_trade_direction(params: TradeParameters):
   dirsign = getattr(params, "dirsign", None)
   if dirsign is None:

@@ -8,6 +8,11 @@ class TakeProfitTarget:
     triggered: bool = False
 
 @dataclass
+class EntryTarget:
+    price: float = 0.0
+    margin_percent: float = 0.0
+
+@dataclass
 class TradeParameters:
     # Inputs
     liq_delta_to_SL_delta_ratio: float
@@ -46,7 +51,10 @@ class TradeParameters:
 class Trade:
     parameters: TradeParameters
     current_price: float = 0.0
+    buffer_SL: float = 0.0
+    entry_levels: list[EntryTarget] = field(default_factory=list)
     tp_targets: list[TakeProfitTarget] = field(default_factory=list)
+    order_type: Literal["single limit", "single market", "single post only", "k1m6a box"] = "single limit"
     trailing_SL_percent: float = 0.0
     trailing_sl_enabled: bool = False
     current_sl_price: float = 0.0

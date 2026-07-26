@@ -5,7 +5,8 @@ import altair as alt
 import pandas as pd
 
 #logic functions
-from classes import TradeParameters, Trade, TakeProfitTarget
+from classes import TradeParameters, Trade, EntryTarget, TakeProfitTarget
+from trading_logic import calculate_buffered_tp1_close_percent
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
 st.text("Optimized for execution speed.")
@@ -13,12 +14,24 @@ st.text("Optimized for execution speed.")
 #trade specific values
 
 def init_trade_inputs():
+    if "entry_levels" not in st.session_state:
+        st.session_state.entry_levels = [{"price": 0.0, "margin_percent": 0.0}]
     if "tp_targets" not in st.session_state:
         st.session_state.tp_targets = [{"price": 0.0, "close_percent": 0.0}]
     if "trailing_SL_percent" not in st.session_state:
         st.session_state.trailing_SL_percent = 0.0
     if "current_price" not in st.session_state:
         st.session_state.current_price = 0.0
+    if "buffer_SL" not in st.session_state:
+        st.session_state.buffer_SL = 0.0
+    if "buffer_SL_close_pct" not in st.session_state:
+        st.session_state.buffer_SL_close_pct = 0.0
+    if "order_type" not in st.session_state:
+        st.session_state.order_type = "single limit"
+
+
+def add_entry_target():
+    st.session_state.entry_levels.append({"price": 0.0, "margin_percent": 0.0})
 
 
 def add_tp_target():
@@ -104,8 +117,32 @@ def render_trade_controls(trade: Trade):
     with st.container(border=True):
         st.subheader("🎯 Trade Ziele & Trailing SL")
 
+        if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
+            add_entry_target()
         if st.button("Weitere TP hinzufügen", key="add_tp_button"):
             add_tp_target()
+
+        entry_levels: list[EntryTarget] = []
+        for index, target in enumerate(st.session_state.entry_levels):
+            price_key = f"entry_price_{index}"
+            pct_key = f"entry_margin_pct_{index}"
+            price = st.number_input(
+                f"Entry Level {index + 1} Preis:",
+                value=target["price"],
+                min_value=0.0,
+                step=0.01,
+                key=price_key,
+            )
+            margin_pct = st.number_input(
+                f"Entry Level {index + 1} Margin (%):",
+                value=target["margin_percent"],
+                min_value=0.0,
+                max_value=100.0,
+                step=1.0,
+                key=pct_key,
+            )
+            st.session_state.entry_levels[index] = {"price": price, "margin_percent": margin_pct}
+            entry_levels.append(EntryTarget(price=price, margin_percent=margin_pct))
 
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
@@ -145,6 +182,20 @@ def render_trade_controls(trade: Trade):
             key="current_price",
         )
         st.session_state.current_price = float(current_price)
+        order_type = st.selectbox(
+            "Order Type:",
+            ["single limit", "single market", "single post only", "k1m6a box"],
+            index=["single limit", "single market", "single post only", "k1m6a box"].index(st.session_state.order_type),
+            key="order_type",
+        )
+        buffer_SL = st.number_input(
+            "Buffer SL Preis:",
+            value=st.session_state.buffer_SL,
+            min_value=0.0,
+            step=0.01,
+            key="buffer_SL",
+        )
+        st.session_state.buffer_SL = float(buffer_SL)
         current_sl_price = st.number_input(
             "Aktueller SL Preis:",
             value=trade.parameters.p_SL,
@@ -153,14 +204,30 @@ def render_trade_controls(trade: Trade):
             key="current_sl_price",
         )
 
+        if st.button("Berechne TP1 Close% für Buffer SL", key="calc_buffer_tp1"):
+            try:
+                st.session_state.buffer_SL_close_pct = calculate_buffered_tp1_close_percent(trade)
+            except Exception as exc:
+                st.error(f"Berechnung fehlgeschlagen: {exc}")
+
+        trade.entry_levels = entry_levels
         trade.tp_targets = tp_targets
         trade.current_price = st.session_state.current_price
-        trade.current_price = st.session_state.current_price
+        trade.buffer_SL = st.session_state.buffer_SL
+        trade.order_type = st.session_state.order_type
         trade.trailing_SL_percent = st.session_state.trailing_SL_percent
         trade.trailing_sl_enabled = st.session_state.trailing_SL_percent > 0.0
         trade.current_sl_price = float(current_sl_price)
 
+        if st.session_state.buffer_SL_close_pct:
+            st.info(f"Empfohlener TP1 Close: {round(st.session_state.buffer_SL_close_pct, 2)} %")
+
         trade = update_tp_targets_triggered(trade)
+
+        if entry_levels:
+            st.markdown("**Entry Levels:**")
+            for target in entry_levels:
+                st.write(f"- Entry Level bei {target.price} mit {target.margin_percent}% Margin")
 
         if tp_targets:
             st.markdown("**Aktuelle TP Targets:**")
