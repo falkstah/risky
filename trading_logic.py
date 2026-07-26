@@ -146,33 +146,36 @@ def calculate_TP_delta(params: TradeParameters):
     raise ValueError("Entry price and Take Profit price must both be set.")
   return abs(p_entry - p_TP)
 
-
+  #small partial TP1 allows: moving SL under previous Low to ain more buffer. 
+  # This function calculates the tp1-size so that buffer_SL hit would stop trade out (p.ex. under a low) without a loss (by risking Tp1 gains)
+  # (increae of V if buffer_SL is pulled further to entry could also be interesting, i.e. pyramid entry)
 def calculate_buffered_tp1_close_percent(trade: Trade):
   params = trade.parameters
   p_entry = getattr(params, "p_entry", None)
   p_TP = getattr(params, "p_TP", None)
   buffer_SL = getattr(trade, "buffer_SL", None)
 
+  #useless when it will be included in sanitier:
   if p_entry is None or p_TP is None or buffer_SL is None:
     raise ValueError("Entry price, TP price and buffer SL must be set.")
 
-  tp_delta = abs(p_TP - p_entry)
+  TP_delta = params.TP_delta
   buffer_delta = abs(buffer_SL - p_entry)
 
-  if tp_delta == 0.0:
+  if TP_delta == 0.0:
     raise ValueError("TP price must differ from entry price.")
   if buffer_delta == 0.0:
     return 0.0
 
   # Buffer SL must be on the correct side of entry for the trade direction.
-  if params.dirsign is None:
-    params.dirsign = calculate_dirsign(params)
-  if params.dirsign > 0 and buffer_SL >= p_entry:
+  if params.current_direction is None:
+    params.current_direction = get_trade_direction(params)
+  if params.current_direction == "long" and buffer_SL >= p_entry:
     raise ValueError("Buffer SL must be below entry for a long trade.")
-  if params.dirsign < 0 and buffer_SL <= p_entry:
+  if params.current_direction == "short" and buffer_SL <= p_entry:
     raise ValueError("Buffer SL must be above entry for a short trade.")
 
-  close_fraction = buffer_delta / (tp_delta + buffer_delta)
+  close_fraction = buffer_delta / (TP_delta + buffer_delta)
   return float(close_fraction * 100.0)
 
 
@@ -361,4 +364,4 @@ def debug_calculate_all(**overrides):
   return calculate_all(trade)
 
 #for debugging run this function with Debugger till Breakpoint:
-debug_calculate_all()
+#debug_calculate_all()
