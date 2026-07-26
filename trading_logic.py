@@ -80,6 +80,7 @@ def calculate_all(params: TradeParameters):
     params.n_pos_value = calculate_n_pos_value(params)
     params.maintainance_margin = calculate_maintainance_margin(params, params.n_pos_value)
     params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
+    params.isolated_margin = params.max_margin
 
     # 6) Risk feedback evaluation
     params.TP_delta = calculate_TP_delta(params)

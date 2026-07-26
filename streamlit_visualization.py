@@ -61,11 +61,10 @@ def fast_order_table(params: TradeParameters):
   
   
         st.subheader("📊 Fast Order Table")
-        
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("lvg", f"{params.lvg} x")
-        col2.metric("isolated margin", f"{round(params.initial_margin, 2)} $")
+        col2.metric("isolated margin", f"{round(params.isolated_margin, 2)} $")
         col3.metric("p_liquidation", f"{round(params.p_liquidation, 2)} $")
         col4.metric("n_pos_value", f"{round(params.n_pos_value, 2)} $")
   
