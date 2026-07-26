@@ -52,6 +52,7 @@ class Trade:
     parameters: TradeParameters
     current_price: float = 0.0
     buffer_SL: float = 0.0
+    pull_SL: float = 0.0
     entry_levels: list[EntryTarget] = field(default_factory=list)
     tp_targets: list[TakeProfitTarget] = field(default_factory=list)
     order_type: Literal["single limit", "single market", "single post only", "k1m6a box"] = "single limit"

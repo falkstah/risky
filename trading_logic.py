@@ -98,8 +98,8 @@ def calculate_dynamic_state(trade: Trade):
 
 #margins
 #receive fom DEX
-#maintainance_margin_rate  # = minimaler rel. Anteil an Positionsgröße, der als Eigenkapital stets verfügbar sein muss, sonst Zwangsliquidation (rel. Pendant zur absoluten Mainainance  Margin); oft nicht so hoch, worst case Annahme
-#maintainance_deduction       # "0" ist konsevativ
+#maintainance_margin_rate  # = minimum relative portion of position size that must always be available as equity, otherwise forced liquidation (relative counterpart to absolute maintenance margin); often not as high, worst case assumption
+#maintainance_deduction       # "0" is conservative
 
 #initial margin calculation
 def calculate_dirsign(params: TradeParameters):
@@ -188,7 +188,7 @@ def calculate_initial_margin_rate(lvg):
 
 #live calculation
 def calculate_n_pos_value(params: TradeParameters):
-  return params.dirsign * params.risk / params.rel_risk # = initial_margin * lvg - koppelt somit lvg und initial_margin; n_pos_value < 0 <==> short
+  return params.dirsign * params.risk / params.rel_risk # = initial_margin * lvg - thus couples lvg and initial_margin; n_pos_value < 0 <==> short
 
 def calculate_max_lvg(params: TradeParameters):
   return math.floor(1 / params.maintainance_margin_rate)
@@ -223,13 +223,13 @@ def reduce_risk(params):
    return params.max_margin * params.max_lvg * params.rel_risk
 
 
-#Risiko: wenn Kurs gegen mich läuft sinkt mein Kontostand = hinterlegte Margin schrumpft -> bei maintainance margin <= 2%*n_pos_value: Zwangsliquidation
-#->live updates für folgende Werte nötig:
+#Risk: if price moves against me, my account balance decreases = posted margin shrinks -> if maintenance margin <= 2% * n_pos_value: forced liquidation
+#->live updates necessary for the following values:
 def calculate_maintainance_margin(params: TradeParameters, n_pos_value):
   return abs(n_pos_value) * params.maintainance_margin_rate + params.maintainance_deduction # Maintenance margin is a positive requirement; direction is already encoded in n_pos_value
 
 def calculate_rel_maintainance_margin(params: TradeParameters):
-  #nur im Verlauf des Trades sinnvoll, da sich margin ändert und rel_maintainance_margin dann nicht mhr gleich MMR?
+  #only useful during the trade, because margin changes and rel_maintainance_margin may no longer equal MMR
   return params.maintainance_margin / abs(params.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
 def p_liq_exchange_forced(params: TradeParameters):
@@ -248,14 +248,14 @@ def calculate_tp_active(params: TradeParameters):
 
 
 #exchange = ccxt.bybit()
-#k = 1.5  sicherheitsmultiplikator
-#live atr erstmal überbrückt, weil bybit google IP-Anfragrn blockiert
+#k = 1.5  safety multiplier
+#live ATR temporarily bypassed because bybit blocks Google IP requests
 #used to match the liq price to current volatility:
 def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
   #ohlcv = "open, high, low, close, volume", fetch = retrieve
-  #ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit = length + 1)  # +1, weil ATR_formel schon für die TR der ersten Kerze Referenzwert von vorheriger Kerze braucht
+  #ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit = length + 1)  # +1 because the ATR formula already needs the previous candle's reference value for the first TR
 
-  #Umwandeln in DataFrame
+  #Convert to DataFrame
   #df = pd.DataFrame(ohlcv, columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
   #ATR Calculation

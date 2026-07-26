@@ -26,6 +26,8 @@ def init_trade_inputs():
         st.session_state.buffer_SL = 0.0
     if "buffer_SL_close_pct" not in st.session_state:
         st.session_state.buffer_SL_close_pct = 0.0
+    if "pull_SL" not in st.session_state:
+        st.session_state.pull_SL = 0.0
     if "order_type" not in st.session_state:
         st.session_state.order_type = "single limit"
 
@@ -195,6 +197,14 @@ def render_trade_controls(trade: Trade):
             key="trailing_SL_percent",
         )
         st.session_state.trailing_SL_percent = float(trailing_SL_percent)
+        pull_SL = st.number_input(
+            "Pull SL Preis:",
+            value=st.session_state.pull_SL,
+            min_value=0.0,
+            step=0.01,
+            key="pull_SL",
+        )
+        st.session_state.pull_SL = float(pull_SL)
         current_price = st.number_input(
             "Aktueller Asset-Preis:",
             value=st.session_state.current_price,
@@ -235,6 +245,7 @@ def render_trade_controls(trade: Trade):
         trade.tp_targets = tp_targets
         trade.current_price = st.session_state.current_price
         trade.buffer_SL = st.session_state.buffer_SL
+        trade.pull_SL = st.session_state.pull_SL
         trade.order_type = st.session_state.order_type
         trade.trailing_SL_percent = st.session_state.trailing_SL_percent
         trade.trailing_sl_enabled = st.session_state.trailing_SL_percent > 0.0
@@ -355,7 +366,7 @@ def visualize_trade(trade: Trade):
     )
     text = rule.mark_text(align='left', dx=5, dy=-5).encode(text='Label')
 
-    chart = alt.layer(area, rule, text).properties(height=500, width=200).interactive()
+    chart = alt.layer(area, rule, text).properties(height=500, width=200)
 
     # In Streamlit anzeigen
     st.altair_chart(chart, use_container_width=True)
