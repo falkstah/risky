@@ -110,7 +110,7 @@ def fast_order_table(trade: Trade):
 def render_trade_controls(trade: Trade):
     init_trade_inputs()
 
-    #managing input lists in st:
+    #Initializing input lists in st:
     if "entry_levels" not in st.session_state:
             st.session_state.entry_levels = [{"price": 0.0, "position_share": 1.0}]
     if "tp_targets" not in st.session_state:
@@ -154,11 +154,8 @@ def render_trade_controls(trade: Trade):
                 step=1.0,
                 key=pct_key,
             )
-            st.session_state.entry_levels[index] = {"price": price, "margin_percent": position_share}
-            entry_levels.append(EntryLevel(price=price, position_share=position_share))
-
-        if st.session_state.tp_targets:
-            st.session_state.tp_targets[0]["price"] = st.session_state.get("p_TP", trade.entr_levels.)
+            st.session_state.entry_levels[index] = {"price": price, "position_share": position_share}
+            entry_levels.append(EntryLevel(price=price, position_share = position_share))
 
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
@@ -171,10 +168,8 @@ def render_trade_controls(trade: Trade):
                 step=0.01,
                 key=price_key,
             )
-            if index == 0:
-                st.session_state["p_TP"] = price
-                trade.parameters.p_TP = price
-            close_pct = st.number_input(
+
+            close_perecent = st.number_input(
                 f"TP {index + 1} Schließung (%):",
                 value=target["close_percent"],
                 min_value=0.0,
@@ -182,8 +177,8 @@ def render_trade_controls(trade: Trade):
                 step=1.0,
                 key=pct_key,
             )
-            st.session_state.tp_targets[index] = {"price": price, "close_percent": close_pct}
-            tp_targets.append(TakeProfitTarget(price=price, close_percent=close_pct))
+            st.session_state.tp_targets[index] = {"price": price, "close_percent": close_percent}
+            tp_targets.append(TakeProfitTarget(price=price, close_percent=close_percent))
 
         trailing_SL_percent = st.number_input(
             "Trailing SL (%):",
@@ -231,9 +226,9 @@ def render_trade_controls(trade: Trade):
             key="input_current_sl_price",
         )
 
-        if st.button("Berechne TP1 Close% für Buffer SL", key="calc_buffer_tp1"):
+        if st.button("Calculate TP1 close_perecnt for buffer_SL", key="calc_buffer_tp1"):
             try:
-                st.session_state.buffer_SL_close_pct = calculate_buffered_tp1_close_percent(trade)
+                st.session_state.buffer_SL_close_pct = trade.tp_targets[0].close_percent
             except Exception as exc:
                 st.error(f"Berechnung fehlgeschlagen: {exc}")
 
@@ -261,8 +256,8 @@ def render_trade_controls(trade: Trade):
             st.markdown("**Aktuelle TP Targets:**")
             for target in tp_targets:
                 tp_profit = 0.0
-                if entry.price and trade.parameters.n_pos_value:
-                    profit = (trade.parameters.dirsign * (target.price - entry.price) / entry.price) * abs(trade.parameters.n_pos_value)
+                if target.price and trade.parameters.n_pos_value:
+                    profit = (trade.parameters.dirsign * (target.price - target.price) / target.price) * abs(trade.parameters.n_pos_value)
                     tp_profit = target.close_percent / 100.0 * profit
                 status = "✅ Erreicht" if target.triggered else "– offen"
                 st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung ({status})")
