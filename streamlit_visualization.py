@@ -136,42 +136,35 @@ def render_trade_controls(trade: Trade):
                 remove_tp_target()
 
   
-        for index, target in enumerate(st.session_state.entry_levels):
+        for index, tranche in enumerate(trade.tranches):
             price_key = f"entry_price_{index}"
             share_key = f"position_share_{index}"
             
-            # 1. Wert im Session State initialisieren, falls noch nicht geschehen
-            if price_key not in st.session_state:
-                st.session_state[price_key] = float(target["price"])
-            if share_key not in st.session_state:
-                st.session_state[share_key] = float(target["position_share"])
-
-            # 1. Sicherstellen, dass der Wert existiert und mind. den min_value (0.01) hat
+            # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
             if price_key not in st.session_state or st.session_state[price_key] < 0.01:
-                st.session_state[price_key] = max(0.01, float(target["price"]))
+                st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
                 
             if share_key not in st.session_state or st.session_state[share_key] < 0.01:
-                st.session_state[share_key] = max(0.01, float(target["position_share"]))
+                st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
-            # 2. Widgets rein über den Key steuern (ohne value-Parameter)
+            # 2. Widgets über den Key steuern
             st.session_state[price_key] = st.number_input(
-                f"Entry Level {index + 1} Preis:",
+                f"Tranche {index + 1} Entry Preis:",
                 min_value=0.01,
                 step=0.01,
                 key=price_key
             )
             
             st.session_state[share_key] = st.number_input(
-                f"Entry Level {index + 1} Share:",
+                f"Tranche {index + 1} Share:",
                 min_value=0.01,
                 step=0.01,
                 key=share_key
             )
             
-            # 3. Direkt in das Target-Dictionary zurückschreiben
-            target["price"] = st.session_state[price_key]
-            target["position_share"] = st.session_state[share_key]
-
+            # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
+            tranche.entry_level.price = st.session_state[price_key]
+            tranche.entry_level.position_share = st.session_state[share_key]
 
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
