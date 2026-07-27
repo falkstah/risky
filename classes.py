@@ -73,6 +73,12 @@ class Trade:
     #classes
     trade_parameters: TradeParameters
     tranches: list[Tranche] = field(default_factory = list)
+
+    #trade-specific variables
+    liq_delta_to_sl_delta_ratio: float = 4.0
+    maintainance_margin_rate: float = 0.02
+
+
     
 
     

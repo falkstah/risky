@@ -54,9 +54,9 @@ def get_trade_parameters():
     print("Enter parameters: ")
     init_trade_inputs()
 
-    tranche.tranche_parameters = TradeParameters(
+    tradeParameters = TradeParameters(
         liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
-        risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
+        total_risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
         maintainance_margin_rate=float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001)),
         maintainance_deduction=float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001)),
         max_lvg=float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
@@ -64,7 +64,7 @@ def get_trade_parameters():
         p_SL=get_SL()
     )
 
-    return tranche.tranche_parameters
+    return trade
 
 def get_SL():
   p_SL = st.number_input("SL: ", value=0.0, min_value=0.0, step=0.01)

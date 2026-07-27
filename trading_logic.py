@@ -104,24 +104,24 @@ def calculate_initial_risk(trade: Trade, tranche):
 
 def calculate_exit_and_tp_structure(trade: Trade, tranche):
   tranche.tranche_parameters = tranche.tranche_parameters
-  tranche.tranche_parameters.p_liquidation = match_liquidation_price_to_SL(rade, tranche)
-  tranche.tranche_parameters.TP_delta = calculate_TP_delta(tranche)
+  tranche.tranche_parameters.p_liquidation = match_liquidation_price_to_SL(trade, tranche)
+  tranche.tranche_parameters.TP_delta = calculate_TP_delta(trade, tranche)
   return trade
 
 
 def calculate_dynamic_state(trade: Trade, tranche):
   tranche.tranche_parameters = tranche.tranche_parameters
-  tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = find_max_lvg(tranche)
+  tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = find_max_lvg(trade, tranche)
   tranche.tranche_parameters.max_margin = find_max_margin(tranche)
-  tranche.tranche_parameters.initial_margin = calculate_initial_margin(tranche)
+  tranche.tranche_parameters.initial_margin = calculate_initial_margin(trade, tranche)
   tranche.tranche_parameters.risk, tranche.tranche_parameters.initial_margin = check_initial_margin(tranche)
 
-  tranche.tranche_parameters.n_pos_value = calculate_n_pos_value(tranche)
+  tranche.tranche_parameters.n_pos_value = calculate_n_pos_value(trade, tranche)
   tranche.tranche_parameters.maintainance_margin = calculate_maintainance_margin(tranche)
   tranche.tranche_parameters.rel_maintainance_margin = calculate_rel_maintainance_margin(tranche)
   tranche.tranche_parameters.isolated_margin = tranche.tranche_parameters.max_margin
 
-  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(trade_tranche)
+  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(trade, tranche)
   return trade
 
 #margins
@@ -188,7 +188,7 @@ def calculate_buffered_tp1_close_percent(trade: Trade, tranche):
 
   # Buffer SL must be on the correct side of entry for the trade direction.
   if tranche.tranche_parameters.current_direction is None:
-    tranche.tranche_parameters.current_direction = get_trade_direction(tranche.tranche_parameters)
+    tranche.tranche_parameters.current_direction = get_trade_direction(trade, tranche)
   if tranche.tranche_parameters.current_direction == "long" and buffer_SL >= entry.price:
     raise ValueError("Buffer SL must be below entry for a long trade.")
   if tranche.tranche_parameters.current_direction == "short" and buffer_SL <= entry.price:

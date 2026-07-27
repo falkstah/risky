@@ -19,7 +19,8 @@ def main():
     st.text("Opimized for execution speed.")
 
     tranche.tranche_parameters = streamlit_visualization.get_trade_parameters()
-    trade = Trade(parameters=tranche.tranche_parameters)
+    tranche = Tranche()
+    trade = Trade(tranche = tranche)
     trade = calculate_all(trade)
     trade = streamlit_visualization.render_trade_controls(trade)
     trade = calculate_all(trade)
