@@ -54,7 +54,7 @@ def get_trade_parameters():
     print("Enter parameters: ")
     init_trade_inputs()
 
-    params = TradeParameters(
+    tranche.tranche_parameters = TradeParameters(
         liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
         risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
         maintainance_margin_rate=float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001)),
@@ -64,7 +64,7 @@ def get_trade_parameters():
         p_SL=get_SL()
     )
 
-    return params
+    return tranche.tranche_parameters
 
 def get_SL():
   p_SL = st.number_input("SL: ", value=0.0, min_value=0.0, step=0.01)
@@ -94,15 +94,15 @@ def update_tp_targets_triggered(trade: Trade):
 
 
 def fast_order_table(trade: Trade):
-    params = trade.parameters
+    tranche.tranche_parameters = trade.parameters
     with st.container(border=True):
         st.subheader("📊 Fast Order Table")
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("lvg", f"{params.lvg} x")
-        col2.metric("isolated margin", f"{round(params.isolated_margin, 2)} $")
-        col3.metric("p_liquidation", f"{round(params.p_liquidation, 2)} $")
-        col4.metric("n_pos_value", f"{round(params.n_pos_value, 2)} $")
+        col1.metric("lvg", f"{tranche.tranche_parameters.lvg} x")
+        col2.metric("isolated margin", f"{round(tranche.tranche_parameters.isolated_margin, 2)} $")
+        col3.metric("p_liquidation", f"{round(tranche.tranche_parameters.p_liquidation, 2)} $")
+        col4.metric("n_pos_value", f"{round(tranche.tranche_parameters.n_pos_value, 2)} $")
 
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
@@ -286,7 +286,7 @@ def render_trade_controls(trade: Trade):
 
 
 def overview_table(trade: Trade):
-  params = trade.parameters
+  tranche.tranche_parameters = trade.parameters
   #table1
   with st.container(border=True):
 
@@ -294,11 +294,11 @@ def overview_table(trade: Trade):
       
       # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("SL Delta", f"{round(params.sl_delta, 2)} $")
-      col2.metric("Risk", f"{round(params.risk, 2)} $")
-      col3.metric("Relative Risk", f"{round(params.rel_risk, 2)} $")
-      col4.metric("Initial Margin", f"{round(params.initial_margin, 2)} $")
-      col5.metric("potential_profit", f"{round(params.potential_profit, 2)} $")
+      col1.metric("SL Delta", f"{round(tranche.tranche_parameters.sl_delta, 2)} $")
+      col2.metric("Risk", f"{round(tranche.tranche_parameters.risk, 2)} $")
+      col3.metric("Relative Risk", f"{round(tranche.tranche_parameters.rel_risk, 2)} $")
+      col4.metric("Initial Margin", f"{round(tranche.tranche_parameters.initial_margin, 2)} $")
+      col5.metric("potential_profit", f"{round(tranche.tranche_parameters.potential_profit, 2)} $")
 
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
@@ -307,11 +307,11 @@ def overview_table(trade: Trade):
       st.subheader("💰 Risk Feedback")
       
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("Risiko", f"{round(params.risk, 2)} €")
-      col2.metric("rrr", f"{round(params.rrr, 1)}")
-      col3.metric("relative Gain", f"{round(params.rel_asset_gain_at_TP * 100, 2)}%")
-      col4.metric("Wartungsmarge", f"{round(params.maintainance_margin, 2)} €")
-      col5.metric("rel asset gain at TP", f"{round(params.rel_asset_gain_at_TP * 100, 2)}%")
+      col1.metric("Risiko", f"{round(tranche.tranche_parameters.risk, 2)} €")
+      col2.metric("rrr", f"{round(tranche.tranche_parameters.rrr, 1)}")
+      col3.metric("relative Gain", f"{round(tranche.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
+      col4.metric("Wartungsmarge", f"{round(tranche.tranche_parameters.maintainance_margin, 2)} €")
+      col5.metric("rel asset gain at TP", f"{round(tranche.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
 
   if trade.tp_targets:
       with st.container(border=True):
@@ -324,9 +324,9 @@ def overview_table(trade: Trade):
 
 
 def visualize_trade(trade: Trade):
-  params = trade.parameters
+  tranche.tranche_parameters = trade.parameters
   st.title("Trade Visualizer")
-  st.write(f"Direction: {params.current_direction.capitalize()}" if params.current_direction else "Direction unknown")
+  st.write(f"Direction: {tranche.tranche_parameters.current_direction.capitalize()}" if tranche.tranche_parameters.current_direction else "Direction unknown")
 
   # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
   try:
@@ -334,14 +334,14 @@ def visualize_trade(trade: Trade):
 
     #ba top
     if trade.tp_targets[0].price > 0:  # hence, tp exists
-      if params.dirsign > 0:  # long case
-        balken_oben = trade.tp_targets[0].price if params.tp_active else trade.entry_levels[0].price
-      elif params.dirsign < 0:  # short case
-        balken_oben = trade.tp_targets[0].price if params.tp_active else trade.entry_levels[0].price
+      if tranche.tranche_parameters.dirsign > 0:  # long case
+        balken_oben = trade.tp_targets[0].price if tranche.tranche_parameters.tp_active else trade.entry_levels[0].price
+      elif tranche.tranche_parameters.dirsign < 0:  # short case
+        balken_oben = trade.tp_targets[0].price if tranche.tranche_parameters.tp_active else trade.entry_levels[0].price
       else:
-        balken_oben = params.p_liquidation
+        balken_oben = tranche.tranche_parameters.p_liquidation
     else:
-        balken_oben = max(trade.entry_levels[0].price, params.p_liquidation)  # covers short and long case
+        balken_oben = max(trade.entry_levels[0].price, tranche.tranche_parameters.p_liquidation)  # covers short and long case
 
     # Daten fürs Chart zusammenbauen
     zone_data = pd.DataFrame({
@@ -350,11 +350,11 @@ def visualize_trade(trade: Trade):
         'Zone': ['Preisbereich']
     })
 
-    preise = [trade.entry_levels[0].price, params.p_SL, params.p_liquidation]
+    preise = [trade.entry_levels[0].price, tranche.tranche_parameters.p_SL, tranche.tranche_parameters.p_liquidation]
     labels = ['Entry', 'Stop Loss', 'Liquidation']
     typen = ['entry', 'sl', 'liq']
 
-    if params.tp_active:
+    if tranche.tranche_parameters.tp_active:
         preise.append(trade.tp_targets[0].price)
         labels.append('Take Profit')
         typen.append('tp')

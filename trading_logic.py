@@ -3,26 +3,26 @@ import math
 import numbers
 from dataclasses import fields
 import pandas as pd
-from classes import Trade, TradeParameters, Tranche_Parameters, TakeProfitTarget, EntryLevel
+from classes import Trade, TradeParameters, Tranche, Tranche_Parameters, TakeProfitTarget, EntryLevel
 #import ccxt
 #import pandas_ta as ta
 
 #2. manage SL pulls and TPs for whole position
 def calculate_all(trade: Trade):
-  #sanitizes trade attributes first and then the attributes in trade-Ojekt params:
+  #sanitizes trade attributes first and then the attributes in trade-Ojekt tranche.tranche_parameters:
   sanitize_inputs(trade)
   sanitize_inputs(trade.trade_parameters)
   sanitize_inputs(trade.tranches)
 
-  #1. calculate all params for each partial entry (ladder) of a trade with one given SL
+  #1. calculate all tranche.tranche_parameters for each partial entry (ladder) of a trade with one given SL
   #entry meint ein ListenELement von entry_levels
   for tranche in trade.tranches:
     tranche.tranche_parameters = calculate_tranche_allocations(trade)
 
     #Calculate:
-    trade = calculate_initial_risk(trade, entry)
-    trade = calculate_exit_and_tp_structure(trade, entry)
-    trade = calculate_dynamic_state(trade, entry)
+    trade = calculate_initial_risk(trade, tranche)
+    trade = calculate_exit_and_tp_structure(trade, tranche)
+    trade = calculate_dynamic_state(trade, tranche)
 
   return trade
 
@@ -68,8 +68,8 @@ def sanitize_inputs(item):
           setattr(item, field_name, 0.0)
 
 def calculate_tranche_allocations(trade):
-  trade.parameters.risk = trade.params.position_share * trade.total_risk
-  trade.parameters.max_margin = trade.params.position_share * trade.max_margin  #faktor buffer für überbeischerung wird in schleife für jeden entry einzeln eingebaut, nicht schon in trade
+  trade.parameters.risk = trade.tranche.tranche_parameters.position_share * trade.total_risk
+  trade.parameters.max_margin = trade.tranche.tranche_parameters.position_share * trade.max_margin  #faktor buffer für überbeischerung wird in schleife für jeden entry einzeln eingebaut, nicht schon in trade
   #TPs are managed globally with FiFo principle (exchange standard)
 
   #SL is gloabal and same for all tranches at the moment, but can be changed later here
@@ -77,52 +77,51 @@ def calculate_tranche_allocations(trade):
 
   return trade.parameters
 
-def calculate_initial_risk(trade: Trade, entry):
-  params = trade.parameters
+def calculate_initial_risk(trade: Trade, tranche):
 
   # 1) Directional basics
-  if entry == 0.0:
+  if tranche.tranche_parameters.entry == 0.0:
     print("P_Entry is 0.0, cannot calculate trade parameters.")
     return trade
 
   try:
-      entry.price = float(entry.price)
-      params.p_SL = float(params.p_SL)
+      tranche.tranche_parameters.price = float(tranche.tranche_parameters.price)
+      tranche.tranche_parameters.p_SL = float(tranche.tranche_parameters.p_SL)
   except (TypeError, ValueError):
       raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
-  params.dirsign = calculate_dirsign(params, entry)
-  params.sl_delta = calculate_SL_delta(params, entry)
-  if params.sl_delta == 0:
+  tranche.tranche_parameters.dirsign = calculate_dirsign(tranche.tranche_parameters, tranche.tranche_parameters.entry)
+  tranche.tranche_parameters.sl_delta = calculate_SL_delta(trade, tranche.tranche_parameters)
+  if tranche.tranche_parameters.sl_delta == 0:
       raise ValueError("SL_delta = 0")
 
-  params.current_direction = get_trade_direction(params)
-  params.tp_active = calculate_tp_active(params, entry)
-  params.rel_risk = calculate_rel_risk(params, entry)
+  tranche.tranche_parameters.current_direction = get_trade_direction(trade, tranche.tranche_parameters)
+  tranche.tranche_parameters.tp_active = calculate_tp_active(trade, tranche.tranche_parameters)
+  tranche.tranche_parameters.rel_risk = calculate_rel_risk(trade, tranche.tranche_parameters)
 
   return trade
 
 
-def calculate_exit_and_tp_structure(trade: Trade, entry):
-  params = trade.parameters
-  params.p_liquidation = match_liquidation_price_to_SL(params, entry)
-  params.TP_delta = calculate_TP_delta(params, entry)
+def calculate_exit_and_tp_structure(trade: Trade, tranche):
+  tranche.tranche_parameters = tranche.tranche_parameters
+  tranche.tranche_parameters.p_liquidation = match_liquidation_price_to_SL(tranche.tranche_parameters, tranche.tranche_parameters.entry)
+  tranche.tranche_parameters.TP_delta = calculate_TP_delta(tranche.tranche_parameters, tranche.tranche_parameters.entry)
   return trade
 
 
-def calculate_dynamic_state(trade: Trade, entry):
-  params = trade.parameters
-  params.lvg, params.risk = find_max_lvg(params, entry)
-  params.max_margin = find_max_margin(params)
-  params.initial_margin = calculate_initial_margin(params)
-  params.risk, params.initial_margin = check_initial_margin(params)
+def calculate_dynamic_state(trade: Trade, tranche):
+  tranche.tranche_parameters = tranche.tranche_parameters
+  tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = find_max_lvg(tranche.tranche_parameters, tranche.tranche_parameters.entry)
+  tranche.tranche_parameters.max_margin = find_max_margin(tranche.tranche_parameters)
+  tranche.tranche_parameters.initial_margin = calculate_initial_margin(tranche.tranche_parameters)
+  tranche.tranche_parameters.risk, tranche.tranche_parameters.initial_margin = check_initial_margin(tranche.tranche_parameters)
 
-  params.n_pos_value = calculate_n_pos_value(params)
-  params.maintainance_margin = calculate_maintainance_margin(params)
-  params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
-  params.isolated_margin = params.max_margin
+  tranche.tranche_parameters.n_pos_value = calculate_n_pos_value(tranche.tranche_parameters)
+  tranche.tranche_parameters.maintainance_margin = calculate_maintainance_margin(tranche.tranche_parameters)
+  tranche.tranche_parameters.rel_maintainance_margin = calculate_rel_maintainance_margin(tranche.tranche_parameters)
+  tranche.tranche_parameters.isolated_margin = tranche.tranche_parameters.max_margin
 
-  params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params, entry)
+  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(tranche.tranche_parameters, entry)
   return trade
 
 #margins
@@ -131,9 +130,10 @@ def calculate_dynamic_state(trade: Trade, entry):
 #maintainance_deduction       # "0" is conservative
 
 #initial margin calculation
-def calculate_dirsign(params: TradeParameters, entry):
-  entry.price = getattr(params, "p_entry", None)
-  p_SL = getattr(params, "p_SL", None)
+def calculate_dirsign(tranche):
+  entry = tranche.tranche_parameters.entry
+  entry.price = getattr(tranche.tranche_parameters, "p_entry", None)
+  p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
 
   if entry.price is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
@@ -148,16 +148,18 @@ def calculate_dirsign(params: TradeParameters, entry):
     raise ValueError("Entry and Stop Loss must not be equal.")
 
 
-def calculate_SL_delta(params: TradeParameters, entry):
-  entry.price = getattr(params, "p_entry", None)
-  p_SL = getattr(params, "p_SL", None)
+def calculate_SL_delta(tranche.tranche_parameters: TradeParameters, tranche):
+  entry = tranche.tranche_parameters.entry
+  entry.price = getattr(tranche.tranche_parameters, "p_entry", None)
+  p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
   if entry.price is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
   return abs(entry.price - p_SL)
 
-def calculate_TP_delta(params: TradeParameters, entry):
-  entry.price = getattr(params, "entry.price", None)
-  p_TP = getattr(params, "p_TP", None)
+def calculate_TP_delta(tranche.tranche_parameters: TradeParameters, tranche):
+  entry = tranche.tranche_parameters.entry
+  entry.price = getattr(tranche.tranche_parameters, "entry.price", None)
+  p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
   if entry.price is None or p_TP is None:
     raise ValueError("Entry price and Take Profit price must both be set.")
   return abs(entry.price - p_TP)
@@ -165,17 +167,18 @@ def calculate_TP_delta(params: TradeParameters, entry):
   #small partial TP1 allows: moving SL under previous Low to ain more buffer. 
   # This function calculates the tp1-size so that buffer_SL hit would stop trade out (p.ex. under a low) without a loss (by risking Tp1 gains)
   # (increae of V if buffer_SL is pulled further to entry could also be interesting, i.e. pyramid entry)
-def calculate_buffered_tp1_close_percent(trade: Trade, entry):
-  params = trade.parameters
-  entry.price = getattr(params, "entry.price", None)
-  p_TP = getattr(params, "p_TP", None)
+def calculate_buffered_tp1_close_percent(trade: Trade, tranche):
+  entry = tranche.tranche_parameters.entry
+  tranche.tranche_parameters = tranche.tranche_parameters
+  entry.price = getattr(tranche.tranche_parameters, "entry.price", None)
+  p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
   buffer_SL = getattr(trade, "buffer_SL", None)
 
   #useless when it will be included in sanitier:
   if entry.price is None or p_TP is None or buffer_SL is None:
     raise ValueError("Entry price, TP price and buffer SL must be set.")
 
-  TP_delta = params.TP_delta
+  TP_delta = tranche.tranche_parameters.TP_delta
   buffer_delta = abs(buffer_SL - entry.price)
 
   if TP_delta == 0.0:
@@ -184,11 +187,11 @@ def calculate_buffered_tp1_close_percent(trade: Trade, entry):
     return 0.0
 
   # Buffer SL must be on the correct side of entry for the trade direction.
-  if params.current_direction is None:
-    params.current_direction = get_trade_direction(params)
-  if params.current_direction == "long" and buffer_SL >= entry.price:
+  if tranche.tranche_parameters.current_direction is None:
+    tranche.tranche_parameters.current_direction = get_trade_direction(tranche.tranche_parameters)
+  if tranche.tranche_parameters.current_direction == "long" and buffer_SL >= entry.price:
     raise ValueError("Buffer SL must be below entry for a long trade.")
-  if params.current_direction == "short" and buffer_SL <= entry.price:
+  if tranche.tranche_parameters.current_direction == "short" and buffer_SL <= entry.price:
     raise ValueError("Buffer SL must be above entry for a short trade.")
 
   #profit(TP1) = close_fraction * n_pos_value * (TP1 - entry.price)
@@ -200,8 +203,8 @@ def calculate_buffered_tp1_close_percent(trade: Trade, entry):
   return float(close_fraction)
 
 
-def get_trade_direction(params: TradeParameters):
-  dirsign = getattr(params, "dirsign", None)
+def get_trade_direction(tranche):
+  dirsign = getattr(tranche.tranche_parameters, "dirsign", None)
   if dirsign is None:
     raise ValueError("dirsign must be calculated before determining trade direction.")
 
@@ -213,45 +216,45 @@ def get_trade_direction(params: TradeParameters):
     print("Trade direction not consistent. Please check your input parameters.")
   return None
 
-def calculate_rel_risk(params: TradeParameters, entry):
-  return abs(params.sl_delta) / entry.price
+def calculate_rel_risk(tranche):
+  return abs(tranche.tranche_parameters.sl_delta) / tranche.tranche_parameters.price
 
-def calculate_initial_margin(params: TradeParameters):
-  return params.risk / (params.rel_risk * params.lvg) # initial margin >= maintainance_margin (immer)
+def calculate_initial_margin(tranche):
+  return tranche.tranche_paramters.risk / (tranche.tranche_parameters.rel_risk * tranche.tranche_parameters.lvg) # initial margin >= maintainance_margin (immer)
 
 def calculate_initial_margin_rate(lvg):
   return 1 / lvg
 
 #live calculation; sign matches trade direction, abs(n_pos_value) is used for position calculations that do not depend on direction
-def calculate_n_pos_value(params: TradeParameters):
-  return params.dirsign * params.risk / params.rel_risk # = initial_margin * lvg - thus couples lvg and initial_margin; n_pos_value < 0 <==> short
+def calculate_n_pos_value(tranche):
+  return tranche.tranche_parameters.dirsign * tranche.tranche_parameters.risk / tranche.tranche_parameters.rel_risk # = initial_margin * lvg - thus couples lvg and initial_margin; n_pos_value < 0 <==> short
 
-def calculate_max_lvg(params: TradeParameters):
-  return math.floor(1 / params.maintainance_margin_rate)
+def calculate_max_lvg(tranche):
+  return math.floor(1 / tranche.tranche_parameters.maintainance_margin_rate)
 
 #can differ or long and short even for same sl_delta and liq distance, which is against Intuiton; not symmetrical!!! hat's no error
-def max_lvg_for_given_liquidation(params: TradeParameters, entry):
-  if params.current_direction == "long":
-    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / entry.price))  # = general p_liq formula solved for lvg; formula can get < 1
-  elif params.current_direction == "short":
-    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction -  entry.price / params.p_liquidation))
+def max_lvg_for_given_liquidation(tranche):
+  if tranche.tranche_parameters.current_direction == "long":
+    lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction - tranche.tranche_parameters.p_liquidation / entry.price))  # = general p_liq formula solved for lvg; formula can get < 1
+  elif tranche.tranche_parameters.current_direction == "short":
+    lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction -  entry.price / tranche.tranche_parameters.p_liquidation))
   else: lvg = 0
   return lvg 
 
-def find_max_lvg(params: TradeParameters, entry):
-  max_allowed_lvg = calculate_max_lvg(params)
-  max_lvg_liq = max_lvg_for_given_liquidation(params, entry)
+def find_max_lvg(tranche):
+  max_allowed_lvg = calculate_max_lvg(tranche)
+  max_lvg_liq = max_lvg_for_given_liquidation(tranche)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen. But lvg >= 1 with max:
   lvg = math.floor(min(max_allowed_lvg, max_lvg_liq)) #floor guarantees that lvg does not force early liq
-  return check_lvg(lvg, params)
+  return check_lvg(lvg, tranche)
 
 #risk correction functions
-def check_lvg(lvg, params):
-  risk = params.risk
-  if lvg > params.max_lvg:  # Assuming params.max_lvg is 10
-    print(f"Warning: Calculated leverage {lvg} exceeds {params.max_lvg}. Risk will be made smaller to adjust.")
-    lvg = params.max_lvg
-    risk = reduce_risk(params)
+def check_lvg(lvg, tranche):
+  risk = tranche.tranche_parameters.risk
+  if lvg > tranche.tranche_parameters.max_lvg:  # Assuming tranche.tranche_parameters.max_lvg is 10
+    print(f"Warning: Calculated leverage {lvg} exceeds {tranche.tranche_parameters.max_lvg}. Risk will be made smaller to adjust.")
+    lvg = tranche.tranche_parameters.max_lvg
+    risk = reduce_risk(tranche.tranche_parameters)
 
   if lvg < 1:
     print("lvg < 1. Over secuing already guaranteed by find_max_margin. hence, buffer is too big. Risk too small.")
@@ -259,30 +262,30 @@ def check_lvg(lvg, params):
     #possibly risk has to be fitted
   return lvg, risk
 
-def reduce_risk(params):
-   return params.max_margin * params.max_lvg * params.rel_risk
+def reduce_risk(tranche):
+   return tranche.tranche_parameters.max_margin * tranche.tranche_parameters.max_lvg * tranche.tranche_parameters.rel_risk
 
 
 #Risk: if price moves against me, my account balance decreases = posted margin shrinks -> if maintenance margin <= 2% * n_pos_value: forced liquidation
 #->live updates necessary for the following values:
-def calculate_maintainance_margin(params: TradeParameters):
-  return abs(params.n_pos_value) * params.maintainance_margin_rate + params.maintainance_deduction # Maintenance margin is a positive requirement; direction is already encoded in n_pos_value
+def calculate_maintainance_margin(tranche):
+  return abs(tranche.tranche_parameters.n_pos_value) * tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction # Maintenance margin is a positive requirement; direction is already encoded in n_pos_value
 
-def calculate_rel_maintainance_margin(params: TradeParameters):
+def calculate_rel_maintainance_margin(tranche):
   #only useful during the trade, because margin changes and rel_maintainance_margin may no longer equal MMR
-  return params.maintainance_margin / abs(params.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
+  return tranche.tranche_parameters.maintainance_margin / abs(tranche.tranche_parameters.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
-def p_liq_exchange_forced(params: TradeParameters, entry):
-  return entry.price * (1 - params.maintainance_margin)
+def p_liq_exchange_forced(tranche):
+  return entry.price * (1 - tranche.tranche_parameters.maintainance_margin)
 
 
 #Strategy Feedback
-def calculate_tp_active(trade, entry):
+def calculate_tp_active(trade, tranche):
   if trade.tp_targets[0].price <= 0:
     return False
-  if trade.params.dirsign > 0:
+  if trade.tranche.tranche_parameters.dirsign > 0:
     return trade.tp_targets[0].price > entry.price
-  if trade.params.dirsign < 0:
+  if trade.tranche.tranche_parameters.dirsign < 0:
     return trade.tp_targets[0].price < entry.price
   return False
 
@@ -312,23 +315,23 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 #management-dependent calulations (here: simplicity biased)
 
 #conservatively hardcoded liq buffer to skip API-task
-def match_liquidation_price_to_SL(params: TradeParameters, entry):
-    return max(entry.price - params.liq_delta_to_SL_delta_ratio * params.sl_delta * params.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
+def match_liquidation_price_to_SL(tranche):
+    return max(entry.price - tranche.tranche_parameters.liq_delta_to_SL_delta_ratio * tranche.tranche_parameters.sl_delta * tranche.tranche_parameters.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
 
-#def match_lvg_to_liquidation_price(params: TradeParameters):
-#  return 1 / (1 + params.maintainance_margin_rate - params.p_liquidation * (1 + params.maintainance_margin_rate) / params.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
+#def match_lvg_to_liquidation_price(tranche.tranche_parameters: TradeParameters):
+#  return 1 / (1 + tranche.tranche_parameters.maintainance_margin_rate - tranche.tranche_parameters.p_liquidation * (1 + tranche.tranche_parameters.maintainance_margin_rate) / tranche.tranche_parameters.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
 
-def find_max_margin(params):
-   return 0.9 * params.max_margin #forces over securing margin, to avoid margin calls and forced liquidation
-def check_initial_margin(params: TradeParameters):
-  max_margin = max(params.max_margin, 1.0)
-  if params.initial_margin > max_margin:
+def find_max_margin(tranche):
+   return 0.9 * tranche.tranche_parameters.max_margin #forces over securing margin, to avoid margin calls and forced liquidation
+def check_initial_margin(tranche):
+  max_margin = max(tranche.tranche_parameters.max_margin, 1.0)
+  if tranche.tranche_parameters.initial_margin > max_margin:
     print(f"margin-demand too high. Reducing risk to fit max_margin={max_margin}")
-    risk = max_margin * params.rel_risk * params.lvg
-    return risk, calculate_initial_margin(params)
+    risk = max_margin * tranche.tranche_parameters.rel_risk * tranche.tranche_parameters.lvg
+    return risk, calculate_initial_margin(tranche)
   else:
-    risk = params.risk
-    initial_margin = params.initial_margin
+    risk = tranche.tranche_parameters.risk
+    initial_margin = tranche.tranche_parameters.initial_margin
     return risk, initial_margin
   
 def check_rrr(rrr):
@@ -337,18 +340,18 @@ def check_rrr(rrr):
 
 #safety calculus
 #evaluating trading setups
-def evaluate_trade(params: TradeParameters, entry):
-  rel_asset_gain_at_TP = params.TP_delta / entry.price
-  rrr = params.TP_delta / params.sl_delta
-  potential_profit = params.risk * rrr
-  equity = calculate_equity(params)
+def evaluate_trade(tranche.tranche_parameters: TradeParameters, entry):
+  rel_asset_gain_at_TP = tranche.tranche_parameters.TP_delta / entry.price
+  rrr = tranche.tranche_parameters.TP_delta / tranche.tranche_parameters.sl_delta
+  potential_profit = tranche.tranche_parameters.risk * rrr
+  equity = calculate_equity(tranche.tranche_parameters)
   return rel_asset_gain_at_TP, rrr, potential_profit, equity
 
-def calulate_tranche_profit_at_price_p(params: TradeParameters, p, entry):
+def calulate_tranche_profit_at_price_p(tranche.tranche_parameters: TradeParameters, p, entry):
   if p >= entry.price:
-    return params.dirsign * abs(p - entry.price) / entry.price * abs(params.n_pos_value) #for long and short (pos value)
+    return tranche.tranche_parameters.dirsign * abs(p - entry.price) / entry.price * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
   else:
-    return -1 * params.dirsign * abs(p - entry.price) / entry.price * abs(params.n_pos_value) #for long and short (pos value)
+    return -1 * tranche.tranche_parameters.dirsign * abs(p - entry.price) / entry.price * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
 
 def update_asset_price(trade):
   for tranche in trade:
@@ -385,8 +388,8 @@ def calculate_avg_entry_price(trade):
   return avg_entry_price
 
 
-def calculate_equity(params):
-  return params.initial_margin - params.loss
+def calculate_equity(tranche.tranche_parameters):
+  return tranche.tranche_parameters.initial_margin - tranche.tranche_parameters.loss
 
 
 def debug_calculate_all(**overrides):
@@ -404,9 +407,9 @@ def debug_calculate_all(**overrides):
   }
   defaults.update(overrides)
 
-  #takes given params with default values as Fallback (in parantheses)
+  #takes given tranche.tranche_parameters with default values as Fallback (in parantheses)
   #tp, entry to be added!!!
-  params = TradeParameters(
+  tranche.tranche_parameters = TradeParameters(
       liq_delta_to_SL_delta_ratio=float(defaults.get("liq_delta_to_SL_delta_ratio", 4.0)),
       risk=float(defaults.get("risk", 10.0)),
       maintainance_margin_rate=float(defaults.get("maintainance_margin_rate", 0.02)),
@@ -415,7 +418,7 @@ def debug_calculate_all(**overrides):
       max_lvg=float(defaults.get("max_lvg", 10.0)),
       max_margin=float(defaults.get("max_margin", 100.0)),
   )
-  trade = Trade(parameters=params)
+  trade = Trade(parameters=tranche.tranche_parameters)
   return calculate_all(trade)
 
 #for debugging run this function with Debugger till Breakpoint:

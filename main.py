@@ -18,8 +18,8 @@ def main():
     st.title("Too_Risky - Crypto live lvg and liquidation manager")
     st.text("Opimized for execution speed.")
 
-    params = streamlit_visualization.get_trade_parameters()
-    trade = Trade(parameters=params)
+    tranche.tranche_parameters = streamlit_visualization.get_trade_parameters()
+    trade = Trade(parameters=tranche.tranche_parameters)
     trade = calculate_all(trade)
     trade = streamlit_visualization.render_trade_controls(trade)
     trade = calculate_all(trade)
