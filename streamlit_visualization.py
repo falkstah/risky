@@ -56,12 +56,59 @@ def get_trade_parameters():
 
     trade_parameters = Trade_Parameters(
         liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
-        total_risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
+        total_risk=float(st.number_input("total risk: ", value = 10, min_value = 0, step = 1)),
         maintainance_margin_rate=float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001)),
         maintainance_deduction=float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001)),
-        total_max_lvg =float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
-        total_max_margin =float(st.number_input("max_margin: ", value = 100.0, min_value = 1.0, step = 1.0)),
-        p_SL=get_SL()
+        total_max_lvg =float(st.number_input("total max leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
+        total_max_margin =float(st.number_input("total max margin: ", value = 100.0, min_value = 1.0, step = 1.0)),
+        p_SL = get_SL(),
+
+        trailing_SL_percent = st.number_input(
+            "Trailing SL (%):",
+            value=st.session_state.trailing_SL_percent,
+            min_value=0.0,
+            step=0.1,
+            key="input_trailing_SL_percent",
+        ),
+
+        pull_SL = st.number_input(
+            "Pull SL Preis:",
+            value=st.session_state.pull_SL,
+            min_value=0.0,
+            step=0.01,
+            key="input_pull_SL",
+        ),
+
+        current_asset_price = st.number_input(
+            "Aktueller Asset-Preis:",
+            value=st.session_state.current_asset_price,
+            min_value=0.0,
+            step=0.01,
+            key="input_current_price",
+        ),
+
+        order_type = st.selectbox(
+            "Order Type:",
+            ["single limit", "single market", "single post only", "k1m6a box"],
+            index=["single limit", "single market", "single post only", "k1m6a box"].index(st.session_state.order_type),
+            key="input_order_type",
+        ),
+
+        buffer_SL = st.number_input(
+            "Buffer SL Preis:",
+            value=st.session_state.buffer_SL,
+            min_value=0.0,
+            step=0.01,
+            key="input_buffer_SL",
+        ),
+        
+        current_sl_price = st.number_input(
+            "Aktueller SL Preis:",
+            value= 0.0,
+            min_value=0.0,
+            step=0.01,
+            key="input_current_sl_price",
+        )
     )
 
     return trade_parameters
@@ -106,176 +153,101 @@ def fast_order_table(trade: Trade):
 
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-
-def render_trade_controls(trade: Trade):
+def render_ladders(trade, tranche):
     init_trade_inputs()
-
-    #Initializing input lists in st:
-    if "entry_levels" not in st.session_state:
-            st.session_state.entry_levels = [{"price": 0.01, "position_share": 100.0}]
-    if "tp_targets" not in st.session_state:
-            st.session_state.tp_targets = [{"price": 0.01, "close_percent": 50.0, "triggered": False}]
-
+    
     with st.container(border=True):
-        st.subheader("🎯 Trade Ziele & Trailing SL")
+        st.subheader("🎯 Entries & TPs")
+        render_ladder_entries(trade, tranche)
+        render_ladder_TPs(trade)
+    return trade.tranches
 
-        entry_col1, entry_col2 = st.columns(2)
-        with entry_col1:
-            if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
-                add_entry_target()
-        with entry_col2:
-            if st.button("Entry entfernen", key="remove_entry_button"):
-                remove_entry_target()
+def render_ladder_entries(trade, tranche):
+    entry_col1, entry_col2 = st.columns(2)
+    with entry_col1:
+        if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
+            add_entry_target()
+    with entry_col2:
+        if st.button("Entry entfernen", key="remove_entry_button"):
+            remove_entry_target()
 
-        tp_col1, tp_col2 = st.columns(2)
-        with tp_col1:
-            if st.button("Weitere TP hinzufügen", key="add_tp_button"):
-                add_tp_target()
-        with tp_col2:
-            if st.button("TP entfernen", key="remove_tp_button"):
-                remove_tp_target()
-
-  
-        for index, tranche in enumerate(trade.tranches):
-            price_key = f"entry_price_{index}"
-            share_key = f"position_share_{index}"
+    for index, tranche in enumerate(trade.tranches):
+        price_key = f"entry_price_{index}"
+        share_key = f"position_share_{index}"
+        
+        # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
+        if price_key not in st.session_state or st.session_state[price_key] < 0.01:
+            st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
             
-            # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
-            if price_key not in st.session_state or st.session_state[price_key] < 0.01:
-                st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
-                
-            if share_key not in st.session_state or st.session_state[share_key] < 0.01:
-                st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
+        if share_key not in st.session_state or st.session_state[share_key] < 0.01:
+            st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
-            # 2. Widgets über den Key steuern
-            st.session_state[price_key] = st.number_input(
-                f"Tranche {index + 1} Entry Preis:",
-                min_value=0.01,
-                step=0.01,
-                key=price_key
-            )
-            
-            st.session_state[share_key] = st.number_input(
-                f"Tranche {index + 1} Share:",
-                min_value=0.01,
-                step=0.01,
-                key=share_key
-            )
-            
-            # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
-            tranche.entry_level.price = st.session_state[price_key]
-            tranche.entry_level.position_share = st.session_state[share_key]
-
-        tp_targets: list[Take_Profit_Target] = []
-        for index, target in enumerate(st.session_state.tp_targets):
-            price_key = f"tp_price_{index}"
-            pct_key = f"_close_percent_{index}"
-            price = st.number_input(
-                f"TP {index + 1} Preis:",
-                value=target["price"],
-                min_value=0.01,
-                step=0.01,
-                key=price_key,
-            )
-
-            close_percent = st.number_input(
-                f"TP {index + 1} Schließung (%):",
-                value=target["close_percent"],
-                min_value=0.0,
-                max_value=100.0,
-                step=1.0,
-                key=pct_key,
-            )
-            st.session_state.tp_targets[index] = {"price": price, "close_percent": close_percent}
-            tp_targets.append(Take_Profit_Target(price=price, close_percent= close_percent))
-
-        trailing_SL_percent = st.number_input(
-            "Trailing SL (%):",
-            value=st.session_state.trailing_SL_percent,
-            min_value=0.0,
-            step=0.1,
-            key="input_trailing_SL_percent",
-        )
-        st.session_state.trailing_SL_percent = float(trailing_SL_percent)
-        pull_SL = st.number_input(
-            "Pull SL Preis:",
-            value=st.session_state.pull_SL,
-            min_value=0.0,
+        # 2. Widgets über den Key steuern
+        st.session_state[price_key] = st.number_input(
+            f"Tranche {index + 1} Entry Preis:",
+            min_value=0.01,
             step=0.01,
-            key="input_pull_SL",
+            key=price_key
         )
-        st.session_state.pull_SL = float(pull_SL)
-        current_price = st.number_input(
-            "Aktueller Asset-Preis:",
-            value=st.session_state.current_price,
-            min_value=0.0,
+        
+        st.session_state[share_key] = st.number_input(
+            f"Tranche {index + 1} Share:",
+            min_value=0.01,
             step=0.01,
-            key="input_current_price",
+            key=share_key
         )
-        st.session_state.current_price = float(current_price)
-        order_type = st.selectbox(
-            "Order Type:",
-            ["single limit", "single market", "single post only", "k1m6a box"],
-            index=["single limit", "single market", "single post only", "k1m6a box"].index(st.session_state.order_type),
-            key="input_order_type",
-        )
-        buffer_SL = st.number_input(
-            "Buffer SL Preis:",
-            value=st.session_state.buffer_SL,
-            min_value=0.0,
+        
+        # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
+        tranche.entry_level.price = st.session_state[price_key]
+        tranche.entry_level.position_share = st.session_state[share_key]
+
+    #visualize
+    if trade.tranches.entry_level:
+        st.markdown("**Entry Levels:**")
+        for tranche in trade.tranches:
+            st.write(f"- Entry Level bei {tranche.entry_level.price} mit {tranche.entry_level.position_share}% Positionsanteil")
+
+    return trade.tranches
+
+def render_ladder_TPs(trade):
+    tp_col1, tp_col2 = st.columns(2)
+    with tp_col1:
+        if st.button("Weitere TP hinzufügen", key="add_tp_button"):
+            add_tp_target()
+    with tp_col2:
+        if st.button("TP entfernen", key="remove_tp_button"):
+            remove_tp_target()
+
+    tp_targets: list[Take_Profit_Target] = []
+    for index, target in enumerate(st.session_state.tp_targets):
+        price_key = f"tp_price_{index}"
+        pct_key = f"_close_percent_{index}"
+        price = st.number_input(
+            f"TP {index + 1} Preis:",
+            value=target["price"],
+            min_value=0.01,
             step=0.01,
-            key="input_buffer_SL",
+            key=price_key,
         )
-        st.session_state.buffer_SL = float(buffer_SL)
-        current_sl_price = st.number_input(
-            "Aktueller SL Preis:",
-            value=trade.trade_parameters.p_SL,
+
+        close_percent = st.number_input(
+            f"TP {index + 1} Schließung (%):",
+            value=target["close_percent"],
             min_value=0.0,
-            step=0.01,
-            key="input_current_sl_price",
+            max_value=100.0,
+            step=1.0,
+            key=pct_key,
         )
+        st.session_state.tp_targets[index] = {"price": price, "close_percent": close_percent}
+        tp_targets.append(Take_Profit_Target(price=price, close_percent= close_percent))
 
-        if st.button("Calculate TP1 close_perecnt for buffer_SL", key="calc_buffer_tp1"):
-            try:
-                st.session_state.buffer_SL_close_pct = trade.tranches[0].tp_target.close_percent
-            except Exception as exc:
-                st.error(f"Berechnung fehlgeschlagen: {exc}")
+    #visualize
+    if trade.tranches.tp_target:
+        st.markdown("**Entry Levels:**")
+        for tranche in trade.tranches:
+            st.write(f"- Entry Level bei {tranche.tp_target.price} mit {tranche.tp_target.close_percent}% Positionsanteil")
 
-        trade.tranches.entry_levels = st.session_state.entry_levels
-        trade.tranches.tp_targets = tp_targets
-        trade.trade_parameters.current_asset_price = st.session_state.current_asset_price
-        trade.trade_parameters.buffer_SL = st.session_state.buffer_SL
-        trade.trade_parameters.pull_SL = st.session_state.pull_SL
-        trade.trade_parameters.order_type = st.session_state.order_type
-        trade.trade_parameters.trailing_SL_percent = st.session_state.trailing_SL_percent
-        trade.trade_parameters.trailing_sl_enabled = st.session_state.trailing_SL_percent > 0.0
-        trade.trade_parameters.current_sl_price = float(current_sl_price)
-
-        if st.session_state.buffer_SL_close_pct:
-            st.info(f"Empfohlener TP1 Close: {round(st.session_state.buffer_SL_close_pct, 2)} %")
-
-        trade = update_tp_targets_triggered(trade)
-
-        if trade.tranches.entry_levels:
-            st.markdown("**Entry Levels:**")
-            for target in trade.tranches.entry_levels:
-                st.write(f"- Entry Level bei {target.price} mit {target.position_share}% Margin")
-
-        if tp_targets:
-            st.markdown("**Aktuelle TP Targets:**")
-            for target in tp_targets:
-                tp_profit = 0.0
-                if target.price and trade.trade_parameters.n_pos_value:
-                    profit = (trade.tranches[0].dirsign * (target.price - target.price) / target.price) * abs(trade.tranches[0].tranche_parameters.n_pos_value)
-                    tp_profit = target.close_percent / 100.0 * profit
-                status = "✅ Erreicht" if target.triggered else "– offen"
-                st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung ({status})")
-                st.caption(f"Partial profit: ${round(tp_profit, 2)}")
-
-        if trade.trade_parameters.trailing_sl_enabled:
-            st.info(f"Trailing SL ist aktiviert: {trade.trade_parameters.trailing_SL_percent}%")
-
-    return trade
+    return trade.tranches
 
 
 def overview_table(trade: Trade):

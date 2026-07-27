@@ -8,7 +8,7 @@ from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_P
 #import pandas_ta as ta
 
 #2. manage SL pulls and TPs for whole position
-def calculate_all(trade: Trade):
+def calculate_all(trade: Trade, tranche):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt tranche.tranche_parameters:
   sanitize_inputs(trade)
   sanitize_inputs(trade.trade_parameters)
