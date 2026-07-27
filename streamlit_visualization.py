@@ -317,15 +317,15 @@ def visualize_trade(trade: Trade):
     balken_unten = 0.0
 
     #ba top
-    if params.p_TP > 0:  # hence, tp exists
+    if trade.tp_targets[0].price > 0:  # hence, tp exists
       if params.dirsign > 0:  # long case
-        balken_oben = params.p_TP if params.tp_active else params.p_entry
+        balken_oben = trade.tp_targets[0].price if params.tp_active else trade.entry_levels[0].price
       elif params.dirsign < 0:  # short case
-        balken_oben = params.p_TP if params.tp_active else params.p_entry
+        balken_oben = trade.tp_targets[0].price if params.tp_active else trade.entry_levels[0].price
       else:
         balken_oben = params.p_liquidation
     else:
-        balken_oben = max(params.p_entry, params.p_liquidation)  # covers short and long case
+        balken_oben = max(trade.entry_levels[0].price, params.p_liquidation)  # covers short and long case
 
     # Daten fürs Chart zusammenbauen
     zone_data = pd.DataFrame({
@@ -334,12 +334,12 @@ def visualize_trade(trade: Trade):
         'Zone': ['Preisbereich']
     })
 
-    preise = [params.p_entry, params.p_SL, params.p_liquidation]
+    preise = [trade.entry_levels[0].price, params.p_SL, params.p_liquidation]
     labels = ['Entry', 'Stop Loss', 'Liquidation']
     typen = ['entry', 'sl', 'liq']
 
     if params.tp_active:
-        preise.append(params.p_TP)
+        preise.append(trade.tp_targets[0].price)
         labels.append('Take Profit')
         typen.append('tp')
 
