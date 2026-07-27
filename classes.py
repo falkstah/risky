@@ -9,7 +9,7 @@ class TakeProfitTarget:
 
 @dataclass
 class EntryLevel:
-    price: float = 1.0
+    price: float = 0.01
     position_share: float = 100.0
 
 @dataclass
