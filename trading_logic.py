@@ -121,7 +121,7 @@ def calculate_dynamic_state(trade: Trade, tranche):
   tranche.tranche_parameters.rel_maintainance_margin = calculate_rel_maintainance_margin(tranche)
   tranche.tranche_parameters.isolated_margin = tranche.tranche_parameters.max_margin
 
-  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(trade, tranche)
+  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(trade)
   return trade
 
 #margins
@@ -234,6 +234,7 @@ def calculate_max_lvg(trade, tranche):
 
 #can differ or long and short even for same sl_delta and liq distance, which is against Intuiton; not symmetrical!!! hat's no error
 def max_lvg_for_given_liquidation(trade, tranche):
+  entry = tranche.tranche_parameters.entry
   if tranche.tranche_parameters.current_direction == "long":
     lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction - tranche.tranche_parameters.p_liquidation / entry.price))  # = general p_liq formula solved for lvg; formula can get < 1
   elif tranche.tranche_parameters.current_direction == "short":
@@ -420,7 +421,8 @@ def debug_calculate_all(**overrides):
       max_lvg=float(defaults.get("max_lvg", 10.0)),
       max_margin=float(defaults.get("max_margin", 100.0)),
   )
-  tranche = Tranche(tranche_parameters=tranche.tranche_parameters)
+  tranche = Tranche(tranche_parameters = Tranche_Parameters)
+  trade = Trade()
   return calculate_all(trade)
 
 #for debugging run this function with Debugger till Breakpoint:

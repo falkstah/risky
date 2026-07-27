@@ -50,14 +50,18 @@ class Tranche_Parameters:
 class Tranche:
     #classes
     tranche_parameters: Tranche_Parameters
-    tp_tage: TakeProfitTarget
+    tp_target: TakeProfitTarget
     entry_level: EntryLevel
 
 @dataclass
 class TradeParameters:
-    #default value fields
+    #trade specific variables
+    total_max_lvg: float = 10.0
     total_risk: float = 0.0
-    total_max_margin = 0.0
+    total_max_margin: float  = 0.0
+    liq_delta_to_SL_delta_ratio: float = 4.0
+    maintainance_margin_rate: float = 0.02
+    maintainance_deduction: float = 0.00
     current_asset_price: float = 0.0
     buffer_SL: float = 0.0
     pull_SL: float = 0.0
@@ -73,10 +77,6 @@ class Trade:
     #classes
     trade_parameters: TradeParameters
     tranches: list[Tranche] = field(default_factory = list)
-
-    #trade-specific variables
-    liq_delta_to_sl_delta_ratio: float = 4.0
-    maintainance_margin_rate: float = 0.02
 
 
     
