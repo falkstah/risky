@@ -160,7 +160,7 @@ def render_trade_controls(trade: Trade):
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
             price_key = f"tp_price_{index}"
-            pct_key = f"tp_close_pct_{index}"
+            pct_key = f"_close_percent_{index}"
             price = st.number_input(
                 f"TP {index + 1} Preis:",
                 value=target["price"],
@@ -178,7 +178,7 @@ def render_trade_controls(trade: Trade):
                 key=pct_key,
             )
             st.session_state.tp_targets[index] = {"price": price, "close_percent": close_percent}
-            tp_targets.append(TakeProfitTarget(price=price, close_percent=close_percent))
+            tp_targets.append(TakeProfitTarget(price=price, close_percent= close_percent))
 
         trailing_SL_percent = st.number_input(
             "Trailing SL (%):",
