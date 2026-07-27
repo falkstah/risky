@@ -138,7 +138,7 @@ def render_trade_controls(trade: Trade):
         entry_levels: list[EntryLevel] = []
         for index, target in enumerate(st.session_state.entry_levels):
             price_key = f"entry_price_{index}"
-            pct_key = f"entry_margin_pct_{index}"
+            percent_key = f"position_share_{index}"
             price = st.number_input(
                 f"Entry Level {index + 1} Preis:",
                 value=target["price"],
@@ -147,12 +147,12 @@ def render_trade_controls(trade: Trade):
                 key=price_key,
             )
             position_share = st.number_input(
-                f"Entry Level {index + 1} Margin (%):",
+                f"Entry Level {index + 1} Position_share (%):",
                 value=target["position_share"],
                 min_value=0.0,
                 max_value= 100,  #eigtl. 0.9 * max_margin wegen buffer
                 step=1.0,
-                key=pct_key,
+                key= percent_key,
             )
             st.session_state.entry_levels[index] = {"price": price, "position_share": position_share}
             entry_levels.append(EntryLevel(price=price, position_share = position_share))
