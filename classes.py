@@ -4,7 +4,7 @@ from typing import Literal
 @dataclass
 class TakeProfitTarget:
     price: float = 0.01
-    close_percent: float = 100.0
+    close_percent: float = 50.0
     triggered: bool = False
 
 @dataclass
