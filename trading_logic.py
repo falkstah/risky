@@ -3,7 +3,7 @@ import math
 import numbers
 from dataclasses import fields
 import pandas as pd
-from classes import Trade, TradeParameters, Tranche, Tranche_Parameters, TakeProfitTarget, EntryLevel
+from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 #import ccxt
 #import pandas_ta as ta
 
@@ -30,8 +30,8 @@ def sanitize_inputs(item):
   if isinstance(item, Trade):
       field_names = [field.name for field in fields(Trade)]
       skip_fields = {"parameters", "entry_levels", "tp_targets", "order_type", "current_direction", "tp_active"}
-  elif isinstance(item, TradeParameters):
-      field_names = [field.name for field in fields(TradeParameters)]
+  elif isinstance(item, Trade_Parameters):
+      field_names = [field.name for field in fields(Trade_Parameters)]
       skip_fields = {"current_direction", "tp_active"}
   else:
       field_names = getattr(item, "__dataclass_fields__", {})

@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
 
-from classes import Trade
+from classes import Trade, TradeParameters, Tranche, Tranche_Parameters, TakeProfitTarget, Entry_Level
 from trading_logic import calculate_all
 import streamlit_visualization
 

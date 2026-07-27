@@ -2,14 +2,14 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 @dataclass
-class TakeProfitTarget:
+class Take_Profit_Target:
     price: float = 0.01
     profit: float = 0.0
     close_percent: float = 50.0
     triggered: bool = False
 
 @dataclass
-class EntryLevel:
+class Entry_Level:
     price: float = 0.01
     position_share: float = 100.0
 
@@ -50,11 +50,11 @@ class Tranche_Parameters:
 class Tranche:
     #classes
     tranche_parameters: Tranche_Parameters
-    tp_target: TakeProfitTarget
-    entry_level: EntryLevel
+    tp_target: Take_Profit_Target
+    entry_level: Entry_Level
 
 @dataclass
-class TradeParameters:
+class Trade_Parameters:
     #trade specific variables
     total_max_lvg: float = 10.0
     total_risk: float = 0.0
@@ -75,7 +75,7 @@ class TradeParameters:
 @dataclass
 class Trade:
     #classes
-    trade_parameters: TradeParameters
+    trade_parameters: Trade_Parameters
     tranches: list[Tranche] = field(default_factory = list)
 
 
