@@ -169,7 +169,7 @@ def render_trade_controls(trade: Trade):
                 key=price_key,
             )
 
-            close_perecent = st.number_input(
+            close_percent = st.number_input(
                 f"TP {index + 1} Schließung (%):",
                 value=target["close_percent"],
                 min_value=0.0,

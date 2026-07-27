@@ -111,7 +111,7 @@ def calculate_exit_and_tp_structure(trade: Trade, entry):
 
 def calculate_dynamic_state(trade: Trade, entry):
   params = trade.parameters
-  params.lvg, params.risk = find_max_lvg(params)
+  params.lvg, params.risk = find_max_lvg(params, entry)
   params.max_margin = find_max_margin(params)
   params.initial_margin = calculate_initial_margin(params)
   params.risk, params.initial_margin = check_initial_margin(params)
@@ -229,17 +229,17 @@ def calculate_max_lvg(params: TradeParameters):
   return math.floor(1 / params.maintainance_margin_rate)
 
 #can differ or long and short even for same sl_delta and liq distance, which is against Intuiton; not symmetrical!!! hat's no error
-def max_lvg_for_given_liquidation(params: TradeParameters):
+def max_lvg_for_given_liquidation(params: TradeParameters, entry):
   if params.current_direction == "long":
-    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / params.p_entry))  # = general p_liq formula solved for lvg; formula can get < 1
+    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction - params.p_liquidation / entry.price))  # = general p_liq formula solved for lvg; formula can get < 1
   elif params.current_direction == "short":
-    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction -  params.p_entry / params.p_liquidation))
+    lvg = math.floor(1 / (1 + params.maintainance_margin_rate + params.maintainance_deduction -  entry.price / params.p_liquidation))
   else: lvg = 0
   return lvg 
 
-def find_max_lvg(params: TradeParameters):
+def find_max_lvg(params: TradeParameters, entry):
   max_allowed_lvg = calculate_max_lvg(params)
-  max_lvg_liq = max_lvg_for_given_liquidation(params)
+  max_lvg_liq = max_lvg_for_given_liquidation(params, entry)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen. But lvg >= 1 with max:
   lvg = math.floor(min(max_allowed_lvg, max_lvg_liq)) #floor guarantees that lvg does not force early liq
   return check_lvg(lvg, params)
@@ -276,13 +276,13 @@ def p_liq_exchange_forced(params: TradeParameters, entry):
 
 
 #Strategy Feedback
-def calculate_tp_active(trade):
+def calculate_tp_active(trade, entry):
   if trade.tp_targets[0].price <= 0:
     return False
   if trade.params.dirsign > 0:
-    return trade.tp_targets[0].price > trade.entry_levels[0].price
+    return trade.tp_targets[0].price > entry.price
   if trade.params.dirsign < 0:
-    return trade.tp_targets[0].price < trade.entry_levels[0].price
+    return trade.tp_targets[0].price < entry.price
   return False
 
 
