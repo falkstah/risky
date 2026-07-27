@@ -82,27 +82,27 @@ def current_direction_label(current_direction):
 
 
 def update_tp_targets_triggered(trade: Trade):
-    if not trade.tranches.tranche_parameters.current_direction:
+    if not trade.tranches[0].tranche_parameters.current_direction:
         return trade
-
-    for target in trade.tp_targets:
-        if trade.parameters.current_direction == "long":
-            target.triggered = trade.current_asset_price >= target.price
-        elif trade.parameters.current_direction == "short":
-            target.triggered = trade.current_asset_price <= target.price
+    
+    for tranche in trade.tranches:
+        if tranche.tranche_parameters.current_direction == "long":
+            tranche.tp_target.triggered = trade.trade_parameters.current_asset_price >= trade.trade_parameters.current_asset_price    #boolish equation
+        elif tranche.tranche_parameters.current_direction == "short":
+            tranche.tp_target.triggered = trade.trade_parameters.current_asset_price <= trade.trade_parameters.current_asset_price
     return trade
 
 
 def fast_order_table(trade: Trade):
-    params = trade.trade_parameters
+    tranche1 = trade.tranches[0]
     with st.container(border=True):
         st.subheader("📊 Fast Order Table")
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("lvg", f"{tranche.tranche_parameters.lvg} x")
-        col2.metric("isolated margin", f"{round(tranche.tranche_parameters.isolated_margin, 2)} $")
-        col3.metric("p_liquidation", f"{round(tranche.tranche_parameters.p_liquidation, 2)} $")
-        col4.metric("n_pos_value", f"{round(tranche.tranche_parameters.n_pos_value, 2)} $")
+        col1.metric("lvg", f"{tranche1.tranche_parameters.lvg} x")
+        col2.metric("isolated margin", f"{round(tranche1.tranche_parameters.isolated_margin, 2)} $")
+        col3.metric("p_liquidation", f"{round(tranche1.tranche_parameters.p_liquidation, 2)} $")
+        col4.metric("n_pos_value", f"{round(tranche1.tranche_parameters.n_pos_value, 2)} $")
 
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
@@ -313,74 +313,74 @@ def overview_table(trade: Trade):
       col4.metric("Wartungsmarge", f"{round(tranche1.tranche_parameters.maintainance_margin, 2)} €")
       col5.metric("rel asset gain at TP", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
 
-  if trade.tranche1.tp_target:
+  if tranche1.tp_target:
       with st.container(border=True):
           st.subheader("🎯 TP-Status")
-          for target in trade.tranche1.tp_targets:
-              status = "✅ Erreicht" if target.triggered else "– offen"
-              st.write(f"- TP bei {target.price} | {target.close_percent}% Schließung | {status}")
+          for tranche in trade.tranches:
+              status = "✅ Erreicht" if tranche.tp_target.triggered else "- offen"
+              st.write(f"- TP bei {tranche.tp_target.price} | {tranche.tp_target.close_percent}% Schließung | {status}")
 
   st.divider()
 
 
 def visualize_trade(trade: Trade):
-  tranche.tranche_parameters = trade.parameters
-  st.title("Trade Visualizer")
-  st.write(f"Direction: {tranche.tranche_parameters.current_direction.capitalize()}" if tranche.tranche_parameters.current_direction else "Direction unknown")
+    tranche1 = trade.tranches[0]
+    st.title("Trade Visualizer")
+    st.write(f"Direction: {tranche1.tranche_parameters.current_direction.capitalize()}" if tranche1.tranche_parameters.current_direction else "Direction unknown")
 
-  # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
-  try:
-    balken_unten = 0.0
+    # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
+    try:
+        balken_unten = 0.0
 
-    #ba top
-    if trade.tp_targets[0].price > 0:  # hence, tp exists
-      if tranche.tranche_parameters.dirsign > 0:  # long case
-        balken_oben = trade.tp_targets[0].price if tranche.tranche_parameters.tp_active else trade.entry_levels[0].price
-      elif tranche.tranche_parameters.dirsign < 0:  # short case
-        balken_oben = trade.tp_targets[0].price if tranche.tranche_parameters.tp_active else trade.entry_levels[0].price
-      else:
-        balken_oben = tranche.tranche_parameters.p_liquidation
-    else:
-        balken_oben = max(trade.entry_levels[0].price, tranche.tranche_parameters.p_liquidation)  # covers short and long case
+        #ba top
+        if tranche1.tp_target.price > 0:  # hence, tp exists
+            if tranche1.tranche_parameters.dirsign > 0:  # long case
+                balken_oben = tranche1.tp_target.price if tranche1.tranche_parameters.tp_active else tranche1.entry_level.price
+            elif tranche1.tranche_parameters.dirsign < 0:  # short case
+                balken_oben = tranche1.tp_target.price if tranche1.tranche_parameters.tp_active else tranche1.entry_level.price
+            else:
+                balken_oben = tranche1.tranche_parameters.p_liquidation
+        else:
+            balken_oben = max(tranche1.entry_level.price, tranche1.tranche_parameters.p_liquidation)  # covers short and long case
 
-    # Daten fürs Chart zusammenbauen
-    zone_data = pd.DataFrame({
-        'y_min': [balken_unten],
-        'y_max': [balken_oben],
-        'Zone': ['Preisbereich']
-    })
+        # Daten fürs Chart zusammenbauen
+        zone_data = pd.DataFrame({
+            'y_min': [balken_unten],
+            'y_max': [balken_oben],
+            'Zone': ['Preisbereich']
+        })
 
-    preise = [trade.entry_levels[0].price, tranche.tranche_parameters.p_SL, tranche.tranche_parameters.p_liquidation]
-    labels = ['Entry', 'Stop Loss', 'Liquidation']
-    typen = ['entry', 'sl', 'liq']
+        preise = [tranche1.entry_level.price, tranche1.tranche_parameters.p_SL, tranche1.tranche_parameters.p_liquidation]
+        labels = ['Entry', 'Stop Loss', 'Liquidation']
+        typen = ['entry', 'sl', 'liq']
 
-    if tranche.tranche_parameters.tp_active:
-        preise.append(trade.tp_targets[0].price)
-        labels.append('Take Profit')
-        typen.append('tp')
+        if tranche1.tranche_parameters.tp_active:
+            preise.append(tranche1.tp_target.price)
+            labels.append('Take Profit')
+            typen.append('tp')
 
-    lines_data = pd.DataFrame({
-        'Preis': preise,
-        'Label': labels,
-        'Typ': typen
-    })
+        lines_data = pd.DataFrame({
+            'Preis': preise,
+            'Label': labels,
+            'Typ': typen
+        })
 
-    # Chart zeichnen
-    base = alt.Chart(zone_data).encode(x=alt.X('Zone', title=None, axis=None))
-    area = base.mark_rect(opacity=0.2, color='#3b82f6').encode(
-        y=alt.Y('y_min', title='Preis in USDT', scale=alt.Scale(domain=[0, balken_oben * 1.05])),
-        y2='y_max'
-    )
-    rule = alt.Chart(lines_data).mark_rule(strokeWidth=2).encode(
-        y=alt.Y('Preis'),
-        color=alt.Color('Typ', scale={'domain': ['entry', 'sl', 'liq', 'tp'], 'range': ['#10b981', '#ef4444', '#8b5cf6', '#3b82f6']}, legend=None),
-        tooltip=['Label', 'Preis']
-    )
-    text = rule.mark_text(align='left', dx=5, dy=-5).encode(text='Label')
+        # Chart zeichnen
+        base = alt.Chart(zone_data).encode(x=alt.X('Zone', title=None, axis=None))
+        area = base.mark_rect(opacity=0.2, color='#3b82f6').encode(
+            y=alt.Y('y_min', title='Preis in USDT', scale=alt.Scale(domain=[0, balken_oben * 1.05])),
+            y2='y_max'
+        )
+        rule = alt.Chart(lines_data).mark_rule(strokeWidth=2).encode(
+            y=alt.Y('Preis'),
+            color=alt.Color('Typ', scale={'domain': ['entry', 'sl', 'liq', 'tp'], 'range': ['#10b981', '#ef4444', '#8b5cf6', '#3b82f6']}, legend=None),
+            tooltip=['Label', 'Preis']
+        )
+        text = rule.mark_text(align='left', dx=5, dy=-5).encode(text='Label')
 
-    chart = alt.layer(area, rule, text).properties(height=500, width=200)
+        chart = alt.layer(area, rule, text).properties(height=500, width=200)
 
-    # In Streamlit anzeigen
-    st.altair_chart(chart, use_container_width=True)
-  except Exception as exc:
-    st.warning(f"Error in visualizing trade: {exc}")
+        # In Streamlit anzeigen
+        st.altair_chart(chart, use_container_width=True)
+    except Exception as exc:
+        st.warning(f"Error in visualizing trade: {exc}")
