@@ -64,3 +64,4 @@ class Trade:
     trailing_SL_percent: float = 0.0
     trailing_sl_enabled: bool = False
     current_sl_price: float = 0.0
+    p_SL: float = 0.0

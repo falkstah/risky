@@ -110,6 +110,12 @@ def fast_order_table(trade: Trade):
 def render_trade_controls(trade: Trade):
     init_trade_inputs()
 
+    #managing input lists in st:
+    if "entry_levels" not in st.session_state:
+            st.session_state.entry_levels = [{"price": 0.0, "position_share": 1.0}]
+    if "tp_targets" not in st.session_state:
+            st.session_state.tp_targets = [{"price": 0.0, "close_percent": 1.0, "triggered": False}]
+
     with st.container(border=True):
         st.subheader("🎯 Trade Ziele & Trailing SL")
 
