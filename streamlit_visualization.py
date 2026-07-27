@@ -142,17 +142,17 @@ def render_trade_controls(trade: Trade):
             )
             position_share = st.number_input(
                 f"Entry Level {index + 1} Margin (%):",
-                value=target["margin_percent"],
+                value=target["position_share"],
                 min_value=0.0,
                 max_value= 100,  #eigtl. 0.9 * max_margin wegen buffer
                 step=1.0,
                 key=pct_key,
             )
-            st.session_state.entry_levels[index] = {"price": price, "margin_percent": margin_pct}
-            entry_levels.append(EntryLevel(price=price, margin_percent=margin_pct))
+            st.session_state.entry_levels[index] = {"price": price, "margin_percent": position_share}
+            entry_levels.append(EntryLevel(price=price, position_share=position_share))
 
         if st.session_state.tp_targets:
-            st.session_state.tp_targets[0]["price"] = st.session_state.get("p_TP", trade.parameters.p_TP)
+            st.session_state.tp_targets[0]["price"] = st.session_state.get("p_TP", trade.entr_levels.)
 
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
@@ -249,14 +249,14 @@ def render_trade_controls(trade: Trade):
         if entry_levels:
             st.markdown("**Entry Levels:**")
             for target in entry_levels:
-                st.write(f"- Entry Level bei {target.price} mit {target.margin_percent}% Margin")
+                st.write(f"- Entry Level bei {target.price} mit {target.position_share}% Margin")
 
         if tp_targets:
             st.markdown("**Aktuelle TP Targets:**")
             for target in tp_targets:
                 tp_profit = 0.0
-                if trade.parameters.p_entry and trade.parameters.n_pos_value:
-                    profit = (trade.parameters.dirsign * (target.price - trade.parameters.p_entry) / trade.parameters.p_entry) * abs(trade.parameters.n_pos_value)
+                if entry.price and trade.parameters.n_pos_value:
+                    profit = (trade.parameters.dirsign * (target.price - entry.price) / entry.price) * abs(trade.parameters.n_pos_value)
                     tp_profit = target.close_percent / 100.0 * profit
                 status = "✅ Erreicht" if target.triggered else "– offen"
                 st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung ({status})")

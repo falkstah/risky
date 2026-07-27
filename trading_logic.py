@@ -90,26 +90,26 @@ def calculate_initial_risk(trade: Trade, entry):
   except (TypeError, ValueError):
       raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
-  params.dirsign = calculate_dirsign(params)
-  params.sl_delta = calculate_SL_delta(params)
+  params.dirsign = calculate_dirsign(params, entry)
+  params.sl_delta = calculate_SL_delta(params, entry)
   if params.sl_delta == 0:
       raise ValueError("SL_delta = 0")
 
   params.current_direction = get_trade_direction(params)
-  params.tp_active = calculate_tp_active(params)
-  params.rel_risk = calculate_rel_risk(params)
+  params.tp_active = calculate_tp_active(params, entry)
+  params.rel_risk = calculate_rel_risk(params, entry)
 
   return trade
 
 
-def calculate_exit_and_tp_structure(trade: Trade):
+def calculate_exit_and_tp_structure(trade: Trade, entry):
   params = trade.parameters
-  params.p_liquidation = match_liquidation_price_to_SL(params)
-  params.TP_delta = calculate_TP_delta(params)
+  params.p_liquidation = match_liquidation_price_to_SL(params, entry)
+  params.TP_delta = calculate_TP_delta(params, entry)
   return trade
 
 
-def calculate_dynamic_state(trade: Trade):
+def calculate_dynamic_state(trade: Trade, entry):
   params = trade.parameters
   params.lvg, params.risk = find_max_lvg(params)
   params.max_margin = find_max_margin(params)
@@ -121,7 +121,7 @@ def calculate_dynamic_state(trade: Trade):
   params.rel_maintainance_margin = calculate_rel_maintainance_margin(params)
   params.isolated_margin = params.max_margin
 
-  params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params)
+  params.rel_asset_gain_at_TP, params.rrr, params.potential_profit, params.equity = evaluate_trade(params, entry)
   return trade
 
 #margins
@@ -369,14 +369,13 @@ def debug_calculate_all(**overrides):
   defaults.update(overrides)
 
   #takes given params with default values as Fallback (in parantheses)
+  #tp, entry to be added!!!
   params = TradeParameters(
       liq_delta_to_SL_delta_ratio=float(defaults.get("liq_delta_to_SL_delta_ratio", 4.0)),
       risk=float(defaults.get("risk", 10.0)),
       maintainance_margin_rate=float(defaults.get("maintainance_margin_rate", 0.02)),
       maintainance_deduction=float(defaults.get("maintainance_deduction", 0.0)),
-      p_entry=float(defaults.get("p_entry", 10.0)),
       p_SL=float(defaults.get("p_SL", 11.0)),
-      p_TP=float(defaults.get("p_TP", 8.0)),
       max_lvg=float(defaults.get("max_lvg", 10.0)),
       max_margin=float(defaults.get("max_margin", 100.0)),
   )
