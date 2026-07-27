@@ -82,7 +82,7 @@ def current_direction_label(current_direction):
 
 
 def update_tp_targets_triggered(trade: Trade):
-    if not trade.parameters.current_direction:
+    if not trade.tranche.tranche_parameters.current_direction:
         return trade
 
     for target in trade.tp_targets:

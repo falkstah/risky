@@ -114,7 +114,7 @@ def calculate_dynamic_state(trade: Trade, tranche):
   tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = find_max_lvg(trade, tranche)
   tranche.tranche_parameters.max_margin = find_max_margin(tranche)
   tranche.tranche_parameters.initial_margin = calculate_initial_margin(trade, tranche)
-  tranche.tranche_parameters.risk, tranche.tranche_parameters.initial_margin = check_initial_margin(tranche)
+  tranche.tranche_parameters.risk, tranche.tranche_parameters.initial_margin = check_initial_margin(trade, tranche)
 
   tranche.tranche_parameters.n_pos_value = calculate_n_pos_value(trade, tranche)
   tranche.tranche_parameters.maintainance_margin = calculate_maintainance_margin(tranche)
@@ -264,7 +264,7 @@ def check_lvg(trade, tranche):
     #possibly risk has to be fitted
   return lvg, risk
 
-def reduce_risk(tranche):
+def reduce_risk(trade, tranche):
    return tranche.tranche_parameters.max_margin * tranche.tranche_parameters.max_lvg * tranche.tranche_parameters.rel_risk
 
 
@@ -278,11 +278,12 @@ def calculate_rel_maintainance_margin(tranche):
   return tranche.tranche_parameters.maintainance_margin / abs(tranche.tranche_parameters.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
 def p_liq_exchange_forced(tranche):
-  return entry.price * (1 - tranche.tranche_parameters.maintainance_margin)
+  return tranche.entry_level.price * (1 - tranche.tranche_parameters.maintainance_margin)
 
 
 #Strategy Feedback
 def calculate_tp_active(trade, tranche):
+  entry = tranche.tranche_parameters.entry
   if trade.tp_targets[0].price <= 0:
     return False
   if trade.tranche.tranche_parameters.dirsign > 0:
@@ -317,7 +318,7 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 #management-dependent calulations (here: simplicity biased)
 
 #conservatively hardcoded liq buffer to skip API-task
-def match_liquidation_price_to_SL(tranche):
+def match_liquidation_price_to_SL(trade, tranche):
     return max(tranche.tranche_parameters.price - tranche.tranche_parameters.liq_delta_to_SL_delta_ratio * tranche.tranche_parameters.sl_delta * tranche.tranche_parameters.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
 
 #def match_lvg_to_liquidation_price(tranche.tranche_parameters: TradeParameters):
@@ -325,7 +326,7 @@ def match_liquidation_price_to_SL(tranche):
 
 def find_max_margin(tranche):
    return 0.9 * tranche.tranche_parameters.max_margin #forces over securing margin, to avoid margin calls and forced liquidation
-def check_initial_margin(tranche):
+def check_initial_margin(trade, tranche):
   max_margin = max(tranche.tranche_parameters.max_margin, 1.0)
   if tranche.tranche_parameters.initial_margin > max_margin:
     print(f"margin-demand too high. Reducing risk to fit max_margin={max_margin}")
@@ -394,7 +395,7 @@ def calculate_avg_entry_price(trade):
 def calculate_equity(tranche):
   return tranche.tranche_parameters.initial_margin - tranche.tranche_parameters.loss
 
-
+'''
 def debug_calculate_all(**overrides):
   #Create a TradeParameters object with default inputs and run calculate_all for debugging.
   defaults = {
@@ -427,3 +428,5 @@ def debug_calculate_all(**overrides):
 
 #for debugging run this function with Debugger till Breakpoint:
 #debug_calculate_all()
+
+'''
