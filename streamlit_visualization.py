@@ -101,7 +101,7 @@ def get_trade_parameters():
             step=0.01,
             key="input_buffer_SL",
         ),
-        
+
         current_sl_price = st.number_input(
             "Aktueller SL Preis:",
             value= 0.0,
@@ -160,7 +160,7 @@ def render_ladders(trade, tranche):
         st.subheader("🎯 Entries & TPs")
         render_ladder_entries(trade, tranche)
         render_ladder_TPs(trade)
-    return trade.tranches
+    return trade
 
 def render_ladder_entries(trade, tranche):
     entry_col1, entry_col2 = st.columns(2)
