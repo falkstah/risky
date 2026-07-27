@@ -5,7 +5,7 @@ import altair as alt
 import pandas as pd
 
 #logic functions
-from classes import TradeParameters, Trade, EntryLevel, TakeProfitTarget
+from classes import Trade, TradeParameters, Tranche, Tranche_Parameters, TakeProfitTarget, EntryLevel
 from trading_logic import calculate_buffered_tp1_close_percent
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
@@ -82,7 +82,7 @@ def current_direction_label(current_direction):
 
 
 def update_tp_targets_triggered(trade: Trade):
-    if not trade.tranche.tranche_parameters.current_direction:
+    if not trade.tranches.tranche_parameters.current_direction:
         return trade
 
     for target in trade.tp_targets:
@@ -94,7 +94,7 @@ def update_tp_targets_triggered(trade: Trade):
 
 
 def fast_order_table(trade: Trade):
-    tranche.tranche_parameters = trade.parameters
+    params = trade.trade_parameters
     with st.container(border=True):
         st.subheader("📊 Fast Order Table")
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
@@ -236,7 +236,7 @@ def render_trade_controls(trade: Trade):
         st.session_state.buffer_SL = float(buffer_SL)
         current_sl_price = st.number_input(
             "Aktueller SL Preis:",
-            value=trade.parameters.p_SL,
+            value=trade.trade_parameters.p_SL,
             min_value=0.0,
             step=0.01,
             key="input_current_sl_price",
@@ -244,61 +244,61 @@ def render_trade_controls(trade: Trade):
 
         if st.button("Calculate TP1 close_perecnt for buffer_SL", key="calc_buffer_tp1"):
             try:
-                st.session_state.buffer_SL_close_pct = trade.tp_targets[0].close_percent
+                st.session_state.buffer_SL_close_pct = trade.tranches[0].tp_target.close_percent
             except Exception as exc:
                 st.error(f"Berechnung fehlgeschlagen: {exc}")
 
-        trade.entry_levels = st.session_state.entry_levels
-        trade.tp_targets = tp_targets
-        trade.current_asset_price = st.session_state.current_asset_price
-        trade.buffer_SL = st.session_state.buffer_SL
-        trade.pull_SL = st.session_state.pull_SL
-        trade.order_type = st.session_state.order_type
-        trade.trailing_SL_percent = st.session_state.trailing_SL_percent
-        trade.trailing_sl_enabled = st.session_state.trailing_SL_percent > 0.0
-        trade.current_sl_price = float(current_sl_price)
+        trade.tranches.entry_levels = st.session_state.entry_levels
+        trade.tranches.tp_targets = tp_targets
+        trade.trade_parameters.current_asset_price = st.session_state.current_asset_price
+        trade.trade_parameters.buffer_SL = st.session_state.buffer_SL
+        trade.trade_parameters.pull_SL = st.session_state.pull_SL
+        trade.trade_parameters.order_type = st.session_state.order_type
+        trade.trade_parameters.trailing_SL_percent = st.session_state.trailing_SL_percent
+        trade.trade_parameters.trailing_sl_enabled = st.session_state.trailing_SL_percent > 0.0
+        trade.trade_parameters.current_sl_price = float(current_sl_price)
 
         if st.session_state.buffer_SL_close_pct:
             st.info(f"Empfohlener TP1 Close: {round(st.session_state.buffer_SL_close_pct, 2)} %")
 
         trade = update_tp_targets_triggered(trade)
 
-        if entry_levels:
+        if trade.tranches.entry_levels:
             st.markdown("**Entry Levels:**")
-            for target in entry_levels:
+            for target in trade.tranches.entry_levels:
                 st.write(f"- Entry Level bei {target.price} mit {target.position_share}% Margin")
 
         if tp_targets:
             st.markdown("**Aktuelle TP Targets:**")
             for target in tp_targets:
                 tp_profit = 0.0
-                if target.price and trade.parameters.n_pos_value:
-                    profit = (trade.parameters.dirsign * (target.price - target.price) / target.price) * abs(trade.parameters.n_pos_value)
+                if target.price and trade.trade_parameters.n_pos_value:
+                    profit = (trade.tranches[0].dirsign * (target.price - target.price) / target.price) * abs(trade.tranches[0].tranche_parameters.n_pos_value)
                     tp_profit = target.close_percent / 100.0 * profit
                 status = "✅ Erreicht" if target.triggered else "– offen"
                 st.write(f"- TP bei {target.price} mit {target.close_percent}% Schließung ({status})")
                 st.caption(f"Partial profit: ${round(tp_profit, 2)}")
 
-        if trade.trailing_sl_enabled:
-            st.info(f"Trailing SL ist aktiviert: {trade.trailing_SL_percent}%")
+        if trade.trade_parameters.trailing_sl_enabled:
+            st.info(f"Trailing SL ist aktiviert: {trade.trade_parameters.trailing_SL_percent}%")
 
     return trade
 
 
 def overview_table(trade: Trade):
-  tranche.tranche_parameters = trade.parameters
-  #table1
+  tranche1 = trade.tranches[0]
+  #table1, currently for tranche 1
   with st.container(border=True):
 
       st.subheader("📊 Overview")
       
       # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("SL Delta", f"{round(tranche.tranche_parameters.sl_delta, 2)} $")
-      col2.metric("Risk", f"{round(tranche.tranche_parameters.risk, 2)} $")
-      col3.metric("Relative Risk", f"{round(tranche.tranche_parameters.rel_risk, 2)} $")
-      col4.metric("Initial Margin", f"{round(tranche.tranche_parameters.initial_margin, 2)} $")
-      col5.metric("potential_profit", f"{round(tranche.tranche_parameters.potential_profit, 2)} $")
+      col1.metric("SL Delta", f"{round(tranche1.tranche_parameters.sl_delta, 2)} $")
+      col2.metric("Risk", f"{round(tranche1.tranche_parameters.risk, 2)} $")
+      col3.metric("Relative Risk", f"{round(tranche1.tranche_parameters.rel_risk, 2)} $")
+      col4.metric("Initial Margin", f"{round(tranche1.tranche_parameters.initial_margin, 2)} $")
+      col5.metric("potential_profit", f"{round(tranche1.tranche_parameters.potential_profit, 2)} $")
 
   st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
@@ -307,16 +307,16 @@ def overview_table(trade: Trade):
       st.subheader("💰 Risk Feedback")
       
       col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("Risiko", f"{round(tranche.tranche_parameters.risk, 2)} €")
-      col2.metric("rrr", f"{round(tranche.tranche_parameters.rrr, 1)}")
-      col3.metric("relative Gain", f"{round(tranche.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
-      col4.metric("Wartungsmarge", f"{round(tranche.tranche_parameters.maintainance_margin, 2)} €")
-      col5.metric("rel asset gain at TP", f"{round(tranche.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
+      col1.metric("Risiko", f"{round(tranche1.tranche_parameters.risk, 2)} €")
+      col2.metric("rrr", f"{round(tranche1.tranche_parameters.rrr, 1)}")
+      col3.metric("relative Gain", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
+      col4.metric("Wartungsmarge", f"{round(tranche1.tranche_parameters.maintainance_margin, 2)} €")
+      col5.metric("rel asset gain at TP", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
 
-  if trade.tp_targets:
+  if trade.tranche1.tp_target:
       with st.container(border=True):
           st.subheader("🎯 TP-Status")
-          for target in trade.tp_targets:
+          for target in trade.tranche1.tp_targets:
               status = "✅ Erreicht" if target.triggered else "– offen"
               st.write(f"- TP bei {target.price} | {target.close_percent}% Schließung | {status}")
 
