@@ -136,6 +136,7 @@ def render_trade_controls(trade: Trade):
                 remove_tp_target()
 
         entry_levels: list[EntryLevel] = []
+        '''
         for index, target in enumerate(st.session_state.entry_levels):
             price_key = f"entry_price_{index}"
             percent_key = f"position_share_{index}"
@@ -156,6 +157,23 @@ def render_trade_controls(trade: Trade):
             )
             st.session_state.entry_levels[index] = {"price": price, "position_share": position_share}
             entry_levels.append(EntryLevel(price=price, position_share = position_share))
+        '''
+        for index, target in enumerate(st.session_state.entry_levels):
+            target["price"] = st.number_input(
+                f"Entry Level {index + 1} Preis:",
+                value=target["price"],
+                min_value=0.01,
+                step=0.01,
+                key=f"entry_price_{index}"
+            )
+            
+            target["position_share"] = st.number_input(
+                f"Entry Level {index + 1} Share:",
+                value=target["position_share"],
+                min_value=0.01,
+                step=0.01,
+                key=f"position_share_{index}"
+            )
 
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
