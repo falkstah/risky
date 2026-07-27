@@ -50,7 +50,7 @@ def remove_tp_target():
         st.session_state.tp_targets.pop()
 
 
-def get_trade_parameters():
+def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
     print("Enter parameters: ")
     init_trade_inputs()
 
