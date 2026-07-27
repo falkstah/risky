@@ -90,38 +90,38 @@ def calculate_initial_risk(trade: Trade, tranche):
   except (TypeError, ValueError):
       raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
-  tranche.tranche_parameters.dirsign = calculate_dirsign(tranche.tranche_parameters, tranche.tranche_parameters.entry)
-  tranche.tranche_parameters.sl_delta = calculate_SL_delta(trade, tranche.tranche_parameters)
+  tranche.tranche_parameters.dirsign = calculate_dirsign(tranche)
+  tranche.tranche_parameters.sl_delta = calculate_SL_delta(trade, tranche)
   if tranche.tranche_parameters.sl_delta == 0:
       raise ValueError("SL_delta = 0")
 
-  tranche.tranche_parameters.current_direction = get_trade_direction(trade, tranche.tranche_parameters)
-  tranche.tranche_parameters.tp_active = calculate_tp_active(trade, tranche.tranche_parameters)
-  tranche.tranche_parameters.rel_risk = calculate_rel_risk(trade, tranche.tranche_parameters)
+  tranche.tranche_parameters.current_direction = get_trade_direction(trade, tranche)
+  tranche.tranche_parameters.tp_active = calculate_tp_active(trade, tranche)
+  tranche.tranche_parameters.rel_risk = calculate_rel_risk(trade, tranche)
 
   return trade
 
 
 def calculate_exit_and_tp_structure(trade: Trade, tranche):
   tranche.tranche_parameters = tranche.tranche_parameters
-  tranche.tranche_parameters.p_liquidation = match_liquidation_price_to_SL(tranche.tranche_parameters, tranche.tranche_parameters.entry)
-  tranche.tranche_parameters.TP_delta = calculate_TP_delta(tranche.tranche_parameters, tranche.tranche_parameters.entry)
+  tranche.tranche_parameters.p_liquidation = match_liquidation_price_to_SL(rade, tranche)
+  tranche.tranche_parameters.TP_delta = calculate_TP_delta(tranche)
   return trade
 
 
 def calculate_dynamic_state(trade: Trade, tranche):
   tranche.tranche_parameters = tranche.tranche_parameters
-  tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = find_max_lvg(tranche.tranche_parameters, tranche.tranche_parameters.entry)
-  tranche.tranche_parameters.max_margin = find_max_margin(tranche.tranche_parameters)
-  tranche.tranche_parameters.initial_margin = calculate_initial_margin(tranche.tranche_parameters)
-  tranche.tranche_parameters.risk, tranche.tranche_parameters.initial_margin = check_initial_margin(tranche.tranche_parameters)
+  tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = find_max_lvg(tranche)
+  tranche.tranche_parameters.max_margin = find_max_margin(tranche)
+  tranche.tranche_parameters.initial_margin = calculate_initial_margin(tranche)
+  tranche.tranche_parameters.risk, tranche.tranche_parameters.initial_margin = check_initial_margin(tranche)
 
-  tranche.tranche_parameters.n_pos_value = calculate_n_pos_value(tranche.tranche_parameters)
-  tranche.tranche_parameters.maintainance_margin = calculate_maintainance_margin(tranche.tranche_parameters)
-  tranche.tranche_parameters.rel_maintainance_margin = calculate_rel_maintainance_margin(tranche.tranche_parameters)
+  tranche.tranche_parameters.n_pos_value = calculate_n_pos_value(tranche)
+  tranche.tranche_parameters.maintainance_margin = calculate_maintainance_margin(tranche)
+  tranche.tranche_parameters.rel_maintainance_margin = calculate_rel_maintainance_margin(tranche)
   tranche.tranche_parameters.isolated_margin = tranche.tranche_parameters.max_margin
 
-  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(tranche.tranche_parameters, entry)
+  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(trade_tranche)
   return trade
 
 #margins
@@ -148,7 +148,7 @@ def calculate_dirsign(tranche):
     raise ValueError("Entry and Stop Loss must not be equal.")
 
 
-def calculate_SL_delta(tranche.tranche_parameters: TradeParameters, tranche):
+def calculate_SL_delta(trade, tranche):
   entry = tranche.tranche_parameters.entry
   entry.price = getattr(tranche.tranche_parameters, "p_entry", None)
   p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
@@ -156,7 +156,7 @@ def calculate_SL_delta(tranche.tranche_parameters: TradeParameters, tranche):
     raise ValueError("Entry price and Stop Loss price must both be set.")
   return abs(entry.price - p_SL)
 
-def calculate_TP_delta(tranche.tranche_parameters: TradeParameters, tranche):
+def calculate_TP_delta(trade, tranche):
   entry = tranche.tranche_parameters.entry
   entry.price = getattr(tranche.tranche_parameters, "entry.price", None)
   p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
@@ -203,7 +203,7 @@ def calculate_buffered_tp1_close_percent(trade: Trade, tranche):
   return float(close_fraction)
 
 
-def get_trade_direction(tranche):
+def get_trade_direction(trade, tranche):
   dirsign = getattr(tranche.tranche_parameters, "dirsign", None)
   if dirsign is None:
     raise ValueError("dirsign must be calculated before determining trade direction.")
@@ -216,24 +216,24 @@ def get_trade_direction(tranche):
     print("Trade direction not consistent. Please check your input parameters.")
   return None
 
-def calculate_rel_risk(tranche):
+def calculate_rel_risk(trade, tranche):
   return abs(tranche.tranche_parameters.sl_delta) / tranche.tranche_parameters.price
 
-def calculate_initial_margin(tranche):
+def calculate_initial_margin(trae, tranche):
   return tranche.tranche_paramters.risk / (tranche.tranche_parameters.rel_risk * tranche.tranche_parameters.lvg) # initial margin >= maintainance_margin (immer)
 
 def calculate_initial_margin_rate(lvg):
   return 1 / lvg
 
 #live calculation; sign matches trade direction, abs(n_pos_value) is used for position calculations that do not depend on direction
-def calculate_n_pos_value(tranche):
+def calculate_n_pos_value(trade, tranche):
   return tranche.tranche_parameters.dirsign * tranche.tranche_parameters.risk / tranche.tranche_parameters.rel_risk # = initial_margin * lvg - thus couples lvg and initial_margin; n_pos_value < 0 <==> short
 
-def calculate_max_lvg(tranche):
+def calculate_max_lvg(trade, tranche):
   return math.floor(1 / tranche.tranche_parameters.maintainance_margin_rate)
 
 #can differ or long and short even for same sl_delta and liq distance, which is against Intuiton; not symmetrical!!! hat's no error
-def max_lvg_for_given_liquidation(tranche):
+def max_lvg_for_given_liquidation(trade, tranche):
   if tranche.tranche_parameters.current_direction == "long":
     lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction - tranche.tranche_parameters.p_liquidation / entry.price))  # = general p_liq formula solved for lvg; formula can get < 1
   elif tranche.tranche_parameters.current_direction == "short":
@@ -241,20 +241,21 @@ def max_lvg_for_given_liquidation(tranche):
   else: lvg = 0
   return lvg 
 
-def find_max_lvg(tranche):
-  max_allowed_lvg = calculate_max_lvg(tranche)
-  max_lvg_liq = max_lvg_for_given_liquidation(tranche)
+def find_max_lvg(trade, tranche):
+  max_allowed_lvg = calculate_max_lvg(trade, tranche)
+  max_lvg_liq = max_lvg_for_given_liquidation(trade, tranche)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen. But lvg >= 1 with max:
   lvg = math.floor(min(max_allowed_lvg, max_lvg_liq)) #floor guarantees that lvg does not force early liq
-  return check_lvg(lvg, tranche)
+  return check_lvg(trade, tranche)
 
 #risk correction functions
-def check_lvg(lvg, tranche):
+def check_lvg(trade, tranche):
   risk = tranche.tranche_parameters.risk
+  lvg = tranche.tranche_parameters.lvg
   if lvg > tranche.tranche_parameters.max_lvg:  # Assuming tranche.tranche_parameters.max_lvg is 10
     print(f"Warning: Calculated leverage {lvg} exceeds {tranche.tranche_parameters.max_lvg}. Risk will be made smaller to adjust.")
     lvg = tranche.tranche_parameters.max_lvg
-    risk = reduce_risk(tranche.tranche_parameters)
+    risk = reduce_risk(trade, tranche)
 
   if lvg < 1:
     print("lvg < 1. Over secuing already guaranteed by find_max_margin. hence, buffer is too big. Risk too small.")
@@ -340,14 +341,14 @@ def check_rrr(rrr):
 
 #safety calculus
 #evaluating trading setups
-def evaluate_trade(tranche.tranche_parameters: TradeParameters, entry):
+def evaluate_trade(tranche):
   rel_asset_gain_at_TP = tranche.tranche_parameters.TP_delta / entry.price
   rrr = tranche.tranche_parameters.TP_delta / tranche.tranche_parameters.sl_delta
   potential_profit = tranche.tranche_parameters.risk * rrr
   equity = calculate_equity(tranche.tranche_parameters)
   return rel_asset_gain_at_TP, rrr, potential_profit, equity
 
-def calulate_tranche_profit_at_price_p(tranche.tranche_parameters: TradeParameters, p, entry):
+def calulate_tranche_profit_at_price_p(tranche):
   if p >= entry.price:
     return tranche.tranche_parameters.dirsign * abs(p - entry.price) / entry.price * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
   else:
@@ -388,7 +389,7 @@ def calculate_avg_entry_price(trade):
   return avg_entry_price
 
 
-def calculate_equity(tranche.tranche_parameters):
+def calculate_equity(tranche):
   return tranche.tranche_parameters.initial_margin - tranche.tranche_parameters.loss
 
 
