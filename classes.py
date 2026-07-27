@@ -10,7 +10,7 @@ class TakeProfitTarget:
 @dataclass
 class EntryLevel:
     price: float = 0.0
-    margin_percent: float = 0.0
+    position_share: float = 0.0
 
 @dataclass
 class TradeParameters:
@@ -19,9 +19,7 @@ class TradeParameters:
     risk: float
     maintainance_margin_rate: float
     maintainance_deduction: float
-    p_entry: float
     p_SL: float
-    p_TP: float
     max_lvg: float = 10.0
     max_margin: float = 100.0   #trading logik nutzt nur 80% anteil davon, um Überbesicherung zu erzwingen
     isolated_margin: float = 0.0
@@ -49,12 +47,19 @@ class TradeParameters:
 
 @dataclass
 class Trade:
+    #classes
     parameters: TradeParameters
+
+    #lists
+    entry_levels: list[EntryLevel] = field(default_factory=list)
+    tp_targets: list[TakeProfitTarget] = field(default_factory=list)
+
+    #default value fields
+    total_risk: float = 0.0
+    total_max_margin = 0.0
     current_price: float = 0.0
     buffer_SL: float = 0.0
     pull_SL: float = 0.0
-    entry_levels: list[EntryLevel] = field(default_factory=list)
-    tp_targets: list[TakeProfitTarget] = field(default_factory=list)
     order_type: Literal["single limit", "single market", "single post only", "k1m6a box"] = "single limit"
     trailing_SL_percent: float = 0.0
     trailing_sl_enabled: bool = False

@@ -61,32 +61,16 @@ def get_trade_parameters():
         maintainance_deduction=float(st.number_input("maintainance_deduction: ", value = 0.0, min_value = 0.0, step = 0.001)),
         max_lvg=float(st.number_input("max_leverage: ", value = 10.0, min_value = 1.0, step = 0.5)),
         max_margin=float(st.number_input("max_margin: ", value = 100.0, min_value = 1.0, step = 1.0)),
-        p_entry=get_entry(),
-        p_SL=get_SL(),
-        p_TP=get_TP()
+        p_SL=get_SL()
     )
 
     return params
-
-def get_entry():
-  p_entry = st.number_input("entry: ", value=0.01, min_value=0.0, step=0.01) #nicht params-p_entry, weil die Zuordnung in get_trade_parameters() erfolgt
-  if p_entry is None or p_entry <= 0:
-    p_entry = 0.01
-  return float(p_entry)
-
 
 def get_SL():
   p_SL = st.number_input("SL: ", value=0.0, min_value=0.0, step=0.01)
   if p_SL is None or p_SL < 0:
     p_SL = 0.0
   return float(p_SL)
-
-
-def get_TP():
-  p_TP = st.number_input("TP: ", value=st.session_state.get("p_TP", 0.0), min_value=0.0, step=0.01, key="p_TP")
-  if p_TP is None or p_TP <= 0:
-    p_TP = 0.0
-  return float(p_TP)
 
 def current_direction_label(current_direction):
   if current_direction == "long":
@@ -152,15 +136,15 @@ def render_trade_controls(trade: Trade):
             price = st.number_input(
                 f"Entry Level {index + 1} Preis:",
                 value=target["price"],
-                min_value=0.0,
+                min_value=0.01,
                 step=0.01,
                 key=price_key,
             )
-            margin_pct = st.number_input(
+            position_share = st.number_input(
                 f"Entry Level {index + 1} Margin (%):",
                 value=target["margin_percent"],
                 min_value=0.0,
-                max_value=100.0,
+                max_value= 100,  #eigtl. 0.9 * max_margin wegen buffer
                 step=1.0,
                 key=pct_key,
             )

@@ -7,15 +7,21 @@ from classes import Trade, TradeParameters
 #import ccxt
 #import pandas_ta as ta
 
+#2. manage SL pulls and TPs for whole position
 def calculate_all(trade: Trade):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt params:
   sanitize_inputs(trade)
   sanitize_inputs(trade.parameters)
 
-  #Calculate:
-  trade = calculate_initial_risk(trade)
-  trade = calculate_exit_and_tp_structure(trade)
-  trade = calculate_dynamic_state(trade)
+  #1. calculate all params for each partial entry (ladder) of a trade with one given SL
+  #entry meint ein ListenELement von entry_levels
+  for entry in trade.entry_levels:
+    params = calculate_tranche_allocations(trade)
+
+    #Calculate:
+    trade = calculate_initial_risk(trade, entry)
+    trade = calculate_exit_and_tp_structure(trade)
+    trade = calculate_dynamic_state(trade)
 
   return trade
 
@@ -60,17 +66,26 @@ def sanitize_inputs(item):
       except (TypeError, ValueError):
           setattr(item, field_name, 0.0)
 
+def calculate_tranche_allocations(trade):
+  trade.parameters.risk = trade.params.position_share * trade.total_risk
+  trade.parameters.max_margin = trade.params.position_share * trade.max_margin  #faktor buffer für überbeischerung wird in schleife für jeden entry einzeln eingebaut, nicht schon in trade
+  #TPs are managed globally with FiFo principle (exchange standard)
 
-def calculate_initial_risk(trade: Trade):
+  #SL is gloabal and same for all tranches at the moment, but can be changed later here
+  trade.parameters.p_SL = trade.p_SL
+
+  return trade.parameters
+
+def calculate_initial_risk(trade: Trade, entry):
   params = trade.parameters
 
   # 1) Directional basics
-  if params.p_entry == 0.0:
+  if entry == 0.0:
     print("P_Entry is 0.0, cannot calculate trade parameters.")
     return trade
 
   try:
-      params.p_entry = float(params.p_entry)
+      entry.price = float(entry.price)
       params.p_SL = float(params.p_SL)
   except (TypeError, ValueError):
       raise TypeError("Entry price and Stop Loss price must be numeric values.")
@@ -115,52 +130,52 @@ def calculate_dynamic_state(trade: Trade):
 #maintainance_deduction       # "0" is conservative
 
 #initial margin calculation
-def calculate_dirsign(params: TradeParameters):
-  p_entry = getattr(params, "p_entry", None)
+def calculate_dirsign(params: TradeParameters, entry):
+  entry.price = getattr(params, "p_entry", None)
   p_SL = getattr(params, "p_SL", None)
 
-  if p_entry is None or p_SL is None:
+  if entry.price is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
-  if not isinstance(p_entry, numbers.Real) or not isinstance(p_SL, numbers.Real):
+  if not isinstance(entry.price, numbers.Real) or not isinstance(p_SL, numbers.Real):
     raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
-  if p_entry > p_SL:
+  if entry.price > p_SL:
     return 1
-  elif p_entry < p_SL:
+  elif entry.price < p_SL:
     return -1
   else:
     raise ValueError("Entry and Stop Loss must not be equal.")
 
 
-def calculate_SL_delta(params: TradeParameters):
-  p_entry = getattr(params, "p_entry", None)
+def calculate_SL_delta(params: TradeParameters, entry):
+  entry.price = getattr(params, "p_entry", None)
   p_SL = getattr(params, "p_SL", None)
-  if p_entry is None or p_SL is None:
+  if entry.price is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
-  return abs(p_entry - p_SL)
+  return abs(entry.price - p_SL)
 
-def calculate_TP_delta(params: TradeParameters):
-  p_entry = getattr(params, "p_entry", None)
+def calculate_TP_delta(params: TradeParameters, entry):
+  entry.price = getattr(params, "entry.price", None)
   p_TP = getattr(params, "p_TP", None)
-  if p_entry is None or p_TP is None:
+  if entry.price is None or p_TP is None:
     raise ValueError("Entry price and Take Profit price must both be set.")
-  return abs(p_entry - p_TP)
+  return abs(entry.price - p_TP)
 
   #small partial TP1 allows: moving SL under previous Low to ain more buffer. 
   # This function calculates the tp1-size so that buffer_SL hit would stop trade out (p.ex. under a low) without a loss (by risking Tp1 gains)
   # (increae of V if buffer_SL is pulled further to entry could also be interesting, i.e. pyramid entry)
-def calculate_buffered_tp1_close_percent(trade: Trade):
+def calculate_buffered_tp1_close_percent(trade: Trade, entry):
   params = trade.parameters
-  p_entry = getattr(params, "p_entry", None)
+  entry.price = getattr(params, "entry.price", None)
   p_TP = getattr(params, "p_TP", None)
   buffer_SL = getattr(trade, "buffer_SL", None)
 
   #useless when it will be included in sanitier:
-  if p_entry is None or p_TP is None or buffer_SL is None:
+  if entry.price is None or p_TP is None or buffer_SL is None:
     raise ValueError("Entry price, TP price and buffer SL must be set.")
 
   TP_delta = params.TP_delta
-  buffer_delta = abs(buffer_SL - p_entry)
+  buffer_delta = abs(buffer_SL - entry.price)
 
   if TP_delta == 0.0:
     raise ValueError("TP price must differ from entry price.")
@@ -170,14 +185,14 @@ def calculate_buffered_tp1_close_percent(trade: Trade):
   # Buffer SL must be on the correct side of entry for the trade direction.
   if params.current_direction is None:
     params.current_direction = get_trade_direction(params)
-  if params.current_direction == "long" and buffer_SL >= p_entry:
+  if params.current_direction == "long" and buffer_SL >= entry.price:
     raise ValueError("Buffer SL must be below entry for a long trade.")
-  if params.current_direction == "short" and buffer_SL <= p_entry:
+  if params.current_direction == "short" and buffer_SL <= entry.price:
     raise ValueError("Buffer SL must be above entry for a short trade.")
 
-  #profit(TP1) = close_fraction * n_pos_value * (TP1 - p_entry)
+  #profit(TP1) = close_fraction * n_pos_value * (TP1 - entry.price)
   #unclosed_pos_rest = (1 - x) * n_pos_value
-  #Loss(buffer_SL) = uncloses_pos_rest * n_pos_value * (p_entry - buffer_SL)
+  #Loss(buffer_SL) = uncloses_pos_rest * n_pos_value * (entry.price - buffer_SL)
   #Profit(TP1) == Loss(buffer_SL)  -> solve for close_fraction: close_fraction = buffer_delta / (TP1 - buffer_SL)
   #with TP1 - buffer_SL = TP_delta + buffer_delta:
   close_fraction = buffer_delta / (TP_delta + buffer_delta)
@@ -197,8 +212,8 @@ def get_trade_direction(params: TradeParameters):
     print("Trade direction not consistent. Please check your input parameters.")
   return None
 
-def calculate_rel_risk(params: TradeParameters):
-  return abs(params.sl_delta) / params.p_entry
+def calculate_rel_risk(params: TradeParameters, entry):
+  return abs(params.sl_delta) / entry.price
 
 def calculate_initial_margin(params: TradeParameters):
   return params.risk / (params.rel_risk * params.lvg) # initial margin >= maintainance_margin (immer)
@@ -256,18 +271,18 @@ def calculate_rel_maintainance_margin(params: TradeParameters):
   #only useful during the trade, because margin changes and rel_maintainance_margin may no longer equal MMR
   return params.maintainance_margin / abs(params.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
 
-def p_liq_exchange_forced(params: TradeParameters):
-  return params.p_entry * (1 - params.maintainance_margin)
+def p_liq_exchange_forced(params: TradeParameters, entry):
+  return entry.price * (1 - params.maintainance_margin)
 
 
 #Strategy Feedback
-def calculate_tp_active(params: TradeParameters):
+def calculate_tp_active(params: TradeParameters, entry):
   if params.p_TP <= 0:
     return False
   if params.dirsign > 0:
-    return params.p_TP > params.p_entry
+    return params.p_TP > params.entry.price
   if params.dirsign < 0:
-    return params.p_TP < params.p_entry
+    return params.p_TP < params.entry.price
   return False
 
 
@@ -296,8 +311,8 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 #management-dependent calulations (here: simplicity biased)
 
 #conservatively hardcoded liq buffer to skip API-task
-def match_liquidation_price_to_SL(params: TradeParameters):
-    return max(params.p_entry - params.liq_delta_to_SL_delta_ratio * params.sl_delta * params.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
+def match_liquidation_price_to_SL(params: TradeParameters, entry):
+    return max(params.entry.price - params.liq_delta_to_SL_delta_ratio * params.sl_delta * params.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
 
 #def match_lvg_to_liquidation_price(params: TradeParameters):
 #  return 1 / (1 + params.maintainance_margin_rate - params.p_liquidation * (1 + params.maintainance_margin_rate) / params.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
@@ -321,18 +336,18 @@ def check_rrr(rrr):
 
 #safety calculus
 #evaluating trading setups
-def evaluate_trade(params: TradeParameters):
-  rel_asset_gain_at_TP = params.TP_delta / params.p_entry
+def evaluate_trade(params: TradeParameters, entry):
+  rel_asset_gain_at_TP = params.TP_delta / entry.price
   rrr = params.TP_delta / params.sl_delta
   potential_profit = params.risk * rrr
   equity = calculate_equity(params)
   return rel_asset_gain_at_TP, rrr, potential_profit, equity
 
-def calulate_profit_at_price_p(params: TradeParameters, p):
-  if p >= params.p_entry:
-    return params.dirsign * abs(p - params.p_entry) / params.p_entry * abs(params.n_pos_value) #for long and short (pos value)
+def calulate_profit_at_price_p(params: TradeParameters, p, entry):
+  if p >= entry.price:
+    return params.dirsign * abs(p - entry.price) / entry.price * abs(params.n_pos_value) #for long and short (pos value)
   else:
-    return -1 * params.dirsign * abs(p - params.p_entry) / params.p_entry * abs(params.n_pos_value) #for long and short (pos value)
+    return -1 * params.dirsign * abs(p - entry.price) / entry.price * abs(params.n_pos_value) #for long and short (pos value)
 
 def calculate_equity(params):
   return params.initial_margin - params.loss
