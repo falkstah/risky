@@ -112,9 +112,9 @@ def render_trade_controls(trade: Trade):
 
     #Initializing input lists in st:
     if "entry_levels" not in st.session_state:
-            st.session_state.entry_levels = [{"price": 0.0, "position_share": 1.0}]
+            st.session_state.entry_levels = [{"price": 0.01, "position_share": 100.0}]
     if "tp_targets" not in st.session_state:
-            st.session_state.tp_targets = [{"price": 0.0, "close_percent": 1.0, "triggered": False}]
+            st.session_state.tp_targets = [{"price": 0.01, "close_percent": 50.0, "triggered": False}]
 
     with st.container(border=True):
         st.subheader("🎯 Trade Ziele & Trailing SL")
@@ -164,7 +164,7 @@ def render_trade_controls(trade: Trade):
             price = st.number_input(
                 f"TP {index + 1} Preis:",
                 value=target["price"],
-                min_value=0.0,
+                min_value=0.01,
                 step=0.01,
                 key=price_key,
             )
