@@ -87,9 +87,9 @@ def update_tp_targets_triggered(trade: Trade):
 
     for target in trade.tp_targets:
         if trade.parameters.current_direction == "long":
-            target.triggered = trade.current_price >= target.price
+            target.triggered = trade.current_asset_price >= target.price
         elif trade.parameters.current_direction == "short":
-            target.triggered = trade.current_price <= target.price
+            target.triggered = trade.current_asset_price <= target.price
     return trade
 
 
@@ -248,9 +248,9 @@ def render_trade_controls(trade: Trade):
             except Exception as exc:
                 st.error(f"Berechnung fehlgeschlagen: {exc}")
 
-        trade.entry_levels = entry_levels
+        trade.entry_levels = st.session_state.entry_levels
         trade.tp_targets = tp_targets
-        trade.current_price = st.session_state.current_price
+        trade.current_asset_price = st.session_state.current_asset_price
         trade.buffer_SL = st.session_state.buffer_SL
         trade.pull_SL = st.session_state.pull_SL
         trade.order_type = st.session_state.order_type

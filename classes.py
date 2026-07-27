@@ -4,6 +4,7 @@ from typing import Literal
 @dataclass
 class TakeProfitTarget:
     price: float = 0.01
+    profit: float = 0.0
     close_percent: float = 50.0
     triggered: bool = False
 
@@ -13,7 +14,7 @@ class EntryLevel:
     position_share: float = 100.0
 
 @dataclass
-class TradeParameters:
+class Tranche_Parameters:
     # Inputs
     liq_delta_to_SL_delta_ratio: float
     risk: float
@@ -46,18 +47,18 @@ class TradeParameters:
     equity: float = 0.0
 
 @dataclass
-class Trade:
+class Tranche:
     #classes
-    parameters: TradeParameters
+    tranche_parameters: Tranche_Parameters
+    tp_tage: TakeProfitTarget
+    entry_level: EntryLevel
 
-    #lists
-    entry_levels: list[EntryLevel] = field(default_factory=list)
-    tp_targets: list[TakeProfitTarget] = field(default_factory=list)
-
+@dataclass
+class TradeParameters:
     #default value fields
     total_risk: float = 0.0
     total_max_margin = 0.0
-    current_price: float = 0.0
+    current_asset_price: float = 0.0
     buffer_SL: float = 0.0
     pull_SL: float = 0.0
     order_type: Literal["single limit", "single market", "single post only", "k1m6a box"] = "single limit"
@@ -65,3 +66,13 @@ class Trade:
     trailing_sl_enabled: bool = False
     current_sl_price: float = 0.0
     p_SL: float = 0.0
+    total_potential_trade_profit: float = 0.0
+
+@dataclass
+class Trade:
+    #classes
+    trade_parameters: TradeParameters
+    tranches: list[Tranche] = field(default_factory = list)
+    
+
+    

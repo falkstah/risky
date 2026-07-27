@@ -3,7 +3,7 @@ import math
 import numbers
 from dataclasses import fields
 import pandas as pd
-from classes import Trade, TradeParameters
+from classes import Trade, TradeParameters, Tranche_Parameters, TakeProfitTarget, EntryLevel
 #import ccxt
 #import pandas_ta as ta
 
@@ -11,12 +11,13 @@ from classes import Trade, TradeParameters
 def calculate_all(trade: Trade):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt params:
   sanitize_inputs(trade)
-  sanitize_inputs(trade.parameters)
+  sanitize_inputs(trade.trade_parameters)
+  sanitize_inputs(trade.tranches)
 
   #1. calculate all params for each partial entry (ladder) of a trade with one given SL
   #entry meint ein ListenELement von entry_levels
-  for entry in trade.entry_levels:
-    params = calculate_tranche_allocations(trade)
+  for tranche in trade.tranches:
+    tranche.tranche_parameters = calculate_tranche_allocations(trade)
 
     #Calculate:
     trade = calculate_initial_risk(trade, entry)
@@ -343,11 +344,46 @@ def evaluate_trade(params: TradeParameters, entry):
   equity = calculate_equity(params)
   return rel_asset_gain_at_TP, rrr, potential_profit, equity
 
-def calulate_profit_at_price_p(params: TradeParameters, p, entry):
+def calulate_tranche_profit_at_price_p(params: TradeParameters, p, entry):
   if p >= entry.price:
     return params.dirsign * abs(p - entry.price) / entry.price * abs(params.n_pos_value) #for long and short (pos value)
   else:
     return -1 * params.dirsign * abs(p - entry.price) / entry.price * abs(params.n_pos_value) #for long and short (pos value)
+
+def update_asset_price(trade):
+  for tranche in trade:
+      if trade.current_asset_price >= tranche.price:
+        tranche.triggered = True
+
+#price update davor nötig, oer innerhalb
+def calculate_total_trade_profit(trade: list[TakeProfitTarget]):
+  total_trade_profit = 0.0
+  for tp in trade:
+    if tp.triggered:
+      total_trade_profit += tp.profit
+  return total_trade_profit
+
+def calculate_total_potential_trade_profit(trade: list[TakeProfitTarget]):
+  total_trade_profit = 0.0
+  for tp in trade:
+    if tp.triggered:
+      total_trade_profit += tp.profit
+  return total_trade_profit
+
+def calculate_total_rrr(trade):
+  total_rrr = trade.total_potential_trade_profit / trade.total_risk
+  return total_rrr
+
+def calculate_avg_entry_price(trade):
+  number_of_entries = 0
+  weighted_sum = 0
+  for tranche in trade:
+    number_of_entries += 1
+    weighted_sum += tranche.parameters.n_pos_value * tranche.entrylevel.price
+
+  avg_entry_price = weighted_sum / number_of_entries
+  return avg_entry_price
+
 
 def calculate_equity(params):
   return params.initial_margin - params.loss
