@@ -321,7 +321,7 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 def match_liquidation_price_to_SL(trade, tranche):
     return max(tranche.tranche_parameters.price - tranche.tranche_parameters.liq_delta_to_SL_delta_ratio * tranche.tranche_parameters.sl_delta * tranche.tranche_parameters.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
 
-#def match_lvg_to_liquidation_price(tranche.tranche_parameters: TradeParameters):
+#def match_lvg_to_liquidation_price(tranche.tranche_parameters: Trade_Parameters):
 #  return 1 / (1 + tranche.tranche_parameters.maintainance_margin_rate - tranche.tranche_parameters.p_liquidation * (1 + tranche.tranche_parameters.maintainance_margin_rate) / tranche.tranche_parameters.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
 
 def find_max_margin(tranche):
@@ -363,14 +363,14 @@ def update_asset_price(trade):
         tranche.triggered = True
 
 #price update davor nötig, oer innerhalb
-def calculate_total_trade_profit(trade: list[TakeProfitTarget]):
+def calculate_total_trade_profit(trade: list[Take_Profit_Target]):
   total_trade_profit = 0.0
   for tp in trade:
     if tp.triggered:
       total_trade_profit += tp.profit
   return total_trade_profit
 
-def calculate_total_potential_trade_profit(trade: list[TakeProfitTarget]):
+def calculate_total_potential_trade_profit(trade: list[Take_Profit_Target]):
   total_trade_profit = 0.0
   for tp in trade:
     if tp.triggered:
@@ -397,7 +397,7 @@ def calculate_equity(tranche):
 
 '''
 def debug_calculate_all(**overrides):
-  #Create a TradeParameters object with default inputs and run calculate_all for debugging.
+  #Create a Trade_Parameters object with default inputs and run calculate_all for debugging.
   defaults = {
       "liq_delta_to_SL_delta_ratio": 4.0,
       "risk": 10.0,

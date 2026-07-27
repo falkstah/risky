@@ -16,11 +16,11 @@ class Entry_Level:
 @dataclass
 class Tranche_Parameters:
     # Inputs
-    liq_delta_to_SL_delta_ratio: float
-    risk: float
-    maintainance_margin_rate: float
-    maintainance_deduction: float
-    p_SL: float
+    liq_delta_to_SL_delta_ratio: float = 4.0
+    risk: float =10.0
+    maintainance_margin_rate: float = 0.02
+    maintainance_deduction: float = 0.00
+    p_SL: float = 0.00
     max_lvg: float = 10.0
     max_margin: float = 100.0   #trading logik nutzt nur 80% anteil davon, um Überbesicherung zu erzwingen
     isolated_margin: float = 0.0

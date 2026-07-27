@@ -5,7 +5,7 @@ import altair as alt
 import pandas as pd
 
 #logic functions
-from classes import Trade, TradeParameters, Tranche, Tranche_Parameters, TakeProfitTarget, EntryLevel
+from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 from trading_logic import calculate_buffered_tp1_close_percent
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
@@ -54,7 +54,7 @@ def get_trade_parameters():
     print("Enter parameters: ")
     init_trade_inputs()
 
-    trade_parameters = TradeParameters(
+    trade_parameters = Trade_Parameters(
         liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
         total_risk=float(st.number_input("risk: ", value = 10, min_value = 0, step = 1)),
         maintainance_margin_rate=float(st.number_input("maintainance_margin_rate: ", value = 0.02, min_value = 0.0, step = 0.001)),
@@ -166,7 +166,7 @@ def render_trade_controls(trade: Trade):
             tranche.entry_level.price = st.session_state[price_key]
             tranche.entry_level.position_share = st.session_state[share_key]
 
-        tp_targets: list[TakeProfitTarget] = []
+        tp_targets: list[Take_Profit_Target] = []
         for index, target in enumerate(st.session_state.tp_targets):
             price_key = f"tp_price_{index}"
             pct_key = f"_close_percent_{index}"
@@ -187,7 +187,7 @@ def render_trade_controls(trade: Trade):
                 key=pct_key,
             )
             st.session_state.tp_targets[index] = {"price": price, "close_percent": close_percent}
-            tp_targets.append(TakeProfitTarget(price=price, close_percent= close_percent))
+            tp_targets.append(Take_Profit_Target(price=price, close_percent= close_percent))
 
         trailing_SL_percent = st.number_input(
             "Trailing SL (%):",
