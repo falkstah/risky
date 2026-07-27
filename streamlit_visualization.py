@@ -135,29 +135,7 @@ def render_trade_controls(trade: Trade):
             if st.button("TP entfernen", key="remove_tp_button"):
                 remove_tp_target()
 
-        entry_levels: list[EntryLevel] = []
-        '''
-        for index, target in enumerate(st.session_state.entry_levels):
-            price_key = f"entry_price_{index}"
-            percent_key = f"position_share_{index}"
-            price = st.number_input(
-                f"Entry Level {index + 1} Preis:",
-                value=target["price"],
-                min_value=0.01,
-                step=0.01,
-                key=price_key,
-            )
-            position_share = st.number_input(
-                f"Entry Level {index + 1} Position_share (%):",
-                value=target["position_share"],
-                min_value=0.0,
-                max_value= 100,  #eigtl. 0.9 * max_margin wegen buffer
-                step=1.0,
-                key= percent_key,
-            )
-            st.session_state.entry_levels[index] = {"price": price, "position_share": position_share}
-            entry_levels.append(EntryLevel(price=price, position_share = position_share))
-        '''
+  
         for index, target in enumerate(st.session_state.entry_levels):
             price_key = f"entry_price_{index}"
             share_key = f"position_share_{index}"
@@ -167,6 +145,13 @@ def render_trade_controls(trade: Trade):
                 st.session_state[price_key] = float(target["price"])
             if share_key not in st.session_state:
                 st.session_state[share_key] = float(target["position_share"])
+
+            # 1. Sicherstellen, dass der Wert existiert und mind. den min_value (0.01) hat
+            if price_key not in st.session_state or st.session_state[price_key] < 0.01:
+                st.session_state[price_key] = max(0.01, float(target["price"]))
+                
+            if share_key not in st.session_state or st.session_state[share_key] < 0.01:
+                st.session_state[share_key] = max(0.01, float(target["position_share"]))
 
             # 2. Widgets rein über den Key steuern (ohne value-Parameter)
             st.session_state[price_key] = st.number_input(
@@ -186,7 +171,7 @@ def render_trade_controls(trade: Trade):
             # 3. Direkt in das Target-Dictionary zurückschreiben
             target["price"] = st.session_state[price_key]
             target["position_share"] = st.session_state[share_key]
-            
+
 
         tp_targets: list[TakeProfitTarget] = []
         for index, target in enumerate(st.session_state.tp_targets):
