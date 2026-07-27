@@ -3,14 +3,14 @@ from typing import Literal
 
 @dataclass
 class TakeProfitTarget:
-    price: float = 0.0
-    close_percent: float = 0.0
+    price: float = 0.01
+    close_percent: float = 100.0
     triggered: bool = False
 
 @dataclass
 class EntryLevel:
-    price: float = 0.0
-    position_share: float = 0.0
+    price: float = 1.0
+    position_share: float = 100.0
 
 @dataclass
 class TradeParameters:
