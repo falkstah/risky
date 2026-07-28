@@ -167,11 +167,11 @@ def render_ladders(trade, tranche):
     
     with st.container(border=True):
         st.subheader("🎯 Entries & TPs")
-        render_ladder_entries(trade, tranche)
+        render_ladder_entries(trade)
         render_ladder_TPs(trade)
     return trade
 
-def render_ladder_entries(trade, tranche):
+def render_ladder_entries(trade):
     with st.expander("Ladder Entries"):
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
