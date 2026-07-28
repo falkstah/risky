@@ -167,95 +167,93 @@ def render_ladders(trade, tranche):
     
     with st.container(border=True):
         st.subheader("🎯 Entries & TPs")
-        render_ladder_entries(trade)
-        render_ladder_TPs(trade)
+        render_ladder(trade, "Entries")
+        render_ladder(trade, "TPs")
     return trade
 
-def render_ladder_entries(trade):
-    with st.expander("Ladder Entries"):
-        entry_col1, entry_col2 = st.columns(2)
-        with entry_col1:
-            if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
-                add_entry_target()
-        with entry_col2:
-            if st.button("Entry entfernen", key="remove_entry_button"):
-                remove_entry_target()
+def render_ladder(trade, mode):
+    with st.expander(f"Ladder {mode}"):
+        #Managing ladder size for each mode
+        if mode == "Entries":
+            entry_col1, entry_col2 = st.columns(2)
+            with entry_col1:
+                if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
+                    add_entry_target()
+            with entry_col2:
+                if st.button("Entry entfernen", key="remove_entry_button"):
+                    remove_entry_target()
 
+        elif mode == "TPs":
+            tp_col1, tp_col2 = st.columns(2)
+            with tp_col1:
+                if st.button("Weitere TP hinzufügen", key="add_tp_button"):
+                    add_tp_target()
+            with tp_col2:
+                if st.button("TP entfernen", key="remove_tp_button"):
+                    remove_tp_target()
+        
+        #buildung input fields for each mode
         for index, tranche in enumerate(trade.tranches):
-            price_key = f"input_entry_price_{index}"
-            share_key = f"input_position_share_{index}"
-            
-            # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
-            if price_key not in st.session_state or st.session_state[price_key] < 0.01:
-                st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
+            if mode == "Entries":
+                price_key = f"input_entry_price_{index}"
+                share_key = f"input_position_share_{index}"
                 
-            if share_key not in st.session_state or st.session_state[share_key] < 0.01:
-                st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
+                # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
+                if price_key not in st.session_state or st.session_state[price_key] < 0.01:
+                    st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
+                    
+                if share_key not in st.session_state or st.session_state[share_key] < 0.01:
+                    st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
-            # 2. Widgets über den Key steuern
-            st.number_input(
-                f"Tranche {index + 1} Entry Preis:",
-                min_value=0.01,
-                step=0.01,
-                key=price_key
-            )
+                # 2. Widgets über den Key steuern
+                st.number_input(
+                    f"Tranche {index + 1} Entry Preis:",
+                    min_value=0.01,
+                    step=0.01,
+                    key=price_key
+                )
+                
+                st.number_input(
+                    f"Tranche {index + 1} Share:",
+                    min_value=0.01,
+                    step=0.01,
+                    key=share_key
+                )
             
-            st.number_input(
-                f"Tranche {index + 1} Share:",
-                min_value=0.01,
-                step=0.01,
-                key=share_key
-            )
-            
-            # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
-            tranche.entry_level.price = st.session_state[price_key]
-            tranche.entry_level.position_share = st.session_state[share_key]
+                # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
+                tranche.entry_level.price = st.session_state[price_key]
+                tranche.entry_level.position_share = st.session_state[share_key]
 
-        #visualize
-        st.markdown("**Entry Levels:**")
+            elif mode == "TPs":
+                tp_price_key = f"tp_price_{index}"
+                tp_percent_key = f"tp_close_percent_{index}"
+
+                price = st.number_input(
+                    f"TP {index + 1} Preis:",
+                    min_value=0.01,
+                    step = 0.01,
+                    key = tp_price_key
+                )
+    
+                close_percent = st.number_input(
+                    f"TP {index + 1} Schließung (%):",
+                    min_value=0.0,
+                    max_value=100.0,
+                    step = 1.0,
+                    key = tp_percent_key
+                )
+                tranche.tp_target.price = st.session_state[tp_price_key]
+                tranche.tp_target.close_percent = st.session_state[tp_percent_key]
+
+        #visualize:
+        st.markdown("f**{mode} Levels:**")
         for tranche in trade.tranches:
-            st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
+            if mode == "Entries":
+                st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
+            elif mode == "TPs":
+                st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
 
     return trade.tranches
-
-#Analogy to render_lader_entries():
-def render_ladder_TPs(trade):
-    with st.expander("TPs"):
-        tp_col1, tp_col2 = st.columns(2)
-        with tp_col1:
-            if st.button("Weitere TP hinzufügen", key="add_tp_button"):
-                add_tp_target()
-        with tp_col2:
-            if st.button("TP entfernen", key="remove_tp_button"):
-                remove_tp_target()
-
-        for index, tranche in enumerate(trade.tranches):
-            tp_price_key = f"tp_price_{index}"
-            tp_percent_key = f"tp_close_percent_{index}"
-            price = st.number_input(
-                f"TP {index + 1} Preis:",
-                min_value=0.01,
-                step = 0.01,
-                key = tp_price_key
-            )
-
-            close_percent = st.number_input(
-                f"TP {index + 1} Schließung (%):",
-                min_value=0.0,
-                max_value=100.0,
-                step = 1.0,
-                key = tp_percent_key
-            )
-            tranche.tp_target.price = st.session_state[tp_price_key]
-            tranche.tp_target.close_percent = st.session_state[tp_percent_key]
-
-        #visualize
-        st.markdown("**Entry Levels:**")
-        for tranche in trade.tranches:
-            st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
-
-    return trade.tranches
-
 
 def overview_table(trade: Trade):
   tranche1 = trade.tranches[0]
