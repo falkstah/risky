@@ -212,10 +212,9 @@ def render_ladder_entries(trade):
             tranche.entry_level.position_share = st.session_state[share_key]
 
         #visualize
-        if trade.tranches.entry_level:
-            st.markdown("**Entry Levels:**")
-            for tranche in trade.tranches:
-                st.write(f"- Entry Level bei {tranche.entry_level.price} mit {tranche.entry_level.position_share}% Positionsanteil")
+        st.markdown("**Entry Levels:**")
+        for tranche in trade.tranches:
+            st.write(f"- Entry Level bei {tranche.entry_level.price} mit {tranche.entry_level.position_share}% Positionsanteil")
 
     return trade.tranches
 
