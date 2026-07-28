@@ -111,11 +111,11 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
             #building trade_paramters from session_state
             trade_parameters = Trade_Parameters(
                 liq_delta_to_SL_delta_ratio = st.session_state["input_liq_delta_to_SL_delta_ratio"],
-                total_risk=st.session_state["input_total_risk"],
-                maintainance_margin_rate=st.session_state["input_maintainance_margin_rate"],
-                maintainance_deduction=st.session_state["input_maintainance_deduction"],
-                total_max_lvg =st.session_state["input_total_max_lvg"],
-                total_max_margin =st.session_state["input_total_max_margin"],
+                total_risk = st.session_state["input_total_risk"],
+                maintainance_margin_rate = st.session_state["input_maintainance_margin_rate"],
+                maintainance_deduction = st.session_state["input_maintainance_deduction"],
+                total_max_lvg = st.session_state["input_total_max_lvg"],
+                total_max_margin = st.session_state["input_total_max_margin"],
                 p_SL = st.session_state["input_p_SL"],
                 trailing_SL_percent = st.session_state["input_trailing_SL_percent"],
                 pull_SL = st.session_state["input_pull_SL "],                        
