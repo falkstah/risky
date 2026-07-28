@@ -162,7 +162,7 @@ def fast_order_table(trade: Trade):
 
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-def render_ladders(trade, tranche):
+def render_ladders(trade):
     init_session_state()
     
     with st.container(border=True):
