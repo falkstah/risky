@@ -55,12 +55,6 @@ def remove_tp_target():
 
 def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
     with st.container(border=True):
-        st.subheader("🎯 Fast Order")
-        with st.expander("Fast Inputs"):
-            total_risk = st.number_input("total risk: ", min_value = 0, step = 1, key = "input_total_risk")
-            p_SL = st.number_input("SL: ", min_value=0.0, step=0.01, key = "input_p_SL")
-
-    with st.container(border=True):
         st.subheader("🎯 General Params")
         with st.expander("Main Inputs"):
             #rendering an assigning keys
@@ -113,6 +107,13 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
                 step=0.01,
                 key="input_current_sl_price",
             )
+
+    with st.container(border=True):
+            st.subheader("🎯 Fast Order")
+            with st.expander("Fast Inputs"):
+                total_risk = st.number_input("total risk: ", min_value = 0, step = 1, key = "input_total_risk")
+                p_SL = st.number_input("SL: ", min_value=0.0, step=0.01, key = "input_p_SL")
+
 
     #building trade_paramters from session_state
     trade_parameters = Trade_Parameters(
