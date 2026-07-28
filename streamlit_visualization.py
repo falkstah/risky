@@ -173,22 +173,19 @@ def render_ladders(trade):
 def render_ladder(trade, mode):
     with st.expander(f"Ladder {mode}"):
         #Managing ladder size for each mode
-        if mode == "Entries":
-            entry_col1, entry_col2 = st.columns(2)
-            with entry_col1:
-                if st.button("Weitere Entry hinzufügen", key="add_entry_button"):
+        entry_col1, entry_col2 = st.columns(2)
+        with entry_col1:
+            if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):
+                if mode == "Entries".
                     add_entry_target()
-            with entry_col2:
-                if st.button("Entry entfernen", key="remove_entry_button"):
-                    remove_entry_target()
-
-        elif mode == "TPs":
-            tp_col1, tp_col2 = st.columns(2)
-            with tp_col1:
-                if st.button("Weitere TP hinzufügen", key="add_tp_button"):
+                elif mode == "TPs":
                     add_tp_target()
-            with tp_col2:
-                if st.button("TP entfernen", key="remove_tp_button"):
+
+        with entry_col2:
+            if st.button(f"Entry entfernen", key="remove_entry_button"):
+                if mode == "Entries":
+                    remove_entry_target()
+                elif mode == "TPs":
                     remove_tp_target()
         
         #buildung input fields for each mode
