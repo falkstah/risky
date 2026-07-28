@@ -69,6 +69,7 @@ def sanitize_inputs(item):
           setattr(item, field_name, 0.0)
 
 def calculate_tranche_allocations(trade, tranche):
+  
   t = tranche.tranche_parameters
   p = trade.trade_parameters
   t.risk = fair_share(tranche, p.total_risk)
