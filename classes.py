@@ -77,6 +77,7 @@ class Trade:
     #classes
     trade_parameters: Trade_Parameters
     tranches: list[Tranche] = field(default_factory = list)
+    global_tp_targets: list[Take_Profit_Target] = field(default_factory = list)
 
 
     

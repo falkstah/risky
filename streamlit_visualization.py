@@ -167,7 +167,7 @@ def render_ladders(trade):
     with st.container(border=True):
         st.subheader("🎯 Entries & TPs")
         updated_trade = render_ladder(trade, "Entries")
-        updated_trade = render_ladder(updated_trade, "TPs")
+        updated_trade = render_ladder(updated_trade, "TPs_(tranche_bound)")
     return updated_trade
 
 def render_ladder(trade, mode):
@@ -178,14 +178,14 @@ def render_ladder(trade, mode):
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):
                 if mode == "Entries":
                     add_entry_target()
-                elif mode == "TPs":
+                elif mode == "TPs_(tranche_bound)":
                     add_tp_target()
 
         with entry_col2:
             if st.button(f"{mode} entfernen", key = f"remove_{mode}_button"):
                 if mode == "Entries":
                     remove_entry_target()
-                elif mode == "TPs":
+                elif mode == "TPs_(tranche_bound)":
                     remove_tp_target()
         
         #buildung input fields for each mode
@@ -220,7 +220,7 @@ def render_ladder(trade, mode):
                 tranche.entry_level.price = st.session_state[price_key]
                 tranche.entry_level.position_share = st.session_state[share_key]
 
-            elif mode == "TPs":
+            elif mode == "TPs_(tranche_bound)":
                 tp_price_key = f"tp_price_{index}"
                 tp_percent_key = f"tp_close_percent_{index}"
 
