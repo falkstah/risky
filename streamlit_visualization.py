@@ -54,60 +54,61 @@ def remove_tp_target():
 
 
 def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
-    print("General Trade Inputs")
-    with st.expander("Main Inputs"):
+    with st.container(border=True):
+        st.subheader("🎯 General Params")
+        with st.expander("Main Inputs"):
 
-        trade_parameters = Trade_Parameters(
-            liq_delta_to_SL_delta_ratio=st.number_input("liq_delta_to_SL_delta_ratio: ", min_value = 1.50, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio"),
-            total_risk=st.number_input("total risk: ", min_value = 0, step = 1, key = "input_total_risk"),
-            maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate"),
-            maintainance_deduction=st.number_input("maintainance_deduction: ", min_value = 0.0, step = 0.001, key = "input_maintainance_deduction"),
-            total_max_lvg =st.number_input("total max leverage: ", min_value = 1.0, step = 0.5, key = "input_total_max_lvg"),
-            total_max_margin =st.number_input("total max margin: ", min_value = 1.0, step = 1.0, key ="input_total_max_margin"),
-            p_SL = get_SL(),
+            trade_parameters = Trade_Parameters(
+                liq_delta_to_SL_delta_ratio=st.number_input("liq_delta_to_SL_delta_ratio: ", min_value = 1.50, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio"),
+                total_risk=st.number_input("total risk: ", min_value = 0, step = 1, key = "input_total_risk"),
+                maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate"),
+                maintainance_deduction=st.number_input("maintainance_deduction: ", min_value = 0.0, step = 0.001, key = "input_maintainance_deduction"),
+                total_max_lvg =st.number_input("total max leverage: ", min_value = 1.0, step = 0.5, key = "input_total_max_lvg"),
+                total_max_margin =st.number_input("total max margin: ", min_value = 1.0, step = 1.0, key ="input_total_max_margin"),
+                p_SL = get_SL(),
 
-            trailing_SL_percent = st.number_input(
-                "Trailing SL (%):",
-                min_value=0.0,
-                step=0.1,
-                key="input_trailing_SL_percent",
-            ),
+                trailing_SL_percent = st.number_input(
+                    "Trailing SL (%):",
+                    min_value=0.0,
+                    step=0.1,
+                    key="input_trailing_SL_percent",
+                ),
 
-            pull_SL = st.number_input(
-                "Pull SL Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_pull_SL",
-            ),
+                pull_SL = st.number_input(
+                    "Pull SL Preis:",
+                    min_value=0.0,
+                    step=0.01,
+                    key="input_pull_SL",
+                ),
 
-            
-            current_asset_price = st.number_input(
-                "Aktueller Asset-Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_current_asset_price",
-            ),
+                
+                current_asset_price = st.number_input(
+                    "Aktueller Asset-Preis:",
+                    min_value=0.0,
+                    step=0.01,
+                    key="input_current_asset_price",
+                ),
 
-            order_type = st.selectbox(
-                "Order Type:",
-                ["single limit", "single market", "single post only", "k1m6a box"],
-                key="input_order_type",
-            ),
+                order_type = st.selectbox(
+                    "Order Type:",
+                    ["single limit", "single market", "single post only", "k1m6a box"],
+                    key="input_order_type",
+                ),
 
-            buffer_SL = st.number_input(
-                "Buffer SL Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_buffer_SL",
-            ),
+                buffer_SL = st.number_input(
+                    "Buffer SL Preis:",
+                    min_value=0.0,
+                    step=0.01,
+                    key="input_buffer_SL",
+                ),
 
-            current_sl_price = st.number_input(
-                "Aktueller SL Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_current_sl_price",
+                current_sl_price = st.number_input(
+                    "Aktueller SL Preis:",
+                    min_value=0.0,
+                    step=0.01,
+                    key="input_current_sl_price",
+                )
             )
-        )
 
     return trade_parameters
 
