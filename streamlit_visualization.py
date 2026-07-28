@@ -214,7 +214,7 @@ def render_ladder_entries(trade):
         #visualize
         st.markdown("**Entry Levels:**")
         for tranche in trade.tranches:
-            st.write(f"- Entry Level bei {tranche.entry_level.price} mit {tranche.entry_level.position_share}% Positionsanteil")
+            st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
 
     return trade.tranches
 
@@ -252,10 +252,9 @@ def render_ladder_TPs(trade):
             tp_targets.append(Take_Profit_Target(price=price, close_percent= close_percent))
 
         #visualize
-        if trade.tranches.tp_target:
-            st.markdown("**Entry Levels:**")
-            for tranche in trade.tranches:
-                st.write(f"- Entry Level bei {tranche.tp_target.price} mit {tranche.tp_target.close_percent}% Positionsanteil")
+        st.markdown("**Entry Levels:**")
+        for tranche in trade.tranches:
+            st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
 
     return trade.tranches
 
