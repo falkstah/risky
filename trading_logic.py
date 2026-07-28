@@ -17,7 +17,7 @@ def calculate_all(trade: Trade, tranches):
   #1. calculate all tranche.tranche_parameters for each partial entry (ladder) of a trade with one given SL
   #entry meint ein ListenELement von entry_levels
   for tranche in trade.tranches:
-    tranche.tranche_parameters = calculate_tranche_allocations(trade)
+    tranche.tranche_parameters = calculate_tranche_allocations(trade, tranche)
 
     #Calculate:
     trade = calculate_initial_risk(trade, tranche)
@@ -67,7 +67,7 @@ def sanitize_inputs(item):
       except (TypeError, ValueError):
           setattr(item, field_name, 0.0)
 
-def calculate_tranche_allocations(trade):
+def calculate_tranche_allocations(trade, tranche):
   trade.parameters.risk = trade.tranche.tranche_parameters.position_share * trade.total_risk
   trade.parameters.max_margin = trade.tranche.tranche_parameters.position_share * trade.max_margin  #faktor buffer für überbeischerung wird in schleife für jeden entry einzeln eingebaut, nicht schon in trade
   #TPs are managed globally with FiFo principle (exchange standard)

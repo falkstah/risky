@@ -36,7 +36,7 @@ def main():
         trade_parameters = trade_parameters_init,
         tranches = [tranche_init]
     )
-    trade = calculate_all(trade, tranche_init)
+    #trade = calculate_all(trade, tranche_init)
     trade = streamlit_visualization.render_ladders(trade, tranche_init)
     trade = calculate_all(trade, tranche_init)
 
