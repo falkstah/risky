@@ -57,68 +57,78 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
     with st.container(border=True):
         st.subheader("🎯 General Params")
         with st.expander("Main Inputs"):
+            #rendering an assigning keys
+            liq_delta_to_SL_delta_ratio=st.number_input("liq_delta_to_SL_delta_ratio: ", min_value = 1.50, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio"),
+            total_risk=st.number_input("total risk: ", min_value = 0, step = 1, key = "input_total_risk"),
+            maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate"),
+            maintainance_deduction=st.number_input("maintainance_deduction: ", min_value = 0.0, step = 0.001, key = "input_maintainance_deduction"),
+            total_max_lvg =st.number_input("total max leverage: ", min_value = 1.0, step = 0.5, key = "input_total_max_lvg"),
+            total_max_margin =st.number_input("total max margin: ", min_value = 1.0, step = 1.0, key ="input_total_max_margin"),
+            p_SL = st.number_input("SL: ", min_value=0.0, step=0.01, key = "input_p_SL")
 
+            trailing_SL_percent = st.number_input(
+                "Trailing SL (%):",
+                min_value=0.0,
+                step=0.1,
+                key="input_trailing_SL_percent",
+            ),
+
+            pull_SL = st.number_input(
+                "Pull SL Preis:",
+                min_value=0.0,
+                step=0.01,
+                key="input_pull_SL",
+            ),
+
+            
+            current_asset_price = st.number_input(
+                "Aktueller Asset-Preis:",
+                min_value=0.0,
+                step=0.01,
+                key="input_current_asset_price",
+            ),
+
+            order_type = st.selectbox(
+                "Order Type:",
+                ["single limit", "single market", "single post only", "k1m6a box"],
+                key="input_order_type",
+            ),
+
+            buffer_SL = st.number_input(
+                "Buffer SL Preis:",
+                min_value=0.0,
+                step=0.01,
+                key="input_buffer_SL",
+            ),
+
+            current_sl_price = st.number_input(
+                "Aktueller SL Preis:",
+                min_value=0.0,
+                step=0.01,
+                key="input_current_sl_price",
+            )
+
+            #building trade_paramters from session_state
             trade_parameters = Trade_Parameters(
-                liq_delta_to_SL_delta_ratio=st.number_input("liq_delta_to_SL_delta_ratio: ", min_value = 1.50, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio"),
-                total_risk=st.number_input("total risk: ", min_value = 0, step = 1, key = "input_total_risk"),
-                maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate"),
-                maintainance_deduction=st.number_input("maintainance_deduction: ", min_value = 0.0, step = 0.001, key = "input_maintainance_deduction"),
-                total_max_lvg =st.number_input("total max leverage: ", min_value = 1.0, step = 0.5, key = "input_total_max_lvg"),
-                total_max_margin =st.number_input("total max margin: ", min_value = 1.0, step = 1.0, key ="input_total_max_margin"),
-                p_SL = get_SL(),
-
-                trailing_SL_percent = st.number_input(
-                    "Trailing SL (%):",
-                    min_value=0.0,
-                    step=0.1,
-                    key="input_trailing_SL_percent",
-                ),
-
-                pull_SL = st.number_input(
-                    "Pull SL Preis:",
-                    min_value=0.0,
-                    step=0.01,
-                    key="input_pull_SL",
-                ),
-
-                
-                current_asset_price = st.number_input(
-                    "Aktueller Asset-Preis:",
-                    min_value=0.0,
-                    step=0.01,
-                    key="input_current_asset_price",
-                ),
-
-                order_type = st.selectbox(
-                    "Order Type:",
-                    ["single limit", "single market", "single post only", "k1m6a box"],
-                    key="input_order_type",
-                ),
-
-                buffer_SL = st.number_input(
-                    "Buffer SL Preis:",
-                    min_value=0.0,
-                    step=0.01,
-                    key="input_buffer_SL",
-                ),
-
-                current_sl_price = st.number_input(
-                    "Aktueller SL Preis:",
-                    min_value=0.0,
-                    step=0.01,
-                    key="input_current_sl_price",
-                )
+                liq_delta_to_SL_delta_ratio = st.session_state["input_liq_delta_to_SL_delta_ratio"],
+                total_risk=st.session_state["input_total_risk"],
+                maintainance_margin_rate=st.session_state["input_maintainance_margin_rate"],
+                maintainance_deduction=st.session_state["input_maintainance_deduction"],
+                total_max_lvg =st.session_state["input_total_max_lvg"],
+                total_max_margin =st.session_state["input_total_max_margin"],
+                p_SL = st.session_state["input_p_SL"],
+                trailing_SL_percent = st.session_state["input_trailing_SL_percent"],
+                pull_SL = st.session_state["input_pull_SL "],                        
+                current_asset_price = st.session_state["input_current_asset_price"] ,              
+                order_type = st.session_state["input_order_type"]   ,            
+                buffer_SL = st.session_state["input_buffer_SL"],
+                current_sl_price = st.session_state["input_current_sl_price"]
             )
 
     return trade_parameters
 
-def get_SL():
-  p_SL = st.number_input("SL: ", min_value=0.0, step=0.01, key = "input_p_SL")
-  if p_SL is None or p_SL < 0:
-    p_SL = 0.0
-  return float(p_SL)
-
 def current_direction_label(current_direction):
+  
   if current_direction == "long":
     st.success("Long")
   elif current_direction == "short":
@@ -172,8 +182,8 @@ def render_ladder_entries(trade, tranche):
                 remove_entry_target()
 
         for index, tranche in enumerate(trade.tranches):
-            price_key = f"entry_price_{index}"
-            share_key = f"position_share_{index}"
+            price_key = f"input_entry_price_{index}"
+            share_key = f"input_position_share_{index}"
             
             # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
             if price_key not in st.session_state or st.session_state[price_key] < 0.01:
@@ -183,14 +193,14 @@ def render_ladder_entries(trade, tranche):
                 st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
             # 2. Widgets über den Key steuern
-            st.session_state[price_key] = st.number_input(
+            st.number_input(
                 f"Tranche {index + 1} Entry Preis:",
                 min_value=0.01,
                 step=0.01,
                 key=price_key
             )
             
-            st.session_state[share_key] = st.number_input(
+            st.number_input(
                 f"Tranche {index + 1} Share:",
                 min_value=0.01,
                 step=0.01,
