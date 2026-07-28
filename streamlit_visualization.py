@@ -218,6 +218,7 @@ def render_ladder_entries(trade):
 
     return trade.tranches
 
+#Analogy to render_lader_entries():
 def render_ladder_TPs(trade):
     with st.expander("TPs"):
         tp_col1, tp_col2 = st.columns(2)
@@ -228,28 +229,25 @@ def render_ladder_TPs(trade):
             if st.button("TP entfernen", key="remove_tp_button"):
                 remove_tp_target()
 
-        tp_targets: list[Take_Profit_Target] = []
-        for index, target in enumerate(st.session_state.tp_targets):
-            price_key = f"tp_price_{index}"
-            pct_key = f"_close_percent_{index}"
+        for index, tranche in enumerate(trade.tranches):
+            tp_price_key = f"tp_price_{index}"
+            tp_ercent_key = f"_close_percent_{index}"
             price = st.number_input(
                 f"TP {index + 1} Preis:",
-                value=target["price"],
                 min_value=0.01,
-                step=0.01,
-                key=price_key,
+                step = 0.01,
+                key = tp_price_key,
             )
 
             close_percent = st.number_input(
                 f"TP {index + 1} Schließung (%):",
-                value=target["close_percent"],
                 min_value=0.0,
                 max_value=100.0,
-                step=1.0,
-                key=pct_key,
+                step = 1.0,
+                key = tp_percent_key,
             )
-            st.session_state.tp_targets[index] = {"price": price, "close_percent": close_percent}
-            tp_targets.append(Take_Profit_Target(price=price, close_percent= close_percent))
+            tranche.tp_target.price = st.session_state["tp_price_key"]
+            tranche.tp_target.close_percent = st.session_state["tp_percent_key"]
 
         #visualize
         st.markdown("**Entry Levels:**")
