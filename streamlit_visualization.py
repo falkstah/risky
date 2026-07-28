@@ -30,6 +30,8 @@ def init_trade_inputs():
         st.session_state.pull_SL = 0.0
     if "order_type" not in st.session_state:
         st.session_state.order_type = "single limit"
+    if "current_asset_price" not  in st.session_state:
+                st.session_state.asset_price = 0.0
 
 
 def add_entry_target():
@@ -79,8 +81,10 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
             key="input_pull_SL",
         ),
 
+        
         current_asset_price = st.number_input(
             "Aktueller Asset-Preis:",
+
             value=st.session_state.current_asset_price,
             min_value=0.0,
             step=0.01,
