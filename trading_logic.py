@@ -27,6 +27,7 @@ def calculate_all(trade: Trade, tranches):
   return trade
 
 def sanitize_inputs(item):
+  
   if isinstance(item, Trade):
       field_names = [field.name for field in fields(Trade)]
       skip_fields = {"parameters", "entry_levels", "tp_targets", "order_type", "current_direction", "tp_active"}
