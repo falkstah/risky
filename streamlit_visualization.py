@@ -176,7 +176,7 @@ def render_ladder(trade, mode):
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):
-                if mode == "Entries".
+                if mode == "Entries":
                     add_entry_target()
                 elif mode == "TPs":
                     add_tp_target()
