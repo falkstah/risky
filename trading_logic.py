@@ -83,7 +83,7 @@ def calculate_tranche_allocations(trade, tranche):
 
 #Sharing rule (Trade -> Tranches):
 def fair_share(tranche, pool): 
-    return tranche.tranche_parameters.position_share * pool
+    return tranche.tranche_parameters.position_share * pool #(="risk- and potential-share")
 
 def calculate_initial_risk(trade: Trade, tranche):
 
