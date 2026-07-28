@@ -182,7 +182,7 @@ def render_ladder(trade, mode):
                     add_tp_target()
 
         with entry_col2:
-            if st.button(f"Entry entfernen", key="remove_entry_button"):
+            if st.button(f"{mode}} entfernen", key="remove_{mode}_button"):
                 if mode == "Entries":
                     remove_entry_target()
                 elif mode == "TPs":
