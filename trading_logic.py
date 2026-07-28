@@ -68,14 +68,14 @@ def sanitize_inputs(item):
           setattr(item, field_name, 0.0)
 
 def calculate_tranche_allocations(trade, tranche):
-  trade.parameters.risk = trade.tranche.tranche_parameters.position_share * trade.total_risk
-  trade.parameters.max_margin = trade.tranche.tranche_parameters.position_share * trade.max_margin  #faktor buffer für überbeischerung wird in schleife für jeden entry einzeln eingebaut, nicht schon in trade
+  tranche.tranche_parameters.risk = tranche.tranche_parameters.position_share * trade.total_risk
+  tranche.tranche_parameters.max_margin = tranche.trancheparameters.position_share * trade.trade_parameters.max_margin  #faktor buffer für überbeischerung wird in schleife für jeden entry einzeln eingebaut, nicht schon in trade
   #TPs are managed globally with FiFo principle (exchange standard)
 
   #SL is gloabal and same for all tranches at the moment, but can be changed later here
-  trade.parameters.p_SL = trade.p_SL
+  tranche.tranche_parameters.p_SL = trade.trade_parameters.p_SL
 
-  return trade.parameters
+  return tranche
 
 def calculate_initial_risk(trade: Trade, tranche):
 
