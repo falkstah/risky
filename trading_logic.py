@@ -17,7 +17,7 @@ def calculate_all(trade: Trade, tranches):
   #1. calculate all tranche.tranche_parameters for each partial entry (ladder) of a trade with one given SL
   #entry meint ein ListenELement von entry_levels
   for tranche in trade.tranches:
-    tranche.tranche_parameters = calculate_tranche_allocations(trade, tranche)
+    tranche = calculate_tranche_allocations(trade, tranche)
 
     #Calculate:
     trade = calculate_initial_risk(trade, tranche)
