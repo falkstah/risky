@@ -8,7 +8,7 @@ from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_P
 #import pandas_ta as ta
 
 #2. manage SL pulls and TPs for whole position
-def calculate_all(trade: Trade, tranches):
+def calculate_all(trade: Trade):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt tranche.tranche_parameters:
   sanitize_inputs(trade)
   sanitize_inputs(trade.trade_parameters)
@@ -175,19 +175,20 @@ def calculate_TP_delta(trade, tranche):
   #small partial TP1 allows: moving SL under previous Low to ain more buffer. 
   # This function calculates the tp1-size so that buffer_SL hit would stop trade out (p.ex. under a low) without a loss (by risking Tp1 gains)
   # (increae of V if buffer_SL is pulled further to entry could also be interesting, i.e. pyramid entry)
-def calculate_buffered_tp1_close_percent(trade: Trade, tranche):
-  entry = tranche.tranche_parameters.entry
-  tranche.tranche_parameters = tranche.tranche_parameters
-  entry.price = getattr(tranche.tranche_parameters, "entry.price", None)
-  p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
+def calculate_buffered_tp1_close_percent(trade: Trade):
+  tranche1 = trade.tranches[0]
+  entry = tranche1.entry_level.price
+  tranche1.tranche_parameters = tranche1.tranche_parameters
+  entry = getattr(tranche1.tranche_parameters, "entry.price", None)
+  p_TP = getattr(tranche1.tranche_parameters, "p_TP", None)
   buffer_SL = getattr(trade, "buffer_SL", None)
 
   #useless when it will be included in sanitier:
-  if entry.price is None or p_TP is None or buffer_SL is None:
+  if entry is None or p_TP is None or buffer_SL is None:
     raise ValueError("Entry price, TP price and buffer SL must be set.")
 
-  TP_delta = tranche.tranche_parameters.TP_delta
-  buffer_delta = abs(buffer_SL - entry.price)
+  TP_delta = tranche1.tranche_parameters.TP_delta
+  buffer_delta = abs(buffer_SL - entry)
 
   if TP_delta == 0.0:
     raise ValueError("TP price must differ from entry price.")
@@ -195,11 +196,11 @@ def calculate_buffered_tp1_close_percent(trade: Trade, tranche):
     return 0.0
 
   # Buffer SL must be on the correct side of entry for the trade direction.
-  if tranche.tranche_parameters.current_direction is None:
-    tranche.tranche_parameters.current_direction = get_trade_direction(trade, tranche)
-  if tranche.tranche_parameters.current_direction == "long" and buffer_SL >= entry.price:
+  if tranche1.tranche_parameters.current_direction is None:
+    tranche1.tranche_parameters.current_direction = get_trade_direction(trade, tranche1)
+  if tranche1.tranche_parameters.current_direction == "long" and buffer_SL >= entry.price:
     raise ValueError("Buffer SL must be below entry for a long trade.")
-  if tranche.tranche_parameters.current_direction == "short" and buffer_SL <= entry.price:
+  if tranche1.tranche_parameters.current_direction == "short" and buffer_SL <= entry.price:
     raise ValueError("Buffer SL must be above entry for a short trade.")
 
   #profit(TP1) = close_fraction * n_pos_value * (TP1 - entry.price)
