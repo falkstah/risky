@@ -163,13 +163,12 @@ def fast_order_table(trade: Trade):
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
 def render_ladders(trade):
-    init_session_state()
     
     with st.container(border=True):
         st.subheader("🎯 Entries & TPs")
-        render_ladder(trade, "Entries")
-        render_ladder(trade, "TPs")
-    return trade
+        updated_trade = render_ladder(trade, "Entries")
+        updated_trade = render_ladder(updated_trade, "TPs")
+    return updated_trade
 
 def render_ladder(trade, mode):
     with st.expander(f"Ladder {mode}"):
@@ -253,7 +252,7 @@ def render_ladder(trade, mode):
             elif mode == "TPs":
                 st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
 
-    return trade.tranches
+    return trade
 
 def overview_table(trade: Trade):
   tranche1 = trade.tranches[0]
