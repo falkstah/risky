@@ -245,7 +245,7 @@ def render_ladder(trade, mode):
                 tranche.tp_target.close_percent = st.session_state[tp_percent_key]
 
         #visualize:
-        st.markdown("f**{mode} Levels:**")
+        st.markdown(f"**{mode} Levels:**")
         for tranche in trade.tranches:
             if mode == "Entries":
                 st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
