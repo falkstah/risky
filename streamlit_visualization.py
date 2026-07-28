@@ -13,7 +13,7 @@ st.text("Optimized for execution speed.")
 
 #trade specific values
 
-def init_trade_inputs():
+def init_session_state():
     if "entry_levels" not in st.session_state:
         st.session_state.entry_levels = [{"price": 0.0, "margin_percent": 0.0}]
     if "tp_targets" not in st.session_state:
@@ -54,7 +54,7 @@ def remove_tp_target():
 
 def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
     print("Enter parameters: ")
-    init_trade_inputs()
+    init_session_state()
 
     trade_parameters = Trade_Parameters(
         liq_delta_to_SL_delta_ratio=float(st.number_input("liq_delta_to_SL_delta_ratio: ", value = 4.00, min_value = 1.50, step = 0.25)),
@@ -158,7 +158,7 @@ def fast_order_table(trade: Trade):
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
 def render_ladders(trade, tranche):
-    init_trade_inputs()
+    init_session_state()
     
     with st.container(border=True):
         st.subheader("🎯 Entries & TPs")

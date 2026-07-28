@@ -12,6 +12,7 @@ import streamlit_visualization
 
 def main():
     #Init:
+    streamlit_visualization.init_session_state()
     # init keys:
     if "key" not in st.session_state:
         st.session_state["key"] = 0
