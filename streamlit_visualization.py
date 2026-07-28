@@ -64,7 +64,7 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
             maintainance_deduction=st.number_input("maintainance_deduction: ", min_value = 0.0, step = 0.001, key = "input_maintainance_deduction"),
             total_max_lvg =st.number_input("total max leverage: ", min_value = 1.0, step = 0.5, key = "input_total_max_lvg"),
             total_max_margin =st.number_input("total max margin: ", min_value = 1.0, step = 1.0, key ="input_total_max_margin"),
-            p_SL = st.number_input("SL: ", min_value=0.0, step=0.01, key = "input_p_SL")
+            p_SL = st.number_input("SL: ", min_value=0.0, step=0.01, key = "input_p_SL"),
 
             trailing_SL_percent = st.number_input(
                 "Trailing SL (%):",
@@ -75,9 +75,9 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
 
             pull_SL = st.number_input(
                 "Pull SL Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_pull_SL",
+                min_value = 0.0,
+                step = 0.01,
+                key = "input_pull_SL",
             ),
 
             
@@ -118,7 +118,7 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
                 total_max_margin = st.session_state["input_total_max_margin"],
                 p_SL = st.session_state["input_p_SL"],
                 trailing_SL_percent = st.session_state["input_trailing_SL_percent"],
-                pull_SL = st.session_state["input_pull_SL "],                        
+                pull_SL = st.session_state["input_pull_SL"],                        
                 current_asset_price = st.session_state["input_current_asset_price"] ,              
                 order_type = st.session_state["input_order_type"]   ,            
                 buffer_SL = st.session_state["input_buffer_SL"],
