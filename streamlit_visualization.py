@@ -231,7 +231,7 @@ def render_ladder_TPs(trade):
 
         for index, tranche in enumerate(trade.tranches):
             tp_price_key = f"tp_price_{index}"
-            tp_percent_key = f"_close_percent_{index}"
+            tp_percent_key = f"tp_close_percent_{index}"
             price = st.number_input(
                 f"TP {index + 1} Preis:",
                 min_value=0.01,
@@ -246,8 +246,8 @@ def render_ladder_TPs(trade):
                 step = 1.0,
                 key = tp_percent_key
             )
-            tranche.tp_target.price = st.session_state["tp_price_key"]
-            tranche.tp_target.close_percent = st.session_state["tp_percent_key"]
+            tranche.tp_target.price = st.session_state[tp_price_key]
+            tranche.tp_target.close_percent = st.session_state[tp_percent_key]
 
         #visualize
         st.markdown("**Entry Levels:**")
