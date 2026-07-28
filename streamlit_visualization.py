@@ -108,22 +108,22 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
                 key="input_current_sl_price",
             )
 
-            #building trade_paramters from session_state
-            trade_parameters = Trade_Parameters(
-                liq_delta_to_SL_delta_ratio = st.session_state["input_liq_delta_to_SL_delta_ratio"],
-                total_risk = st.session_state["input_total_risk"],
-                maintainance_margin_rate = st.session_state["input_maintainance_margin_rate"],
-                maintainance_deduction = st.session_state["input_maintainance_deduction"],
-                total_max_lvg = st.session_state["input_total_max_lvg"],
-                total_max_margin = st.session_state["input_total_max_margin"],
-                p_SL = st.session_state["input_p_SL"],
-                trailing_SL_percent = st.session_state["input_trailing_SL_percent"],
-                pull_SL = st.session_state["input_pull_SL"],                        
-                current_asset_price = st.session_state["input_current_asset_price"] ,              
-                order_type = st.session_state["input_order_type"]   ,            
-                buffer_SL = st.session_state["input_buffer_SL"],
-                current_sl_price = st.session_state["input_current_sl_price"]
-            )
+    #building trade_paramters from session_state
+    trade_parameters = Trade_Parameters(
+        liq_delta_to_SL_delta_ratio = st.session_state["input_liq_delta_to_SL_delta_ratio"],
+        total_risk = st.session_state["input_total_risk"],
+        maintainance_margin_rate = st.session_state["input_maintainance_margin_rate"],
+        maintainance_deduction = st.session_state["input_maintainance_deduction"],
+        total_max_lvg = st.session_state["input_total_max_lvg"],
+        total_max_margin = st.session_state["input_total_max_margin"],
+        p_SL = st.session_state["input_p_SL"],
+        trailing_SL_percent = st.session_state["input_trailing_SL_percent"],
+        pull_SL = st.session_state["input_pull_SL"],                        
+        current_asset_price = st.session_state["input_current_asset_price"] ,              
+        order_type = st.session_state["input_order_type"]   ,            
+        buffer_SL = st.session_state["input_buffer_SL"],
+        current_sl_price = st.session_state["input_current_sl_price"]
+    )
 
     return trade_parameters
 
@@ -170,7 +170,7 @@ def render_ladders(trade):
         updated_trade = render_ladder(updated_trade, "TPs_(tranche_bound)")
     return updated_trade
 
-def render_ladder(trade, mode):
+def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
     with st.expander(f"Ladder {mode}"):
         #Managing ladder size for each mode
         entry_col1, entry_col2 = st.columns(2)
