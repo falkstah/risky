@@ -37,7 +37,7 @@ def main():
         tranches = [tranche_init]
     )
     #trade = calculate_all(trade, tranche_init)
-    trade = streamlit_visualization.render_ladders(trade)
+    trade.tranches = streamlit_visualization.render_ladders(trade)
     trade = calculate_all(trade, tranche_init)
 
     # st.session_state["trade"] prevents overwriting after calculate_all()
