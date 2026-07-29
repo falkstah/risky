@@ -159,19 +159,33 @@ def fast_order_table(trade: Trade):
 def render_ladders(trade):
     
     with st.container(border=True):
-        st.subheader("🎯 Entries & TPs")
+        st.subheader("🎯 Entries")
+        #entries
         updated_trade = render_ladder(trade, "Entries")
-        updated_trade = render_ladder(updated_trade, "TPs_(tranche_bound)")
-        updated_trade = render_ladder(updated_trade, "global_TPs")
+
+        st.subheader("🎯 TPs")
+        
+        updated_trade.trade_parameters.tp_mode = st.radio(
+            "Choose TP mode:",
+            options = ["global_TPs", "tranche_bound_TPs"],
+            key = "TP_radio"
+        )
+        #TP-Ladder mode
+        mode = updated_trade.trade_parameters.tp_mode
+        if mode == "global_TPs":
+            updated_trade = render_ladder(updated_trade, "global_TPs")
+        elif mode == "tranche_bound_TPs":
+            updated_trade = render_ladder(updated_trade, "tranche_bound_TPs")
+
     return updated_trade
 
-def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
+def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     with st.expander(f"Ladder {mode}"):
         #Managing ladder size for each mode
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
-                if mode == "Entries" or "TPs_(tranche_bound)":
+                if mode == "Entries" or "tranche_bound_TPs":
                     add_tranche()
                 elif mode == "global TPs":
                     add_global_tp_target()
@@ -180,11 +194,11 @@ def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
             if st.button(f"{mode} entfernen", key = f"remove_{mode}_button"):
                 if mode == "global_TPs":
                     remove_global_tp_target()
-                elif mode == "Entries" or "TPs_(tranche_bound)":
+                elif mode == "Entries" or "tranche_bound_TPs":
                     remove_tranche()
         
         #buildung input fields for each mode
-        if mode == "Entries" or "TPs_(tranche_bound)":
+        if mode == "Entries" or "tranche_bound_TPs":
             for index, tranche in enumerate(trade.tranches):
                 if mode == "Entries":
                     price_key = f"input_entry_price_{index}"
@@ -216,7 +230,7 @@ def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
                     tranche.entry_level.price = st.session_state[price_key]
                     tranche.entry_level.position_share = st.session_state[share_key]
 
-                elif mode == "TPs_(tranche_bound)":
+                elif mode == "tranche_bound_TPs":
                     tp_price_key = f"tp_price_{index}"
                     tp_percent_key = f"tp_close_percent_{index}"
 

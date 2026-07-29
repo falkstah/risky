@@ -72,6 +72,7 @@ class Trade_Parameters:
     p_SL: float = 0.0
     total_potential_trade_profit: float = 0.0
     total_pos_size: float = 0.0
+    tp_mode: Literal["global_TPs", "tranche_bound_TPs"] = "global_TPs"
 
 @dataclass
 class Trade:
