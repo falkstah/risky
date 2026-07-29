@@ -247,8 +247,45 @@ def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
 
 
         elif mode == "global_TPs":
-            
+            for index, tranche in enumerate(trade.tranches):
+                if mode == "Entries":
+                    price_key = f"input_entry_price_{index}"
+                    share_key = f"input_position_share_{index}"
+                    
+                    # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
+                    if price_key not in st.session_state or st.session_state[price_key] < 0.01:
+                        st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
+                        
+                    if share_key not in st.session_state or st.session_state[share_key] < 0.01:
+                        st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
+                    # 2. Widgets über den Key steuern
+                    st.number_input(
+                        f"Tranche {index + 1} Entry Preis:",
+                        min_value=0.01,
+                        step=0.01,
+                        key=price_key
+                    )
+                    
+                    st.number_input(
+                        f"Tranche {index + 1} Share:",
+                        min_value=0.01,
+                        step=0.01,
+                        key=share_key
+                    )
+                
+                    # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
+                    tranche.entry_level.price = st.session_state[price_key]
+                    tranche.entry_level.position_share = st.session_state[share_key]
+                        
+            #visualize:
+            st.markdown(f"**{mode} Levels:**")
+            for tranche in trade.tranches:
+                if mode == "Entries":
+                    st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
+                elif mode == "TPs":
+                    st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
+            
     return trade
 
 def overview_table(trade: Trade):
