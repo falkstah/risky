@@ -72,6 +72,8 @@ def calculate_tranche_allocations(trade, tranche):
   p = trade.trade_parameters  
   t = tranche.tranche_parameters
 
+  #max_lvg copying:
+  t.max_lvg = share_total_max_lvg(trade, tranche)
   #risk and margin sharing
   t.risk = fair_share(tranche, p.total_risk)
   t.max_margin = fair_share(tranche, p.total_max_margin)  #faktor buffer für überbeischerung wird in schleife für jeden entry einzeln eingebaut, nicht schon in trade
@@ -239,6 +241,9 @@ def calculate_initial_margin_rate(lvg):
 #live calculation; sign matches trade direction, abs(n_pos_value) is used for position calculations that do not depend on direction
 def calculate_n_pos_value(trade, tranche):
   return tranche.tranche_parameters.dirsign * tranche.tranche_parameters.risk / tranche.tranche_parameters.rel_risk # = initial_margin * lvg - thus couples lvg and initial_margin; n_pos_value < 0 <==> short
+
+def share_total_max_lvg(trade, tranche):
+  return trade.trade_parameters.max_lvg
 
 def calculate_max_lvg(trade, tranche):
   return math.floor(1 / tranche.tranche_parameters.maintainance_margin_rate)
