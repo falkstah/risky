@@ -107,16 +107,16 @@ def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Par
 
             buffer_SL = st.number_input(
                 "Buffer SL Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_buffer_SL",
+                min_value = 0.0,
+                step = 0.01,
+                key = "input_buffer_SL",
             )
 
             current_sl_price = st.number_input(
                 "Aktueller SL Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_current_sl_price",
+                min_value = 0.0,
+                step = 0.01,
+                key = "input_current_sl_price",
             )
 
     with st.container(border=True):
