@@ -13,7 +13,7 @@ import streamlit_visualization
 def main():
     #Init:
     streamlit_visualization.init_session_state()
-    streamlit_visualization.Intro()
+    streamlit_visualization.intro()
 
     #gets trade von session_state
     trade = streamlit_visualization.get_trade()
