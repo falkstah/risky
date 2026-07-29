@@ -22,6 +22,7 @@ def init_session_state():
     if "key" not in st.session_state:
             st.session_state["key"] = 0
 
+#Start Info
 def intro():
     st.title("Too_Risky - Crypto live lvg and liquidation manager")
     st.text("Opimized for execution speed.")

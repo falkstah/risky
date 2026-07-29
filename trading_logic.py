@@ -1,7 +1,7 @@
 #for calculations
 import math
 import numbers
-from dataclasses import fields
+from dataclasses import dataclass, fields
 import pandas as pd
 from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 #import ccxt

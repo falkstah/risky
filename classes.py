@@ -49,9 +49,9 @@ class Tranche_Parameters:
 @dataclass
 class Tranche:
     #classes
-    tranche_parameters: Tranche_Parameters = Tranche_Parameters()
-    tp_target: Take_Profit_Target = Take_Profit_Target()
-    entry_level: Entry_Level = Entry_Level()
+    tranche_parameters: Tranche_Parameters = field(default_factory = Tranche_Parameters)
+    tp_target: Take_Profit_Target = field(default_factory = Take_Profit_Target)
+    entry_level: Entry_Level = field(default_factory = Entry_Level)
 
 @dataclass
 class Trade_Parameters:
@@ -76,7 +76,7 @@ class Trade_Parameters:
 @dataclass
 class Trade:
     #classes
-    trade_parameters: Trade_Parameters = Trade_Parameters()
+    trade_parameters: Trade_Parameters = field(default_factory = Trade_Parameters)
     tranches: list[Tranche] = field(default_factory = list)
     global_tp_targets: list[Take_Profit_Target] = field(default_factory = list)
 
