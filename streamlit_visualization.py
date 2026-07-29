@@ -198,14 +198,14 @@ def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
                         st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
                     # 2. Widgets über den Key steuern
-                    st.number_input(
+                    tranche.entry_level.price = st.number_input(
                         f"Tranche {index + 1} Entry Preis:",
                         min_value=0.01,
                         step=0.01,
                         key=price_key
                     )
                     
-                    st.number_input(
+                    tranche.entry_level.position_share = st.number_input(
                         f"Tranche {index + 1} Share:",
                         min_value=0.01,
                         step=0.01,
@@ -220,22 +220,24 @@ def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
                     tp_price_key = f"tp_price_{index}"
                     tp_percent_key = f"tp_close_percent_{index}"
 
-                    price = st.number_input(
+                    tranche.tp_target.price = st.number_input(
                         f"TP {index + 1} Preis:",
                         min_value=0.01,
                         step = 0.01,
                         key = tp_price_key
                     )
         
-                    close_percent = st.number_input(
+                    tranche.tp_target.close_percent = st.number_input(
                         f"TP {index + 1} Schließung (%):",
                         min_value=0.0,
                         max_value=100.0,
                         step = 1.0,
                         key = tp_percent_key
                     )
-                    tranche.tp_target.price = st.session_state[tp_price_key]
-                    tranche.tp_target.close_percent = st.session_state[tp_percent_key]
+
+                    #useless:
+                    #tranche.tp_target.price = st.session_state[tp_price_key]
+                    #tranche.tp_target.close_percent = st.session_state[tp_percent_key]
             
             #visualize:
             st.markdown(f"**{mode} Levels:**")
@@ -247,44 +249,41 @@ def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
 
 
         elif mode == "global_TPs":
-            for index, tranche in enumerate(trade.tranches):
-                if mode == "Entries":
-                    price_key = f"input_entry_price_{index}"
-                    share_key = f"input_position_share_{index}"
-                    
-                    # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
-                    if price_key not in st.session_state or st.session_state[price_key] < 0.01:
-                        st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
-                        
-                    if share_key not in st.session_state or st.session_state[share_key] < 0.01:
-                        st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
-
-                    # 2. Widgets über den Key steuern
-                    st.number_input(
-                        f"Tranche {index + 1} Entry Preis:",
-                        min_value=0.01,
-                        step=0.01,
-                        key=price_key
-                    )
-                    
-                    st.number_input(
-                        f"Tranche {index + 1} Share:",
-                        min_value=0.01,
-                        step=0.01,
-                        key=share_key
-                    )
+            for index, tp in enumerate(trade.global_tp_targets):
+                global_price_key = f"input_global_entry_price_{index}"
+                global_share_key = f"input_global_position_share_{index}"
                 
-                    # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
-                    tranche.entry_level.price = st.session_state[price_key]
-                    tranche.entry_level.position_share = st.session_state[share_key]
+                # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
+                if price_key not in st.session_state or st.session_state[global_price_key] < 0.01:
+                    st.session_state[flobal_price_key] = max(0.01, float(tranche.entry_level.price))
+                    
+                if share_key not in st.session_state or st.session_state[global_share_key] < 0.01:
+                    st.session_state[global_share_key] = max(0.01, float(tranche.entry_level.position_share))
+
+                # 2. Widgets über den Key steuern
+                tp.price = st.number_input(
+                    f" {index + 1}. TP target:",
+                    min_value = 0.01,
+                    step = 0.01,
+                    key = global_price_key
+                )
+                
+                tp.close_percent = st.number_input(
+                    f"TP{index + 1} Share:",
+                    min_value = 0.01,
+                    step = 0.01,
+                    key = global_share_key
+                )
+            
+                # now useless: 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
+                #tp.price = st.session_state[global_price_key]
+                #tp.close_percent = st.session_state[global_share_key]
                         
             #visualize:
             st.markdown(f"**{mode} Levels:**")
-            for tranche in trade.tranches:
-                if mode == "Entries":
-                    st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
-                elif mode == "TPs":
-                    st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
+            for tp in trade.global_tp_targets:
+                    st.write(f"Closing {tp.position_share}% of the full position size at {tp.price}$.")
+
             
     return trade
 
