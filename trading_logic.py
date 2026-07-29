@@ -167,12 +167,12 @@ def calculate_SL_delta(trade, tranche):
   return abs(entry.price - p_SL)
 
 def calculate_TP_delta(trade, tranche):
-  entry = tranche.tranche_parameters.entry
-  entry.price = getattr(tranche.tranche_parameters, "entry.price", None)
+  entry = tranche.entry_level.price
+  entry = getattr(tranche.tranche_parameters, "entry.price", None)
   p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
-  if entry.price is None or p_TP is None:
+  if entry is None or p_TP is None:
     raise ValueError("Entry price and Take Profit price must both be set.")
-  return abs(entry.price - p_TP)
+  return abs(entry - p_TP)
 
   #small partial TP1 allows: moving SL under previous Low to ain more buffer. 
   # This function calculates the tp1-size so that buffer_SL hit would stop trade out (p.ex. under a low) without a loss (by risking Tp1 gains)
