@@ -14,24 +14,35 @@ st.text("Optimized for execution speed.")
 #trade specific values
 
 def init_session_state():
-    if "entry_levels" not in st.session_state:
-        st.session_state.entry_levels = [{"price": 0.0, "margin_percent": 0.0}]
-    if "tp_targets" not in st.session_state:
-        st.session_state.tp_targets = [{"price": 0.0, "close_percent": 0.0}]
-    if "trailing_SL_percent" not in st.session_state:
-        st.session_state.trailing_SL_percent = 0.0
-    if "current_price" not in st.session_state:
-        st.session_state.current_price = 0.0
+    #trade parameters inputs init:
+    if "input_liq_delta_to_SL_delta_ratio" not in st.session_state:
+        st.session_state.input_liq_delta_to_SL_delta_ratio = 0.0
+    if "input_total_risk" not in st.session_state:
+        st.session_state.input_total_risk = 0.0
+    if "input_maintainance_margin_rate" not in st.session_state:
+        st.session_state.input_maintainance_margin_rate = 0.0
+    if "input_maintainance_deduction" not in st.session_state:
+            st.session_state.input_maintainance_deduction = 0.0
+    if "input_total_max_lvg" not in st.session_state:
+            st.session_state.input_total_max_lvg = 0.0
+    if "input_total_max_margin" not in st.session_state:
+            st.session_state.input_total_max_margin = 0.0
+    if "input_p_SL" not in st.session_state:
+            st.session_state.input_p_SL = 0.0
+    if "input_" not in st.session_state:
+            st.session_state.input_ = 0.0
+    if "input_trailing_SL_percent" not in st.session_state:
+            st.session_state.trailing_SL_percent = 0.0
+    if "input_pull_SL" not in st.session_state:
+            st.session_state.pull_SL = 0.0
+    if "input_current_asset_price" not in st.session_state:
+            st.session_state.input_current_asset_price = 0.0
+    if "input_order_type" not in st.session_state:
+        st.session_state.input_order_type = "single limit"
     if "buffer_SL" not in st.session_state:
-        st.session_state.buffer_SL = 0.0
+            st.session_state.buffer_SL = 0.0
     if "buffer_SL_close_pct" not in st.session_state:
         st.session_state.buffer_SL_close_pct = 0.0
-    if "pull_SL" not in st.session_state:
-        st.session_state.pull_SL = 0.0
-    if "order_type" not in st.session_state:
-        st.session_state.order_type = "single limit"
-    if "current_asset_price" not  in st.session_state:
-                st.session_state.asset_price = 0.0
 
 
 def add_entry_target():
