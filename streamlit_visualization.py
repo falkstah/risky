@@ -15,61 +15,50 @@ st.text("Optimized for execution speed.")
 
 def init_session_state():
     #trade parameters inputs init:
-    if "input_liq_delta_to_SL_delta_ratio" not in st.session_state:
-        st.session_state.input_liq_delta_to_SL_delta_ratio = 0.0
-    if "input_total_risk" not in st.session_state:
-        st.session_state.input_total_risk = 0.0
-    if "input_maintainance_margin_rate" not in st.session_state:
-        st.session_state.input_maintainance_margin_rate = 0.0
-    if "input_maintainance_deduction" not in st.session_state:
-            st.session_state.input_maintainance_deduction = 0.0
-    if "input_total_max_lvg" not in st.session_state:
-            st.session_state.input_total_max_lvg = 0.0
-    if "input_total_max_margin" not in st.session_state:
-            st.session_state.input_total_max_margin = 0.0
-    if "input_p_SL" not in st.session_state:
-            st.session_state.input_p_SL = 0.0
-    if "input_" not in st.session_state:
-            st.session_state.input_ = 0.0
-    if "input_trailing_SL_percent" not in st.session_state:
-            st.session_state.trailing_SL_percent = 0.0
-    if "input_pull_SL" not in st.session_state:
-            st.session_state.pull_SL = 0.0
-    if "input_current_asset_price" not in st.session_state:
-            st.session_state.input_current_asset_price = 0.0
-    if "input_order_type" not in st.session_state:
-        st.session_state.input_order_type = "single limit"
-    if "buffer_SL" not in st.session_state:
-            st.session_state.buffer_SL = 0.0
-    if "buffer_SL_close_pct" not in st.session_state:
-        st.session_state.buffer_SL_close_pct = 0.0
+    #uses trade_defaults of classes.py class
+    if "input_trade" not in st.session_state:
+        st.session_state.input_trade = Trade()
 
+    if "key" not in st.session_state:
+            st.session_state["key"] = 0
 
+def Intro():
+    st.title("Too_Risky - Crypto live lvg and liquidation manager")
+    st.text("Opimized for execution speed.")
+
+def get_trade():
+    return st.session_state.input_trade
+
+#globale init, wird nicht für jede tranche ausgeführt
 def add_entry_target():
-    st.session_state.entry_levels.append({"price": 0.0, "margin_percent": 0.0})
+    trade = st.session_state.input_trade
+    trade.append(Entry_Level())
 
 
 def remove_entry_target():
     if len(st.session_state.entry_levels) > 1:
-        st.session_state.entry_levels.pop()
+        trade = st.session_state.input_trade
+        trade.entry_levels.pop()
 
 
 def add_tp_target():
-    
-    st.session_state.tp_targets.append({"price": 0.0, "close_percent": 50.0})
+    trade = st.session_state.input_trade
+    trade.append(Take_Profit_Target())
 
 
 def remove_tp_target():
     if len(st.session_state.tp_targets) > 1:
-        st.session_state.tp_targets.pop()
+        trade = st.session_state.input_trade
+        trade.tp_targets.pop()
 
 
-def get_trade_parameters() -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
+def get_trade_parameters(trade) -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
     with st.container(border=True):
         st.subheader("🎯 General Params")
         with st.expander("Main Inputs"):
             #rendering an assigning keys
-            liq_delta_to_SL_delta_ratio = st.number_input("liq_delta_to_SL_delta_ratio: ", min_value = 1.50, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio")
+            t = trade.trade_parameters
+            liq_delta_to_SL_delta_ratio = st.number_input("liq_delta_to_SL_delta_ratio: ", vlue = trade.min_value = 1.50, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio")
             #total_risk=st.number_input("total risk: ", min_value = 0, step = 1, key = "input_total_risk")
             maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate")
             maintainance_deduction=st.number_input("maintainance_deduction: ", min_value = 0.0, step = 0.001, key = "input_maintainance_deduction")

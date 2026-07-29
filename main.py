@@ -13,31 +13,16 @@ import streamlit_visualization
 def main():
     #Init:
     streamlit_visualization.init_session_state()
-    # init keys:
-    if "key" not in st.session_state:
-        st.session_state["key"] = 0
+    streamlit_visualization.Intro()
 
-    st.title("Too_Risky - Crypto live lvg and liquidation manager")
-    st.text("Opimized for execution speed.")
+    #gets trade von session_state
+    trade = streamlit_visualization.get_trade()
 
-    #init Tranche:
-    tranche_parameters_init = Tranche_Parameters()
-    entry_level_init = Entry_Level()
-    tp_init = Take_Profit_Target()
-    tranche_init = Tranche(
-        tranche_parameters = tranche_parameters_init,
-        entry_level = entry_level_init,
-        tp_target = tp_init
-    )
-
-    #init Trade:
-    trade_parameters_init = streamlit_visualization.get_trade_parameters()
-    trade = Trade(
-        trade_parameters = trade_parameters_init,
-        tranches = [tranche_init]
-    )
-    #trade = calculate_all(trade, tranche_init)
+    #Assign Values to trade
+    trade_parameters_init = streamlit_visualization.get_trade_parameters(trade)
     trade = streamlit_visualization.render_ladders(trade)
+
+    #Do the Math
     trade = calculate_all(trade)
 
     # st.session_state["trade"] prevents overwriting after calculate_all()
