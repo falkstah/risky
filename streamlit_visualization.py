@@ -31,27 +31,26 @@ def intro():
 def get_trade():
     return st.session_state.input_trade
 
-#globale init, wird nicht für jede tranche ausgeführt
-def add_entry_target():
+#last list element (hence tp/entry) will be popped, as is intuitiv
+def add_tranche():
     trade = st.session_state.input_trade
-    trade.append(Entry_Level())
+    trade.tranches.append(Tranche())
+    #tranche bound entry und TP created by tranche appendix as well
 
-
-def remove_entry_target():
-    if len(st.session_state.entry_levels) > 1:
+def remove_tranche():
+    if len(st.session_state.trade.tranches) > 1:
         trade = st.session_state.input_trade
-        trade.entry_levels.pop()
+        trade.tranches.pop()
+        #tranche bound entry and tp get popped with the tranche pop as well
 
-
-def add_tp_target():
+def add_global_tp_target():
     trade = st.session_state.input_trade
-    trade.append(Take_Profit_Target())
+    trade.global_tp_targets.append(Take_Profit_Target())
 
-
-def remove_tp_target():
-    if len(st.session_state.tp_targets) > 1:
+def remove_global_tp_target():
+    if len(st.session_state.global_tp_targets) > 1:
         trade = st.session_state.input_trade
-        trade.tp_targets.pop()
+        trade.global_tp_targets.pop()
 
 
 def get_trade_parameters(trade) -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
@@ -65,7 +64,7 @@ def get_trade_parameters(trade) -> Trade_Parameters: #forces Object of Type Trad
             t.maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", value = t.maintainance_margin_rate,  min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate")
             t.maintainance_deduction=st.number_input("maintainance_deduction: ", value = t.maintainance_deduction, min_value = 0.0, step = 0.001, key = "input_maintainance_deduction")
             t.total_max_lvg = st.number_input("total_max_lvg: ", value = t.total_max_lvg if t.total_max_lvg >= 0 else 0.0, min_value = 0.0, step = 0.5, key = "input_total_max_lvg")
-            t.total_max_margin = st.number_input("total_max_margin: ", value = t.total_max_margin if t.total_max_margin >= 0.0 else 0.0, min_value = 0.0, step = 1.0, key ="input_total_max_margin")
+            t.total_max_margin = st.number_input("total_max_margin: ", value = t.total_max_margin if t.total_max_margin >= 0.0 else 0.0, min_value = 0.0, step = 0.1, key ="input_total_max_margin")
 
             t.trailing_SL_percent = st.number_input(
                 "Trailing SL (%):",
@@ -163,6 +162,7 @@ def render_ladders(trade):
         st.subheader("🎯 Entries & TPs")
         updated_trade = render_ladder(trade, "Entries")
         updated_trade = render_ladder(updated_trade, "TPs_(tranche_bound)")
+        updated_trade = render_ladder(updated_trade, "global_TPs")
     return updated_trade
 
 def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
@@ -170,79 +170,84 @@ def render_ladder(trade, mode): #modes: Entries, Tps_(tranche_bound), global_TPs
         #Managing ladder size for each mode
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
-            if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):
-                if mode == "Entries":
-                    add_entry_target()
-                elif mode == "TPs_(tranche_bound)":
-                    add_tp_target()
+            if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
+                if mode == "Entries" or "TPs_(tranche_bound)":
+                    add_tranche()
+                elif mode == "global TPs":
+                    add_global_tp_target()
 
         with entry_col2:
             if st.button(f"{mode} entfernen", key = f"remove_{mode}_button"):
-                if mode == "Entries":
-                    remove_entry_target()
-                elif mode == "TPs_(tranche_bound)":
-                    remove_tp_target()
+                if mode == "global_TPs":
+                    remove_global_tp_target()
+                elif mode == "Entries" or "TPs_(tranche_bound)":
+                    remove_tranche()
         
         #buildung input fields for each mode
-        for index, tranche in enumerate(trade.tranches):
-            if mode == "Entries":
-                price_key = f"input_entry_price_{index}"
-                share_key = f"input_position_share_{index}"
-                
-                # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
-                if price_key not in st.session_state or st.session_state[price_key] < 0.01:
-                    st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
+        if mode == "Entries" or "TPs_(tranche_bound)":
+            for index, tranche in enumerate(trade.tranches):
+                if mode == "Entries":
+                    price_key = f"input_entry_price_{index}"
+                    share_key = f"input_position_share_{index}"
                     
-                if share_key not in st.session_state or st.session_state[share_key] < 0.01:
-                    st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
+                    # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
+                    if price_key not in st.session_state or st.session_state[price_key] < 0.01:
+                        st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
+                        
+                    if share_key not in st.session_state or st.session_state[share_key] < 0.01:
+                        st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
-                # 2. Widgets über den Key steuern
-                st.number_input(
-                    f"Tranche {index + 1} Entry Preis:",
-                    min_value=0.01,
-                    step=0.01,
-                    key=price_key
-                )
+                    # 2. Widgets über den Key steuern
+                    st.number_input(
+                        f"Tranche {index + 1} Entry Preis:",
+                        min_value=0.01,
+                        step=0.01,
+                        key=price_key
+                    )
+                    
+                    st.number_input(
+                        f"Tranche {index + 1} Share:",
+                        min_value=0.01,
+                        step=0.01,
+                        key=share_key
+                    )
                 
-                st.number_input(
-                    f"Tranche {index + 1} Share:",
-                    min_value=0.01,
-                    step=0.01,
-                    key=share_key
-                )
+                    # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
+                    tranche.entry_level.price = st.session_state[price_key]
+                    tranche.entry_level.position_share = st.session_state[share_key]
+
+                elif mode == "TPs_(tranche_bound)":
+                    tp_price_key = f"tp_price_{index}"
+                    tp_percent_key = f"tp_close_percent_{index}"
+
+                    price = st.number_input(
+                        f"TP {index + 1} Preis:",
+                        min_value=0.01,
+                        step = 0.01,
+                        key = tp_price_key
+                    )
+        
+                    close_percent = st.number_input(
+                        f"TP {index + 1} Schließung (%):",
+                        min_value=0.0,
+                        max_value=100.0,
+                        step = 1.0,
+                        key = tp_percent_key
+                    )
+                    tranche.tp_target.price = st.session_state[tp_price_key]
+                    tranche.tp_target.close_percent = st.session_state[tp_percent_key]
             
-                # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
-                tranche.entry_level.price = st.session_state[price_key]
-                tranche.entry_level.position_share = st.session_state[share_key]
+            #visualize:
+            st.markdown(f"**{mode} Levels:**")
+            for tranche in trade.tranches:
+                if mode == "Entries":
+                    st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
+                elif mode == "TPs":
+                    st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
 
-            elif mode == "TPs_(tranche_bound)":
-                tp_price_key = f"tp_price_{index}"
-                tp_percent_key = f"tp_close_percent_{index}"
 
-                price = st.number_input(
-                    f"TP {index + 1} Preis:",
-                    min_value=0.01,
-                    step = 0.01,
-                    key = tp_price_key
-                )
-    
-                close_percent = st.number_input(
-                    f"TP {index + 1} Schließung (%):",
-                    min_value=0.0,
-                    max_value=100.0,
-                    step = 1.0,
-                    key = tp_percent_key
-                )
-                tranche.tp_target.price = st.session_state[tp_price_key]
-                tranche.tp_target.close_percent = st.session_state[tp_percent_key]
-
-        #visualize:
-        st.markdown(f"**{mode} Levels:**")
-        for tranche in trade.tranches:
-            if mode == "Entries":
-                st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
-            elif mode == "TPs":
-                st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
+        elif mode == "global_TPs":
+            
 
     return trade
 
