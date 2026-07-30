@@ -53,7 +53,7 @@ def remove_global_tp_target():
         trade.global_tp_targets.pop()
 
 
-def get_trade_parameters(trade) -> Trade_Parameters: #forces Object of Type Trade_Parameters as Output
+def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Output
     with st.container(border=True):
         st.subheader("🎯 General Params")
         with st.expander("Main Inputs"):
