@@ -293,7 +293,7 @@ def p_liq_exchange_forced(tranche):
 
 
 #Strategy Feedback
-def is_global_TP_active(trade, tranche):
+def is_global_TP_active(trade, index):
   return False
 
 def is_tranche_TP_active(tranche):
