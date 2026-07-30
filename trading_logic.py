@@ -141,7 +141,7 @@ def calculate_dynamic_state(trade: Trade, tranche):
 
 #initial margin calculation
 def calculate_dirsign(tranche):
-  entry = getattr(tranche.enetry_level, "p_entry", None)
+  entry = getattr(tranche.entry_level, "p_entry", None)
   p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
 
   if entry is None or p_SL is None:
@@ -227,8 +227,8 @@ def get_trade_direction(trade, tranche):
 def calculate_rel_risk(trade, tranche):
   return abs(tranche.tranche_parameters.sl_delta) / tranche.tranche_parameters.price
 
-def calculate_initial_margin(trae, tranche):
-  return tranche.tranche_paramters.risk / (tranche.tranche_parameters.rel_risk * tranche.tranche_parameters.lvg) # initial margin >= maintainance_margin (immer)
+def calculate_initial_margin(trade, tranche):
+  return tranche.tranche_parameters.risk / (tranche.tranche_parameters.rel_risk * tranche.tranche_parameters.lvg) # initial margin >= maintainance_margin (immer)
 
 def calculate_initial_margin_rate(lvg):
   return 1 / lvg
@@ -293,14 +293,18 @@ def p_liq_exchange_forced(tranche):
 
 
 #Strategy Feedback
-def calculate_tp_active(trade, tranche):
-  entry = tranche.tranche_parameters.entry
-  if trade.tp_targets[0].price <= 0:
+def is_global_TP_active(trade, tranche):
+  return False
+
+def is_tranche_TP_active(tranche):
+  t = tranche.tp_target
+  p = tranche.entry_level
+  if t.price <= 0:
     return False
-  if trade.tranche.tranche_parameters.dirsign > 0:
-    return trade.tp_targets[0].price > entry.price
-  if trade.tranche.tranche_parameters.dirsign < 0:
-    return trade.tp_targets[0].price < entry.price
+  if tranche.tranche_parameters.dirsign > 0:
+    return t.price > p.price  #bool equation
+  if tranche.tranche_parameters.dirsign < 0:
+    return t.price < p.price
   return False
 
 
