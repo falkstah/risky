@@ -142,12 +142,12 @@ def calculate_dynamic_state(trade: Trade, tranche):
 
 #initial margin calculation
 def calculate_dirsign(tranche):
-  entry = getattr(tranche.entry_level, "p_entry", None)
+  entry = getattr(tranche.entry_level.price, "p_entry", None)
   p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
 
   if entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
-  if not isinstance(entry.price, numbers.Real) or not isinstance(p_SL, numbers.Real):
+  if not isinstance(entry, numbers.Real) or not isinstance(p_SL, numbers.Real):
     raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
   if entry > p_SL:
@@ -166,7 +166,7 @@ def calculate_SL_delta(trade, tranche):
   return abs(entry - p_SL)
 
 def calculate_TP_delta(trade, tranche):
-  entry = getattr(tranche.entry_level, "entry.price", None)
+  entry = getattr(tranche.entry_level, "price", None)
   p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
   if entry is None or p_TP is None:
     raise ValueError("Entry price and Take Profit price must both be set.")
@@ -179,7 +179,7 @@ def calculate_buffered_tp1_close_percent(trade: Trade):
   tranche1 = trade.tranches[0]
   entry = tranche1.entry_level.price
   tranche1.tranche_parameters = tranche1.tranche_parameters
-  entry = getattr(tranche1.tranche_parameters, "entry.price", None)
+  entry = getattr(tranche1.tranche_parameters, "price", None)
   p_TP = getattr(tranche1.tranche_parameters, "p_TP", None)
   buffer_SL = getattr(trade, "buffer_SL", None)
 
@@ -198,14 +198,14 @@ def calculate_buffered_tp1_close_percent(trade: Trade):
   # Buffer SL must be on the correct side of entry for the trade direction.
   if tranche1.tranche_parameters.current_direction is None:
     tranche1.tranche_parameters.current_direction = get_trade_direction(trade, tranche1)
-  if tranche1.tranche_parameters.current_direction == "long" and buffer_SL >= entry.price:
+  if tranche1.tranche_parameters.current_direction == "long" and buffer_SL >= entry:
     raise ValueError("Buffer SL must be below entry for a long trade.")
-  if tranche1.tranche_parameters.current_direction == "short" and buffer_SL <= entry.price:
+  if tranche1.tranche_parameters.current_direction == "short" and buffer_SL <= entry:
     raise ValueError("Buffer SL must be above entry for a short trade.")
 
-  #profit(TP1) = close_fraction * n_pos_value * (TP1 - entry.price)
+  #profit(TP1) = close_fraction * n_pos_value * (TP1 - entry)
   #unclosed_pos_rest = (1 - x) * n_pos_value
-  #Loss(buffer_SL) = uncloses_pos_rest * n_pos_value * (entry.price - buffer_SL)
+  #Loss(buffer_SL) = uncloses_pos_rest * n_pos_value * (entry - buffer_SL)
   #Profit(TP1) == Loss(buffer_SL)  -> solve for close_fraction: close_fraction = buffer_delta / (TP1 - buffer_SL)
   #with TP1 - buffer_SL = TP_delta + buffer_delta:
   close_fraction = buffer_delta / (TP_delta + buffer_delta)
@@ -248,9 +248,9 @@ def calculate_max_lvg(trade, tranche):
 def max_lvg_for_given_liquidation(trade, tranche):
   entry = tranche.entry_level.price
   if tranche.tranche_parameters.current_direction == "long":
-    lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction - tranche.tranche_parameters.p_liquidation / entry.price))  # = general p_liq formula solved for lvg; formula can get < 1
+    lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction - tranche.tranche_parameters.p_liquidation / entry))  # = general p_liq formula solved for lvg; formula can get < 1
   elif tranche.tranche_parameters.current_direction == "short":
-    lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction -  entry.price / tranche.tranche_parameters.p_liquidation))
+    lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction -  entry / tranche.tranche_parameters.p_liquidation))
   else: lvg = 0
   return lvg 
 
@@ -370,10 +370,10 @@ def evaluate_trade(tranche):
 
 def calulate_tranche_profit_at_price_p(tranche, p):
   entry = tranche.entry_level.price
-  if p >= entry.price:
-    return tranche.tranche_parameters.dirsign * abs(p - entry.price) / entry.price * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
+  if p >= entry:
+    return tranche.tranche_parameters.dirsign * abs(p - entry) / entry * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
   else:
-    return -1 * tranche.tranche_parameters.dirsign * abs(p - entry.price) / entry.price * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
+    return -1 * tranche.tranche_parameters.dirsign * abs(p - entry) / entry * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
 
 def update_asset_price(trade):
   for tranche in trade.tranches:

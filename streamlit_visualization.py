@@ -269,7 +269,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                 
                 # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
                 if price_key not in st.session_state or st.session_state[global_price_key] < 0.01:
-                    st.session_state[flobal_price_key] = max(0.01, float(tranche.entry_level.price))
+                    st.session_state[global_price_key] = max(0.01, float(tranche.entry_level.price))
                     
                 if share_key not in st.session_state or st.session_state[global_share_key] < 0.01:
                     st.session_state[global_share_key] = max(0.01, float(tranche.entry_level.position_share))
