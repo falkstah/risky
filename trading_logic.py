@@ -11,8 +11,6 @@ from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_P
 def calculate_all(trade: Trade):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt tranche.tranche_parameters:
   sanitize_inputs(trade)
-  sanitize_inputs(trade.trade_parameters)
-  sanitize_inputs(trade.tranches)
 
   #1. calculate all tranche.tranche_parameters for each partial entry (ladder) of a trade with one given SL
   #entry meint ein ListenELement von entry_levels
@@ -143,34 +141,31 @@ def calculate_dynamic_state(trade: Trade, tranche):
 
 #initial margin calculation
 def calculate_dirsign(tranche):
-  entry = tranche.tranche_parameters.entry
-  entry.price = getattr(tranche.tranche_parameters, "p_entry", None)
+  entry = getattr(tranche.enetry_level, "p_entry", None)
   p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
 
-  if entry.price is None or p_SL is None:
+  if entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
   if not isinstance(entry.price, numbers.Real) or not isinstance(p_SL, numbers.Real):
     raise TypeError("Entry price and Stop Loss price must be numeric values.")
 
-  if entry.price > p_SL:
+  if entry > p_SL:
     return 1
-  elif entry.price < p_SL:
+  elif entry < p_SL:
     return -1
   else:
     raise ValueError("Entry and Stop Loss must not be equal.")
 
 
 def calculate_SL_delta(trade, tranche):
-  entry = tranche.tranche_parameters.entry
-  entry.price = getattr(tranche.tranche_parameters, "p_entry", None)
+  entry = getattr(tranche.entry_level, "p_entry", None)
   p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
-  if entry.price is None or p_SL is None:
+  if entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
-  return abs(entry.price - p_SL)
+  return abs(entry - p_SL)
 
 def calculate_TP_delta(trade, tranche):
-  entry = tranche.entry_level.price
-  entry = getattr(tranche.tranche_parameters, "entry.price", None)
+  entry = getattr(tranche.entry_level, "entry.price", None)
   p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
   if entry is None or p_TP is None:
     raise ValueError("Entry price and Take Profit price must both be set.")
@@ -374,7 +369,7 @@ def calulate_tranche_profit_at_price_p(tranche, p):
     return -1 * tranche.tranche_parameters.dirsign * abs(p - entry.price) / entry.price * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
 
 def update_asset_price(trade):
-  for tranche in trade:
+  for tranche in trade.tranches:
       if trade.current_asset_price >= tranche.price:
         tranche.triggered = True
 
