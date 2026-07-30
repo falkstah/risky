@@ -293,8 +293,10 @@ def p_liq_exchange_forced(tranche):
 
 
 #Strategy Feedback
+#checks triggered for one of the ladder entries:
 def is_global_TP_active(trade, index):
-  return False
+  trade.tp_targets[index].triggered = trade.tp_targets[index] >= trade.trade_parameters.current_asset_price #bool
+  return trade
 
 def is_tranche_TP_active(tranche):
   t = tranche.tp_target
