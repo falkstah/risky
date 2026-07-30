@@ -115,8 +115,8 @@ def get_trade_parameters(trade) -> Trade_Parameters: #forces Object of Type Trad
     with st.container(border=True):
             st.subheader("🎯 Fast Order")
             with st.expander("Fast Inputs"):
-                total_risk = st.number_input("total risk: ", value = t.total_risk, min_value = 0, step = 1, key = "input_total_risk")
-                p_SL = st.number_input("SL: ", value = t.p_SL, min_value=0.0, step=0.01, key = "input_p_SL")
+                t-total_risk = st.number_input("total risk: ", value = t.total_risk, min_value = 0, step = 1, key = "input_total_risk")
+                t.p_SL = st.number_input("SL: ", value = t.p_SL, min_value=0.0, step=0.01, key = "input_p_SL")
 
 
     return t
