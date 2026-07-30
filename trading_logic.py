@@ -106,7 +106,8 @@ def calculate_initial_risk(trade: Trade, tranche):
       raise ValueError("SL_delta = 0")
 
   tranche.tranche_parameters.current_direction = get_trade_direction(trade, tranche)
-  tranche.tranche_parameters.tp_active = calculate_tp_active(trade, tranche)
+  #checks if global TP1 is active
+  trade = is_global_TP_active(trade, 0)
   tranche.tranche_parameters.rel_risk = calculate_rel_risk(trade, tranche)
 
   return trade
