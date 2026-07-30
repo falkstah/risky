@@ -119,7 +119,7 @@ def get_trade_parameters(trade) -> Trade_Parameters: #forces Object of Type Trad
                 t.p_SL = st.number_input("SL: ", value = t.p_SL, min_value=0.0, step=0.01, key = "input_p_SL")
 
 
-    return t
+    return trade
 
 def current_direction_label(current_direction):
   

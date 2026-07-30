@@ -19,7 +19,7 @@ def main():
     trade = streamlit_visualization.get_trade()
 
     #Assign Values to trade
-    trade_parameters_init = streamlit_visualization.get_trade_parameters(trade)
+    trade = streamlit_visualization.get_trade_parameters(trade)
     trade = streamlit_visualization.render_ladders(trade)
 
     #Do the Math
