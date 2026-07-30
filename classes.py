@@ -55,7 +55,7 @@ class Tranche:
 
 @dataclass
 class Trade_Parameters:
-    #trade specific variables
+    #static trade specific variables
     total_max_lvg: float = 10.0
     total_risk: float = 0.0
     total_max_margin: float  = 0.0
@@ -73,6 +73,9 @@ class Trade_Parameters:
     total_potential_trade_profit: float = 0.0
     total_pos_size: float = 0.0
     tp_mode: Literal["global_TPs", "tranche_bound_TPs"] = "global_TPs"
+    potential_total_trade_profit: float = 0.0
+    #dynamic
+    total_cumulated_profit: float = 0.0
 
 @dataclass
 class Trade:

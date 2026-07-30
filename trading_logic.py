@@ -378,20 +378,19 @@ def update_asset_price(trade):
       if trade.current_asset_price >= tranche.price:
         tranche.triggered = True
 
-#price update davor nötig, oer innerhalb
-def calculate_total_trade_profit(trade: list[Take_Profit_Target]):
-  total_trade_profit = 0.0
-  for tp in trade:
-    if tp.triggered:
-      total_trade_profit += tp.profit
-  return total_trade_profit
 
-def calculate_total_potential_trade_profit(trade: list[Take_Profit_Target]):
-  total_trade_profit = 0.0
+def calculate_total_trade_profit(trade):
+  profit = 0.0
   for tp in trade:
     if tp.triggered:
-      total_trade_profit += tp.profit
-  return total_trade_profit
+      profit += tp.profit
+  return profit
+
+def calculate_potential_total_trade_profit(trade):
+  profit = 0.0
+  for tp in trade:
+    profit += tp.profit
+  return profit
 
 def calculate_total_rrr(trade):
   total_rrr = trade.total_potential_trade_profit / trade.total_risk
