@@ -90,7 +90,7 @@ def fair_share(tranche, pool):
 def calculate_initial_risk(trade: Trade, tranche):
 
   # 1) Directional basics
-  if tranche.tranche_parameters.entry == 0.0:
+  if tranche.entry_level.price == 0.0:
     print("P_Entry is 0.0, cannot calculate trade parameters.")
     return trade
 
@@ -246,7 +246,7 @@ def calculate_max_lvg(trade, tranche):
 
 #can differ or long and short even for same sl_delta and liq distance, which is against Intuiton; not symmetrical!!! hat's no error
 def max_lvg_for_given_liquidation(trade, tranche):
-  entry = tranche.tranche_parameters.entry
+  entry = tranche.entry_level.price
   if tranche.tranche_parameters.current_direction == "long":
     lvg = math.floor(1 / (1 + tranche.tranche_parameters.maintainance_margin_rate + tranche.tranche_parameters.maintainance_deduction - tranche.tranche_parameters.p_liquidation / entry.price))  # = general p_liq formula solved for lvg; formula can get < 1
   elif tranche.tranche_parameters.current_direction == "short":
@@ -296,7 +296,7 @@ def p_liq_exchange_forced(tranche):
 #Strategy Feedback
 #checks triggered for one of the ladder entries:
 def is_global_TP_active(trade, index):
-  trade.tp_targets[index].triggered = trade.tp_targets[index] >= trade.trade_parameters.current_asset_price #bool
+  trade.global_tp_targets[index].triggered = trade.global_tp_targets[index] >= trade.trade_parameters.current_asset_price #bool
   return trade
 
 def is_tranche_TP_active(tranche):
@@ -369,7 +369,7 @@ def evaluate_trade(tranche):
   return rel_asset_gain_at_TP, rrr, potential_profit, equity
 
 def calulate_tranche_profit_at_price_p(tranche, p):
-  entry = tranche.tranche_parameters.entry
+  entry = tranche.entry_level.price
   if p >= entry.price:
     return tranche.tranche_parameters.dirsign * abs(p - entry.price) / entry.price * abs(tranche.tranche_parameters.n_pos_value) #for long and short (pos value)
   else:
@@ -383,14 +383,14 @@ def update_asset_price(trade):
 
 def calculate_total_trade_profit(trade):
   profit = 0.0
-  for tp in trade:
+  for tp in trade.global_tp_targets:
     if tp.triggered:
       profit += tp.profit
   return profit
 
 def calculate_potential_total_trade_profit(trade):
   profit = 0.0
-  for tp in trade:
+  for tp in trade.global_tp_targets:
     profit += tp.profit
   return profit
 
