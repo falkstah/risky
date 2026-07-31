@@ -45,7 +45,7 @@ def sanitize_inputs(item):
                 sanitised_val = clean_value(value)
                 setattr(item, field.name, sanitised_val)
     else:
-      #
+      #wenn FUnkton rekursiv bei Parameter angekommen, dann Wertprüfung
       item = clean_value(item)
                 
     return item
