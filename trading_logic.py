@@ -24,47 +24,49 @@ def calculate_all(trade: Trade):
 
   return trade
 
+#recursiv sanitizer:
 def sanitize_inputs(item):
-  
-  if isinstance(item, Trade):
-      field_names = [field.name for field in fields(Trade)]
-      skip_fields = {"parameters", "entry_levels", "tp_targets", "order_type", "current_direction", "tp_active"}
-  elif isinstance(item, Trade_Parameters):
-      field_names = [field.name for field in fields(Trade_Parameters)]
-      skip_fields = {"current_direction", "tp_active"}
-  else:
-      field_names = getattr(item, "__dataclass_fields__", {})
-      skip_fields = set()
+    # 1. Prüfen, ob das Item überhaupt eine Dataclass ist
+    if is_dataclass(item):
+        for field in fields(item):
+            value = getattr(item, field.name)
+            
+            # Fall A: Das Feld ist selbst wieder eine Dataclass (z.B. trade_parameters) -> Rekursion!
+            if is_dataclass(value):
+                sanitise_inputs(value)
+                
+            # Fall B: Das Feld ist eine Liste (z.B. tranches) -> Jedes Element in der Liste durchgehen
+            elif isinstance(value, list):
+                for sub_item in value:
+                    sanitise_inputs(sub_item)
+                    
+            # Fall C: Es ist ein normaler Wert (String, Zahl, etc.) -> Sanitizen
+            else:
+                sanitised_val = clean_value(value)
+                setattr(item, field.name, sanitised_val)
+    else:
+      #
+      item = clean_value(item)
+                
+    return item
 
-  for field_name in field_names:
-      if field_name in skip_fields:
-          continue
+def clean_value(value):
+    """Hilfsfunktion für die eigentliche Typumwandlung"""
+    if value is None:
+        return 0.0
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, numbers.Real):
+        return float(value)
+    if isinstance(value, str):
+        if not value.strip():
+            return 0.0
+        try:
+            return float(value.strip())
+        except ValueError:
+            return 0.0
+    return 0.0
 
-      value = getattr(item, field_name, None)
-      if value is None:
-          setattr(item, field_name, 0.0)
-          continue
-
-      if isinstance(value, str):
-          if not value.strip():
-              setattr(item, field_name, 0.0)
-              continue
-          try:
-              setattr(item, field_name, float(value.strip()))
-          except ValueError:
-              setattr(item, field_name, 0.0)
-          continue
-
-      if isinstance(value, bool):
-          continue
-
-      if isinstance(value, numbers.Real):
-          continue
-
-      try:
-          setattr(item, field_name, float(value))
-      except (TypeError, ValueError):
-          setattr(item, field_name, 0.0)
 
 def calculate_tranche_allocations(trade, tranche):
   p = trade.trade_parameters  
