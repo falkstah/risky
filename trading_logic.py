@@ -1,7 +1,7 @@
 #for calculations
 import math
 import numbers
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, is_dataclass, fields
 import pandas as pd
 from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 #import ccxt
@@ -33,12 +33,12 @@ def sanitize_inputs(item):
             
             # Fall A: Das Feld ist selbst wieder eine Dataclass (z.B. trade_parameters) -> Rekursion!
             if is_dataclass(value):
-                sanitise_inputs(value)
+                sanitize_inputs(value)
                 
             # Fall B: Das Feld ist eine Liste (z.B. tranches) -> Jedes Element in der Liste durchgehen
             elif isinstance(value, list):
                 for sub_item in value:
-                    sanitise_inputs(sub_item)
+                    sanitize_inputs(sub_item)
                     
             # Fall C: Es ist ein normaler Wert (String, Zahl, etc.) -> Sanitizen
             else:
