@@ -346,6 +346,7 @@ def match_liquidation_price_to_SL(trade, tranche):
 
 def find_max_margin(tranche):
    return 0.9 * tranche.tranche_parameters.max_margin #forces over securing margin, to avoid margin calls and forced liquidation
+
 def check_initial_margin(trade, tranche):
   max_margin = max(tranche.tranche_parameters.max_margin, 1.0)
   if tranche.tranche_parameters.initial_margin > max_margin:
