@@ -29,11 +29,11 @@ def main():
     # updating session state after calc; st.session_state["trade"] prevents overwriting after calculate_all()
     streamlit_visualization.update_session_state(trade)
 
-    #Visualization:
-    streamlit_visualization.current_direction_label(trade)
-    streamlit_visualization.fast_order_table(trade)
-    streamlit_visualization.visualize_trade(trade)
-    streamlit_visualization.overview_table(trade)
+    #Visualization of Session State Trade Object:
+    streamlit_visualization.current_direction_label()
+    streamlit_visualization.fast_order_table()
+    streamlit_visualization.visualize_trade()
+    streamlit_visualization.overview_table()
 
 
 if __name__ == "__main__":

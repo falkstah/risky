@@ -75,7 +75,7 @@ def update_input_keys():
         st.session_state[key] = attr
 
 def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
-    with st.container(border=True):
+    with st.container(border = True):
         st.subheader("🎯 General Params")
         with st.expander("Main Inputs"):
             #rendering and assigning keys, giving inputs to trade_parameters
@@ -123,9 +123,9 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
             
             st.number_input(
                 "Aktueller Asset-Preis:",
-                min_value=0.0,
-                step=0.01,
-                key="input_current_asset_price",
+                min_value = 0.0,
+                step = 0.01,
+                key = "input_current_asset_price",
             )
 
             st.selectbox(
@@ -163,8 +163,8 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                     key = "input_p_SL")
 
 
-def current_direction_label(trade):
-  d = trade.tranches[0].tranche_parameters.current_direction
+def current_direction_label():
+  d = st.session_state.input_trade.tranches[0].tranche_parameters.current_direction
   if d == "long":
     st.success("Long")
   elif d == "short":
@@ -173,20 +173,22 @@ def current_direction_label(trade):
     st.warning("Trade direction not consistent. Please check your input parameters.")
 
 
-def update_tp_targets_triggered(trade: Trade):
-    if not trade.tranches[0].tranche_parameters.current_direction:
-        return trade
+def update_tp_targets_triggered():
+    p = p = st.session_state.input_trade.trade_parameters
+
+    if not st.session_state.input_trade.tranches[0].tranche_parameters.current_direction:
+        return st.session_state.input_trade
     
-    for tranche in trade.tranches:
+    for tranche in st.session_state.input_trade.tranches:
         if tranche.tranche_parameters.current_direction == "long":
-            tranche.tp_target.triggered = trade.trade_parameters.current_asset_price >= trade.trade_parameters.current_asset_price    #boolish equation
+            tranche.tp_target.triggered = p.current_asset_price >= tranche.profit_target    #boolish equation
         elif tranche.tranche_parameters.current_direction == "short":
-            tranche.tp_target.triggered = trade.trade_parameters.current_asset_price <= trade.trade_parameters.current_asset_price
-    return trade
+            tranche.tp_target.triggered = p.current_asset_price <= tranche.profit_target
+    return st.session_state.input_trade
 
 
-def fast_order_table(trade: Trade):
-    tranche1 = trade.tranches[0]
+def fast_order_table():
+    tranche1 = st.session_state.input_trade.tranches[0]
     with st.container(border=True):
         st.subheader("📊 Fast Order Table")
         # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
@@ -351,8 +353,8 @@ def update_session_state(trade):
     st.session_state["trade"] = trade
 
 
-def overview_table(trade: Trade):
-  tranche1 = trade.tranches[0]
+def overview_table():
+  tranche1 = st.session_state.input_trade.tranches[0]
   #table1, currently for tranche 1
   with st.container(border=True):
 
@@ -382,15 +384,15 @@ def overview_table(trade: Trade):
   if tranche1.tp_target:
       with st.container(border=True):
           st.subheader("🎯 TP-Status")
-          for tranche in trade.tranches:
+          for tranche in st.session_state.input_trade.tranches:
               status = "✅ Erreicht" if tranche.tp_target.triggered else "- offen"
               st.write(f"- TP bei {tranche.tp_target.price} | {tranche.tp_target.close_percent}% Schließung | {status}")
 
   st.divider()
 
 
-def visualize_trade(trade: Trade):
-    tranche1 = trade.tranches[0]
+def visualize_trade():
+    tranche1 = st.session_state.input_trade.tranches[0]
     st.title("Trade Visualizer")
     st.write(f"Direction: {tranche1.tranche_parameters.current_direction.capitalize()}" if tranche1.tranche_parameters.current_direction else "Direction unknown")
 
