@@ -24,7 +24,6 @@ def main():
     st.session_state["trade"] = trade
 
     #Visualization:
-    up_down = trade.tranches[0].tranche_parameters.current_direction
     streamlit_visualization.current_direction_label(trade)
     streamlit_visualization.fast_order_table(trade)
     streamlit_visualization.visualize_trade(trade)

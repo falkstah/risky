@@ -26,7 +26,7 @@ def init_session_state():
 def get_trade_object_inputs():
     #Collect Trade Inputs in streamlit session state
     update_input_keys()
-    
+
     get_trade_parameters()
     render_ladders()
 
@@ -176,11 +176,11 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                     key = "input_p_SL")
 
 
-def current_direction_label(current_direction):
-  
-  if current_direction == "long":
+def current_direction_label(trade):
+  d = trade.tranches[0].tranche_parameters.current_direction
+  if d == "long":
     st.success("Long")
-  elif current_direction == "short":
+  elif d == "short":
     st.error("Short")
   else:
     st.warning("Trade direction not consistent. Please check your input parameters.")
