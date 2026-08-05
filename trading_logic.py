@@ -1,6 +1,7 @@
 #for calculations
 import math
 import numbers
+from typing import Any
 from dataclasses import dataclass, is_dataclass, fields
 import pandas as pd
 from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
@@ -28,7 +29,7 @@ def calculate_all(trade: Trade):
   return trade
 
 #recursiv sanitizer:
-def sanitize_inputs(item):
+def sanitize_inputs(item: Any) -> Any:
     # 1. Prüfen, ob das Item überhaupt eine Dataclass ist
     if is_dataclass(item):
         for field in fields(item):
