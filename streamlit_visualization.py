@@ -28,9 +28,6 @@ def intro():
     st.title("Too_Risky - Crypto live lvg and liquidation manager")
     st.text("Opimized for execution speed.")
 
-def get_trade():
-    return st.session_state.input_trade
-
 #last list element (hence tp/entry) will be popped, as is intuitiv
 def add_tranche():
     trade = st.session_state.input_trade
@@ -302,8 +299,8 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     return trade
 
 def get_trade_object_from_session_state():
-#st.session_state is global object
-    return st.session_state.get("trade")
+    #st.session_state is global object
+    return st.session_state.get("input_trade")
 
 def overview_table(trade: Trade):
   tranche1 = trade.tranches[0]

@@ -15,12 +15,11 @@ def main():
     streamlit_visualization.init_session_state()
     streamlit_visualization.intro()
 
-    #gets trade von session_state
-    trade = streamlit_visualization.get_trade()
-
-    #Assign Values to trade
-    trade = streamlit_visualization.get_trade_parameters(trade)
+    #Collect Trade Inputs in streamlit session state
+    trade = streamlit_visualization.get_trade_parameters(st.session_state.get("input_trade"))
     trade = streamlit_visualization.render_ladders(trade)
+
+    trade = get_trade_object_from_session_state()
 
     #Do the Math
     trade = calculate_all(trade)
