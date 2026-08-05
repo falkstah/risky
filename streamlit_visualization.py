@@ -58,11 +58,11 @@ def remove_global_tp_target():
     if len(st.session_state.global_tp_targets) > 1:
         trade = st.session_state.input_trade
         trade.global_tp_targets.pop()
-
+    
 
 def update_input_keys():
     # Update session state keys for trade parameters
-    t = st.session_state.input_trade
+    t = st.session_state.input_trade.trade_parameters
     for key, attr in [
         ("input_liq_delta_to_SL_delta_ratio", t.liq_delta_to_SL_delta_ratio),
         ("input_maintainance_margin_rate", t.maintainance_margin_rate),
