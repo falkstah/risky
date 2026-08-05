@@ -164,13 +164,16 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
 
 
 def current_direction_label():
-  d = st.session_state.input_trade.tranches[0].tranche_parameters.current_direction
-  if d == "long":
-    st.success("Long")
-  elif d == "short":
-    st.error("Short")
-  else:
-    st.warning("Trade direction not consistent. Please check your input parameters.")
+    if "input_trade" in st.session_state and st.session_state.input_trade.tranches:
+        d = st.session_state.input_trade.tranches[0].tranche_parameters.current_direction
+        if d == "long":
+            st.success("Long")
+        elif d == "short":
+            st.error("Short")
+        else:
+            st.warning("Trade direction not consistent. Please check your input parameters.")
+    else:
+        st.warning("⚠️ Keine Tranchen vorhanden.")
 
 
 def update_tp_targets_triggered():
