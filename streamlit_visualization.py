@@ -62,7 +62,7 @@ def remove_global_tp_target():
 
 def update_input_keys():
     # Update session state keys for trade parameters
-    t = st.session_state.trade
+    t = st.session_state.input_trade
     for key, attr in [
         ("input_liq_delta_to_SL_delta_ratio", t.liq_delta_to_SL_delta_ratio),
         ("input_maintainance_margin_rate", t.maintainance_margin_rate),
