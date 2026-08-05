@@ -23,7 +23,7 @@ def init_session_state():
             st.session_state["key"] = 0
     #generiert fehler bei variablen mit min_value > 0, oder?
 
-def get_trade_object_inputs():
+def get_trade_inputs_from_ui():
     #Collect Trade Inputs in streamlit session state
     update_input_keys()
 

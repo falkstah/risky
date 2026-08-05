@@ -10,6 +10,9 @@ from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_P
 #2. manage SL pulls and TPs for whole position
 def calculate_all(trade: Trade):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt tranche.tranche_parameters:
+  if trade is None:
+    raise ValueError("Trade object is None. Cannot perform calculations.")
+
   trade = sanitize_inputs(trade)
 
   #1. calculate all tranche.tranche_parameters for each partial entry (ladder) of a trade with one given SL
@@ -45,7 +48,7 @@ def sanitize_inputs(item):
                 sanitised_val = clean_value(value)
                 setattr(item, field.name, sanitised_val)
     else:
-      #wenn FUnkton rekursiv bei Parameter angekommen, dann Wertprüfung
+      #wenn Funktion rekursiv bei Parameter angekommen, dann Wertprüfung
       item = clean_value(item)
                 
     return item

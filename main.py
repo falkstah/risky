@@ -15,14 +15,15 @@ def main():
     streamlit_visualization.init_session_state()
     streamlit_visualization.intro()
 
-    trade = streamlit_visualization.get_trade_object_inputs()
-   
+    raw = streamlit_visualization.get_trade_inputs_from_ui()
+
+    #prevent crash if raw is Any / None
+    if raw is None:
+        raise ValueError("Trade object is None. Cannot perform calculations.")
+    trade: Trade = raw
+
     #Do the Math
-    if trade is not None:
-        trade = calculate_all(trade)
-    else:
-        st.warning("Please provide valid inputs for the trade parameters.")
-        return
+    trade = calculate_all(trade)
     
     
     # updating session state after calc; st.session_state["trade"] prevents overwriting after calculate_all()
