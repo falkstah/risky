@@ -23,6 +23,14 @@ def init_session_state():
             st.session_state["key"] = 0
     #generiert fehler bei variablen mit min_value > 0, oder?
 
+def get_trade_object_inputs():
+    #Collect Trade Inputs in streamlit session state
+    streamlit_visualization.get_trade_parameters()
+    streamlit_visualization.render_ladders()
+
+    #send session state to object
+    return streamlit_visualization.get_trade_object_from_session_state()
+
 #Start Info
 def intro():
     st.title("Too_Risky - Crypto live lvg and liquidation manager")

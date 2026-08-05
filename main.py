@@ -15,22 +15,20 @@ def main():
     streamlit_visualization.init_session_state()
     streamlit_visualization.intro()
 
-    #Collect Trade Inputs in streamlit session state
-    trade = streamlit_visualization.get_trade_parameters(st.session_state.get("input_trade"))
-    trade = streamlit_visualization.render_ladders(trade)
-
-    trade = get_trade_object_from_session_state()
-
+    trade = streamlit_visualization.get_trade_object_inputs()
+   
     #Do the Math
     trade = calculate_all(trade)
 
-    # st.session_state["trade"] prevents overwriting after calculate_all()
+    # updating session state after calc; st.session_state["trade"] prevents overwriting after calculate_all()
     st.session_state["trade"] = trade
+
+    #Visualization:
     up_down = trade.tranches[0].tranche_parameters.current_direction
-    streamlit_visualization.current_direction_label(st.session_state["trade"].trade_parameters.up_down)
-    streamlit_visualization.fast_order_table(st.session_state["trade"])
-    streamlit_visualization.visualize_trade(st.session_state["trade"])
-    streamlit_visualization.overview_table(st.session_state["trade"])
+    streamlit_visualization.current_direction_label(trade)
+    streamlit_visualization.fast_order_table(trade)
+    streamlit_visualization.visualize_trade(trade)
+    streamlit_visualization.overview_table(trade)
 
 
 if __name__ == "__main__":
