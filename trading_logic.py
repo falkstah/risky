@@ -138,7 +138,7 @@ def calculate_dynamic_state(trade: Trade, tranche):
 
 #initial margin calculation
 def calculate_dirsign(tranche):
-  entry = getattr(tranche.entry_level.price, "p_entry", None)
+  entry = getattr(tranche.entry_level, "price", None)
   p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
 
   if entry is None or p_SL is None:
@@ -155,7 +155,7 @@ def calculate_dirsign(tranche):
 
 
 def calculate_SL_delta(trade, tranche):
-  entry = getattr(tranche.entry_level, "p_entry", None)
+  entry = getattr(tranche.entry_level, "price", None)
   p_SL = getattr(tranche.tranche_parameters, "p_SL", None)
   if entry is None or p_SL is None:
     raise ValueError("Entry price and Stop Loss price must both be set.")
@@ -175,12 +175,11 @@ def calculate_buffered_tp1_close_percent(trade: Trade):
   tranche1 = trade.tranches[0]
   entry = tranche1.entry_level.price
   tranche1.tranche_parameters = tranche1.tranche_parameters
-  entry = getattr(tranche1.tranche_parameters, "price", None)
-  p_TP = getattr(tranche1.tranche_parameters, "p_TP", None)
-  buffer_SL = getattr(trade, "buffer_SL", None)
+  tp1 = trade.global_tp_targets[0].price
+  buffer_SL = trade.trade_parameters.buffer_SL
 
   #useless when it will be included in sanitier:
-  if entry is None or p_TP is None or buffer_SL is None:
+  if entry is None or tp1 is None or buffer_SL is None:
     raise ValueError("Entry price, TP price and buffer SL must be set.")
 
   TP_delta = tranche1.tranche_parameters.TP_delta
