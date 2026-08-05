@@ -79,19 +79,6 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
         st.subheader("🎯 General Params")
         with st.expander("Main Inputs"):
             #rendering and assigning keys, giving inputs to trade_parameters
-            #if else in input guarantees value >= min_value
-
-            #input fields can be overwritten by calculate_all() results
-            for key, attr in [
-                ("input_liq_delta_to_SL_delta_ratio", t.liq_delta_to_SL_delta_ratio),
-                ("input_maintainance_margin_rate", t.maintainance_margin_rate),
-                ("input_maintainance_deduction", t.maintainance_deduction),
-                ("input_total_max_lvg", t.total_max_lvg),
-                ("input_total_max_margin", t.total_max_margin),
-                ("input_trailing_sl_percent", t.trailing_sl_percent),
-                ("input_pull_SL", t.pull_SL),
-            ]:
-            st.session_state[key] = attr
            
             st.number_input(
                 "liq_delta_to_SL_delta_ratio: ", 
@@ -143,7 +130,7 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
 
             order_type = st.selectbox(
                 "Order Type:",
-                options = session_state.order_type,
+                options = st.session_state.input_trade.trade_parameters.order_type,
                 key="input_order_type",
             )
 
@@ -211,12 +198,12 @@ def fast_order_table(trade: Trade):
 
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-def render_ladders(trade):
+def render_ladders():
     
     with st.container(border=True):
         st.subheader("🎯 Entries")
         #entries
-        updated_trade = render_ladder(trade, "Entries")
+        updated_trade = render_ladder(st.session_state.input_trade, "Entries")
 
         st.subheader("🎯 TPs")
         
@@ -232,7 +219,7 @@ def render_ladders(trade):
         elif mode == "tranche_bound_TPs":
             updated_trade = render_ladder(updated_trade, "tranche_bound_TPs")
 
-    return updated_trade
+    st.session_state.input_trade = updated_trade
 
 def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     with st.expander(f"Ladder {mode}"):
