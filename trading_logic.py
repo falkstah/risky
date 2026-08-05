@@ -245,7 +245,7 @@ def calculate_n_pos_value(trade, tranche):
   return tranche.tranche_parameters.dirsign * tranche.tranche_parameters.risk / tranche.tranche_parameters.rel_risk # = initial_margin * lvg - thus couples lvg and initial_margin; n_pos_value < 0 <==> short
 
 def share_total_max_lvg(trade, tranche):
-  return trade.trade_parameters.max_lvg
+  return trade.trade_parameters.total_max_lvg
 
 def calculate_max_lvg(trade, tranche):
   return math.floor(1 / tranche.tranche_parameters.maintainance_margin_rate)
