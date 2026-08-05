@@ -18,8 +18,12 @@ def main():
     trade = streamlit_visualization.get_trade_object_inputs()
    
     #Do the Math
-    trade = calculate_all(trade)
-
+    if trade is not None:
+        trade = calculate_all(trade)
+    else: 
+        st.warning("Please provide valid inputs for the trade parameters.")
+        return
+    
     # updating session state after calc; st.session_state["trade"] prevents overwriting after calculate_all()
     streamlit_visualization.update_session_state(trade)
 
