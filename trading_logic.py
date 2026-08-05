@@ -32,6 +32,19 @@ def calculate_all(trade: Trade):
 def sanitize_inputs(item: Any) -> Any:
     # 1. Prüfen, ob das Item überhaupt eine Dataclass ist
     if is_dataclass(item):
+        for f in fields(item):
+            value = getattr(item, f.name)
+            # Rekursiver Aufruf für verschachtelte Dataclasses und Listen
+            if is_dataclass(value) or isinstance(value, list):
+                setattr(item, f.name, sanitize_inputs(value))
+            else:
+                setattr(item, f.name, clean_value(value))
+        return item
+    elif isinstance(item, list):
+        return [sanitize_inputs(sub_item) for sub_item in item]
+    else:
+        return 0.0 if item is None else clean_value(item)
+    if is_dataclass(item):
         for field in fields(item):
             value = getattr(item, field.name)
             

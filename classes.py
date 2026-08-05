@@ -81,10 +81,5 @@ class Trade_Parameters:
 class Trade:
     #classes
     trade_parameters: Trade_Parameters = field(default_factory = Trade_Parameters)
-    tranches: list[Tranche] = field(default_factory = list)
+    tranches: list[Tranche] = field(default_factory = lambda : [Tranche()])     #calable function lambda guarantees a minimum of one tranche, since every trade needs at least one entry-level (which is linked to a tranche)
     global_tp_targets: list[Take_Profit_Target] = field(default_factory = list)
-
-    #guarantees a minimum of one tranche, since every trade needs at least one entry-level (which is linked to a tranche)
-    def __init__(self):
-        if not self.tranches:
-            self.tranches.append(Tranche())
