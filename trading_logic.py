@@ -392,15 +392,15 @@ def calculate_potential_total_trade_profit(trade):
   return profit
 
 def calculate_total_rrr(trade):
-  total_rrr = trade.total_potential_trade_profit / trade.total_risk
+  total_rrr = trade.trade_parameters.total_potential_trade_profit / trade.trade_parameters.total_risk
   return total_rrr
 
 def calculate_avg_entry_price(trade):
   number_of_entries = 0
   weighted_sum = 0
-  for tranche in trade:
+  for tranche in trade.tranches:
     number_of_entries += 1
-    weighted_sum += tranche.parameters.n_pos_value * tranche.entrylevel.price
+    weighted_sum += tranche.tranche_parameters.n_pos_value * tranche.entry_level.price
 
   avg_entry_price = weighted_sum / number_of_entries
   return avg_entry_price
