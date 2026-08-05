@@ -60,7 +60,7 @@ def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Outp
             #rendering and assigning keys, giving inputs to trade_parameters
             #if else in input guarantees value >= min_value
             t = trade.trade_parameters
-            t.liq_delta_to_SL_delta_ratio = st.number_input("liq_delta_to_SL_delta_ratio: ", value = float(t.liq_delta_to_SL_delta_ratio), min_value = 0.0, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio")
+            t.liq_delta_to_SL_delta_ratio = st.number_input("liq_delta_to_SL_delta_ratio: ", value = t.liq_delta_to_SL_delta_ratio, min_value = 0.0, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio")
             t.maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", value = t.maintainance_margin_rate,  min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate")
             t.maintainance_deduction=st.number_input("maintainance_deduction: ", value = t.maintainance_deduction, min_value = 0.0, step = 0.001, key = "input_maintainance_deduction")
             t.total_max_lvg = st.number_input("total_max_lvg: ", value = t.total_max_lvg if t.total_max_lvg >= 0 else 0.0, min_value = 0.0, step = 0.5, key = "input_total_max_lvg")
