@@ -25,6 +25,8 @@ def init_session_state():
 
 def get_trade_object_inputs():
     #Collect Trade Inputs in streamlit session state
+    update_input_keys()
+    
     get_trade_parameters()
     render_ladders()
 
@@ -57,6 +59,20 @@ def remove_global_tp_target():
         trade = st.session_state.input_trade
         trade.global_tp_targets.pop()
 
+
+def update_input_keys(trade: Trade):
+    # Update session state keys for trade parameters
+    t = trade.trade_parameters
+    for key, attr in [
+        ("input_liq_delta_to_SL_delta_ratio", t.liq_delta_to_SL_delta_ratio),
+        ("input_maintainance_margin_rate", t.maintainance_margin_rate),
+        ("input_maintainance_deduction", t.maintainance_deduction),
+        ("input_total_max_lvg", t.total_max_lvg),
+        ("input_total_max_margin", t.total_max_margin),
+        ("input_trailing_sl_percent", t.trailing_SL_percent),
+        ("input_pull_SL", t.pull_SL),
+    ]:
+        st.session_state[key] = attr
 
 def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
     with st.container(border=True):
@@ -106,7 +122,6 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
 
             st.number_input(
                 "Trailing SL (%):",
-                value = t.trailing_SL_percent,
                 min_value=0.0,
                 step=0.1,
                 key="input_trailing_SL_percent",
@@ -114,7 +129,6 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
 
             st.number_input(
                 "Pull SL Preis:",
-                value = t.pull_SL,
                 min_value = 0.0,
                 step = 0.01,
                 key = "input_pull_SL",
@@ -122,7 +136,6 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
             
             st.number_input(
                 "Aktueller Asset-Preis:",
-                value = t.current_asset_price,
                 min_value=0.0,
                 step=0.01,
                 key="input_current_asset_price",
@@ -130,13 +143,12 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
 
             order_type = st.selectbox(
                 "Order Type:",
-                options = t.order_type,
+                options = session_state.order_type,
                 key="input_order_type",
             )
 
             st.number_input(
                 "Buffer SL Preis:",
-                value = t.buffer_SL,
                 min_value = 0.0,
                 step = 0.01,
                 key = "input_buffer_SL",
@@ -144,7 +156,6 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
 
             st.number_input(
                 "Aktueller SL Preis:",
-                value = t.current_sl_price,
                 min_value = 0.0,
                 step = 0.01,
                 key = "input_current_sl_price",
@@ -153,11 +164,17 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
     with st.container(border=True):
             st.subheader("🎯 Fast Order")
             with st.expander("Fast Inputs"):
-                t.total_risk = st.number_input("total risk: ", value = t.total_risk, min_value = 0.0, step = 1.0, key = "input_total_risk")
-                t.p_SL = st.number_input("SL: ", value = t.p_SL, min_value=0.0, step=0.01, key = "input_p_SL")
+                st.number_input(
+                    "total risk: ",
+                    min_value = 0.0, 
+                    step = 1.0, 
+                    key = "input_total_risk")
+                st.number_input(
+                    "SL: ", 
+                    min_value = 0.0, 
+                    step = 0.01, 
+                    key = "input_p_SL")
 
-    trade.trade_parameters = t
-    return trade
 
 def current_direction_label(current_direction):
   
