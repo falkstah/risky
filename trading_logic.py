@@ -10,7 +10,7 @@ from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_P
 #2. manage SL pulls and TPs for whole position
 def calculate_all(trade: Trade):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt tranche.tranche_parameters:
-  sanitize_inputs(trade)
+  trade = sanitize_inputs(trade)
 
   #1. calculate all tranche.tranche_parameters for each partial entry (ladder) of a trade with one given SL
   #entry meint ein ListenELement von entry_levels
