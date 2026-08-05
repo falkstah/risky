@@ -104,8 +104,6 @@ def calculate_initial_risk(trade: Trade, tranche):
       raise ValueError("SL_delta = 0")
 
   tranche.tranche_parameters.current_direction = get_trade_direction(trade, tranche)
-  #checks if global TP1 is active
-  trade = is_global_TP_active(trade, 0)
   tranche.tranche_parameters.rel_risk = calculate_rel_risk(trade, tranche)
 
   return trade
@@ -293,8 +291,9 @@ def p_liq_exchange_forced(tranche):
 
 #Strategy Feedback
 #checks triggered for one of the ladder entries:
-def is_global_TP_active(trade, index):
-  trade.global_tp_targets[index].triggered = trade.global_tp_targets[index] >= trade.trade_parameters.current_asset_price #bool
+def check_global_TP_hits(trade, index):
+  for tp in trade.tp_targets:
+    tp.triggered = tp.price <= trade.trade_parameters.current_asset_price #bool, has to track all the values price had in meantime,  so not correct yet
   return trade
 
 def is_tranche_TP_active(tranche):
