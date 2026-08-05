@@ -333,7 +333,7 @@ def get_live_ATR(symbol = 'BTC/USDT', timeframe = '4h', length = 14):
 
 #conservatively hardcoded liq buffer to skip API-task
 def match_liquidation_price_to_SL(trade, tranche):
-    return max(tranche.tranche_parameters.price - tranche.tranche_parameters.liq_delta_to_SL_delta_ratio * tranche.tranche_parameters.sl_delta * tranche.tranche_parameters.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
+    return max(tranche.entry_level.price - tranche.tranche_parameters.liq_delta_to_SL_delta_ratio * tranche.tranche_parameters.sl_delta * tranche.tranche_parameters.dirsign, 0) #SL_delta is now the absolute distance; dirsign restores the long/short sign
 
 #def match_lvg_to_liquidation_price(tranche.tranche_parameters: Trade_Parameters):
 #  return 1 / (1 + tranche.tranche_parameters.maintainance_margin_rate - tranche.tranche_parameters.p_liquidation * (1 + tranche.tranche_parameters.maintainance_margin_rate) / tranche.tranche_parameters.p_entry)  # = general p_liq formula solved for lvg; formula can get < 1
