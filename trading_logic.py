@@ -112,13 +112,13 @@ def calculate_initial_risk(trade: Trade, tranche):
 def calculate_exit_and_tp_structure(trade: Trade, tranche):
   tranche.tranche_parameters = tranche.tranche_parameters
   tranche.tranche_parameters.p_liquidation = match_liquidation_price_to_SL(trade, tranche)
-  tranche.tranche_parameters.TP_delta = calculate_TP_delta(trade, tranche)
+  tranche.tranche_parameters.tp_delta = calculate_tp_delta(trade, tranche)
   return trade
 
 
 def calculate_dynamic_state(trade: Trade, tranche):
-  tranche.tranche_parameters = tranche.tranche_parameters
-  tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = find_max_lvg(trade, tranche)
+  tranche.tranche_parameters.lvg = find_max_lvg(trade, tranche)
+  tranche.tranche_parameters.lvg, tranche.tranche_parameters.risk = check_lvg(trade, tranche)
   tranche.tranche_parameters.max_margin = find_max_margin(tranche)
   tranche.tranche_parameters.initial_margin = calculate_initial_margin(trade, tranche)
   tranche.tranche_parameters.risk, tranche.tranche_parameters.initial_margin = check_initial_margin(trade, tranche)
@@ -161,7 +161,7 @@ def calculate_SL_delta(trade, tranche):
     raise ValueError("Entry price and Stop Loss price must both be set.")
   return abs(entry - p_SL)
 
-def calculate_TP_delta(trade, tranche):
+def calculate_tp_delta(trade, tranche):
   entry = getattr(tranche.entry_level, "price", None)
   p_TP = getattr(tranche.tp_target, "price", None)
   if entry is None or p_TP is None:
@@ -182,10 +182,10 @@ def calculate_buffered_tp1_close_percent(trade: Trade):
   if entry is None or tp1 is None or buffer_SL is None:
     raise ValueError("Entry price, TP price and buffer SL must be set.")
 
-  TP_delta = tranche1.tranche_parameters.TP_delta
+  tp_delta = tranche1.tranche_parameters.tp_delta
   buffer_delta = abs(buffer_SL - entry)
 
-  if TP_delta == 0.0:
+  if tp_delta == 0.0:
     raise ValueError("TP price must differ from entry price.")
   if buffer_delta == 0.0:
     return 0.0
@@ -202,8 +202,8 @@ def calculate_buffered_tp1_close_percent(trade: Trade):
   #unclosed_pos_rest = (1 - x) * n_pos_value
   #Loss(buffer_SL) = uncloses_pos_rest * n_pos_value * (entry - buffer_SL)
   #Profit(TP1) == Loss(buffer_SL)  -> solve for close_fraction: close_fraction = buffer_delta / (TP1 - buffer_SL)
-  #with TP1 - buffer_SL = TP_delta + buffer_delta:
-  close_fraction = buffer_delta / (TP_delta + buffer_delta)
+  #with TP1 - buffer_SL = tp_delta + buffer_delta:
+  close_fraction = buffer_delta / (tp_delta + buffer_delta)
   return float(close_fraction)
 
 
@@ -254,7 +254,7 @@ def find_max_lvg(trade, tranche):
   max_lvg_liq = max_lvg_for_given_liquidation(trade, tranche)
   #both formulas give upper lvg limits, hence the smaller one has to be chosen. But lvg >= 1 with max:
   lvg = math.floor(min(max_allowed_lvg, max_lvg_liq)) #floor guarantees that lvg does not force early liq
-  return check_lvg(trade, tranche)
+  return lvg
 
 #risk correction functions
 def check_lvg(trade, tranche):
@@ -359,8 +359,8 @@ def check_rrr(rrr):
 #safety calculus
 #evaluating trading setups
 def evaluate_trade(tranche):
-  rel_asset_gain_at_TP = tranche.tranche_parameters.TP_delta / tranche.tranche_parameters.price
-  rrr = tranche.tranche_parameters.TP_delta / tranche.tranche_parameters.sl_delta
+  rel_asset_gain_at_TP = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.price
+  rrr = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.sl_delta
   potential_profit = tranche.tranche_parameters.risk * rrr
   equity = calculate_equity(tranche.tranche_parameters)
   return rel_asset_gain_at_TP, rrr, potential_profit, equity
