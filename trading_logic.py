@@ -68,7 +68,7 @@ def calculate_tranche_allocations(trade, tranche):
   p = trade.trade_parameters  
   t = tranche.tranche_parameters
 
-  #max_lvg copying:
+  #total max_lvg copying:
   t.max_lvg = share_total_max_lvg(trade, tranche)
   #risk and margin sharing
   t.risk = fair_share(tranche, p.total_risk)
@@ -163,7 +163,7 @@ def calculate_SL_delta(trade, tranche):
 
 def calculate_TP_delta(trade, tranche):
   entry = getattr(tranche.entry_level, "price", None)
-  p_TP = getattr(tranche.tranche_parameters, "p_TP", None)
+  p_TP = getattr(tranche.tp_target, "price", None)
   if entry is None or p_TP is None:
     raise ValueError("Entry price and Take Profit price must both be set.")
   return abs(entry - p_TP)
