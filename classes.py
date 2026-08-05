@@ -77,6 +77,9 @@ class Trade_Parameters:
     #dynamic
     total_cumulated_profit: float = 0.0
 
+    #test:
+    max_lvg: float = 10.0
+
 @dataclass
 class Trade:
     #classes
