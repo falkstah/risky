@@ -291,7 +291,7 @@ def p_liq_exchange_forced(tranche):
 #Strategy Feedback
 #checks triggered for one of the ladder entries:
 def check_global_TP_hits(trade, index):
-  for tp in trade.tp_targets:
+  for tp in trade.global_tp_targets:
     tp.triggered = tp.price <= trade.trade_parameters.current_asset_price #bool, has to track all the values price had in meantime,  so not correct yet
   return trade
 
@@ -374,7 +374,7 @@ def calulate_tranche_profit_at_price_p(tranche, p):
 
 def update_asset_price(trade):
   for tranche in trade.tranches:
-      if trade.current_asset_price >= tranche.price:
+      if trade.trade_parameters.current_asset_price >= tranche.price:
         tranche.triggered = True
 
 
