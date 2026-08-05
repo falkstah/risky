@@ -128,7 +128,7 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                 key="input_current_asset_price",
             )
 
-            order_type = st.selectbox(
+            st.selectbox(
                 "Order Type:",
                 options = st.session_state.input_trade.trade_parameters.order_type,
                 key="input_order_type",
@@ -346,6 +346,10 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
 def get_trade_object_from_session_state():
     #st.session_state is global object
     return st.session_state.get("input_trade")
+
+def update_session_state(trade):
+    st.session_state["trade"] = trade
+
 
 def overview_table(trade: Trade):
   tranche1 = trade.tranches[0]

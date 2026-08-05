@@ -21,7 +21,7 @@ def main():
     trade = calculate_all(trade)
 
     # updating session state after calc; st.session_state["trade"] prevents overwriting after calculate_all()
-    st.session_state["trade"] = trade
+    streamlit_visualization.update_session_state(trade)
 
     #Visualization:
     streamlit_visualization.current_direction_label(trade)
