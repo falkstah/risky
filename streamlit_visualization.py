@@ -25,11 +25,11 @@ def init_session_state():
 
 def get_trade_object_inputs():
     #Collect Trade Inputs in streamlit session state
-    streamlit_visualization.get_trade_parameters()
-    streamlit_visualization.render_ladders()
+    get_trade_parameters()
+    render_ladders()
 
     #send session state to object
-    return streamlit_visualization.get_trade_object_from_session_state()
+    return get_trade_object_from_session_state()
 
 #Start Info
 def intro():
@@ -58,20 +58,35 @@ def remove_global_tp_target():
         trade.global_tp_targets.pop()
 
 
-def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Output
+def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
     with st.container(border=True):
         st.subheader("🎯 General Params")
         with st.expander("Main Inputs"):
             #rendering and assigning keys, giving inputs to trade_parameters
             #if else in input guarantees value >= min_value
-            t = trade.trade_parameters
-            t.liq_delta_to_SL_delta_ratio = st.number_input("liq_delta_to_SL_delta_ratio: ", value = t.liq_delta_to_SL_delta_ratio, min_value = 0.0, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio")
-            t.maintainance_margin_rate=st.number_input("maintainance_margin_rate: ", value = t.maintainance_margin_rate,  min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate")
-            t.maintainance_deduction=st.number_input("maintainance_deduction: ", value = t.maintainance_deduction, min_value = 0.0, step = 0.001, key = "input_maintainance_deduction")
-            t.total_max_lvg = st.number_input("total_max_lvg: ", value = t.total_max_lvg if t.total_max_lvg >= 0 else 0.0, min_value = 0.0, step = 0.5, key = "input_total_max_lvg")
-            t.total_max_margin = st.number_input("total_max_margin: ", value = t.total_max_margin if t.total_max_margin >= 0.0 else 0.0, min_value = 0.0, step = 0.1, key ="input_total_max_margin")
+            st.session_state["input_liq_delta_to_SL_ratio"] = st.session_state.input_trade.trade_parameters.liq_delta_to_SL_ratio
+            st.number_input("liq_delta_to_SL_delta_ratio: ", min_value = 0.0, step = 0.25, key = "input_liq_delta_to_SL_delta_ratio")
 
-            t.trailing_SL_percent = st.number_input(
+            st.session_state["liq_delta_to_SL_delta_ratio"] = st.session_state.input_trade.trade_parameters.liq_delta_to_SL_delta_ratio
+            st.number_input("maintainance_margin_rate", min_value = 0.0, step = 0.001, key = "input_maintainance_margin_rate")
+
+            st.session_state["maintainance_deduction"] = st.session_state.input_trade.trade_parameters.maintainance_deduction
+            st.number_input("maintainance_deduction: ", min_value = 0.0, step = 0.001, key = "input_maintainance_deduction")
+
+            st.session_state["total_max_lvg"] = st.session_state.input_trade.trade_parameters.total_max_lvg
+            st.number_input("total_max_lvg", key = "input_total_max_lvg")
+
+            st.session_state["total_max_margin"] = st.session_state.input_trade.trade_parameters.total_max_margin
+            st.number_input("total_max_margin: ", min_value = 0.0, step = 0.1, key ="input_total_max_margin")
+
+            st.session_state[""] = st.session_state.input_trade.trade_parameters.
+            st.session_state[""] = st.session_state.input_trade.trade_parameters.
+        
+
+            
+            
+
+            trailing_SL_percent = st.number_input(
                 "Trailing SL (%):",
                 value = t.trailing_SL_percent,
                 min_value=0.0,
@@ -79,7 +94,7 @@ def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Outp
                 key="input_trailing_SL_percent",
             )
 
-            t.pull_SL = st.number_input(
+            pull_SL = st.number_input(
                 "Pull SL Preis:",
                 value = t.pull_SL,
                 min_value = 0.0,
@@ -87,7 +102,7 @@ def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Outp
                 key = "input_pull_SL",
             )
             
-            t.current_asset_price = st.number_input(
+            current_asset_price = st.number_input(
                 "Aktueller Asset-Preis:",
                 value = t.current_asset_price,
                 min_value=0.0,
@@ -95,13 +110,13 @@ def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Outp
                 key="input_current_asset_price",
             )
 
-            t.order_type = st.selectbox(
+            order_type = st.selectbox(
                 "Order Type:",
                 options = t.order_type,
                 key="input_order_type",
             )
 
-            t.buffer_SL = st.number_input(
+            buffer_SL = st.number_input(
                 "Buffer SL Preis:",
                 value = t.buffer_SL,
                 min_value = 0.0,
@@ -109,7 +124,7 @@ def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Outp
                 key = "input_buffer_SL",
             )
 
-            t.current_sl_price = st.number_input(
+            current_sl_price = st.number_input(
                 "Aktueller SL Preis:",
                 value = t.current_sl_price,
                 min_value = 0.0,
