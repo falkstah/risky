@@ -118,7 +118,7 @@ def get_trade_parameters(trade): #forces Object of Type Trade_Parameters as Outp
                 t.total_risk = st.number_input("total risk: ", value = t.total_risk, min_value = 0.0, step = 1.0, key = "input_total_risk")
                 t.p_SL = st.number_input("SL: ", value = t.p_SL, min_value=0.0, step=0.01, key = "input_p_SL")
 
-
+    trade.trade_parameters = t
     return trade
 
 def current_direction_label(current_direction):
