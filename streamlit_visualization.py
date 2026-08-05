@@ -301,6 +301,10 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
             
     return trade
 
+def get_trade_object_from_session_state():
+#st.session_state is global object
+    return st.session_state.get("trade")
+
 def overview_table(trade: Trade):
   tranche1 = trade.tranches[0]
   #table1, currently for tranche 1
