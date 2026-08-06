@@ -8,6 +8,14 @@ from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_P
 #import ccxt
 #import pandas_ta as ta
 
+#functions that guarantee sfe math:
+#div0 protection
+def safe(numerator: float, denominator: float, fallback):
+  if denominator == 0:
+    return fallback
+  return numerator / denominator
+
+
 #2. manage SL pulls and TPs for whole position
 def calculate_all(trade: Trade):
   #sanitizes trade attributes first and then the attributes in trade-Ojekt tranche.tranche_parameters:

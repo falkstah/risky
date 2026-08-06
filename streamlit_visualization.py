@@ -84,6 +84,10 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                 "liq_delta_to_SL_delta_ratio: ", 
                 min_value = 0.0, step = 0.25, 
                 key = "input_liq_delta_to_SL_delta_ratio")
+            #guard clause:
+            if st.session_state.input_trade.trade_parameters.liq_delta_to_SL_delta_ratio < 1.5:
+                st.warning("⚠️ Warning: liq_delta_to_SL_delta_ratio should be >= 1.5 for safe trading.")
+                st.stop()
 
             st.number_input(
                 "maintainance_margin_rate", 
@@ -100,6 +104,10 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
             st.number_input(
                 "total_max_lvg", 
                 key = "input_total_max_lvg")
+            #guard clause:
+            if st.session_state.input_trade.trade_parameters.total_max_lvg > 15:
+                st.warning("⚠️ Warning: No degenerate gambling, lions!")
+                st.stop()
 
             st.number_input(
                 "total_max_margin: ", 
@@ -156,6 +164,7 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                     min_value = 0.0, 
                     step = 1.0, 
                     key = "input_total_risk")
+                
                 st.number_input(
                     "SL: ", 
                     min_value = 0.0, 
