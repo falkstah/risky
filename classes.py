@@ -2,6 +2,11 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 @dataclass
+class Calculation_Error(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+@dataclass
 class Take_Profit_Target:
     price: float = 0.01
     profit: float = 0.0

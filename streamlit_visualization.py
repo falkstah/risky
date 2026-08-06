@@ -28,7 +28,9 @@ def get_trade_inputs_from_ui():
     update_input_keys()
 
     get_trade_parameters()
-    render_ladders()
+    render_ladder(st.session_state.input_trade, "Entries")
+    #evtl. hier schon fast order table anzeigen
+    render_ladder(st.session_state.input_trade, "global_TPs")
 
     #send session state to object
     return get_trade_object_from_session_state()
@@ -157,19 +159,22 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
             )
 
     with st.container(border=True):
-            st.subheader("🎯 Fast Order")
-            with st.expander("Fast Inputs"):
-                st.number_input(
-                    "total risk: ",
-                    min_value = 0.0, 
-                    step = 1.0, 
-                    key = "input_total_risk")
-                
-                st.number_input(
-                    "SL: ", 
-                    min_value = 0.0, 
-                    step = 0.01, 
-                    key = "input_p_SL")
+        st.subheader("🎯 Fast Order")
+        with st.expander("Fast Inputs", expanded = True):
+            st.number_input(
+                "total risk: ",
+                min_value = 0.0, 
+                step = 1.0, 
+                key = "input_total_risk")
+            
+            st.number_input(
+                "SL: ", 
+                min_value = 0.0, 
+                step = 0.01, 
+                key = "input_p_SL")
+          
+            #description
+            st.write(rf"- loosing {st.session_state.input_total_risk}\$ if price goes to {st.session_state.input_p_SL}\$.")
 
 
 def current_direction_label():
@@ -212,38 +217,33 @@ def fast_order_table():
 
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-def render_ladders():
-    
-    with st.container(border=True):
-        st.subheader("🎯 Entries")
-        #entries
-        updated_trade = render_ladder(st.session_state.input_trade, "Entries")
 
-        st.subheader("🎯 TPs")
-        
-        updated_trade.trade_parameters.tp_mode = st.radio(
-            "Choose TP mode:",
-            options = ["global_TPs", "tranche_bound_TPs"],
-            key = "TP_radio"
-        )
-        #TP-Ladder mode
-        mode = updated_trade.trade_parameters.tp_mode
-        if mode == "global_TPs":
-            updated_trade = render_ladder(updated_trade, "global_TPs")
-        elif mode == "tranche_bound_TPs":
-            updated_trade = render_ladder(updated_trade, "tranche_bound_TPs")
+def render_ladder(trade, input_mode): #modes: Entries, tranche_bound_TPs, global_TPs
+    #vereinfacht logik zu drei ladder cases
+    mode = input_mode if input_mode == "Entries" else st.session_state.input_trade.trade_parameters.tp_mode
+    #for quick trade entry Entry ladder is always expanded at beginning
+    if mode == "Entries":
+        is_Entries = True
+    else:
+        is_Entries = False
 
-    st.session_state.input_trade = updated_trade
+    #ladder:
+    with st.expander(f"Ladder {mode}", expanded = is_Entries):
+        #mode menu
+        if mode == "global_TPs" or "tranche_bound_TPs":
+            st.radio(
+                "Choose TP mode:",
+                options = ["global_TPs", "tranche_bound_TPs"],
+                key = f"{mode}radio"    #every radio need unique key
+            )    
 
-def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
-    with st.expander(f"Ladder {mode}"):
         #Managing ladder size for each mode
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
                 if mode == "Entries" or "tranche_bound_TPs":
                     add_tranche()
-                elif mode == "global TPs":
+                elif mode == "global_TPs":
                     add_global_tp_target()
 
         with entry_col2:
@@ -355,7 +355,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     st.write(f"Closing {tp.position_share}% of the full position size at {tp.price}$.")
 
             
-    return trade
+    return st.session_state.input_trade
 
 def get_trade_object_from_session_state():
     #st.session_state is global object

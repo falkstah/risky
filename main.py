@@ -28,8 +28,8 @@ def main():
     streamlit_visualization.update_session_state(trade)
 
     #Visualization of Session State Trade Object:
-    streamlit_visualization.current_direction_label()
     streamlit_visualization.fast_order_table()
+    streamlit_visualization.current_direction_label()
     streamlit_visualization.visualize_trade()
     streamlit_visualization.overview_table()
 

@@ -4,17 +4,22 @@ import numbers
 from typing import Any
 from dataclasses import dataclass, is_dataclass, fields
 import pandas as pd
-from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
+from classes import Calculation_Error, Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 #import ccxt
 #import pandas_ta as ta
 
 #functions that guarantee sfe math:
 #div0 protection
-def safe(numerator: float, denominator: float, fallback):
+def checked_div(numerator: float, denominator: float):
   if denominator == 0:
-    return fallback
+    raise Calculation_Error("div by 0.")
   return numerator / denominator
 
+#fast solution without complex error handling:
+def safe_div(numerator: float, denominator: float, fallback: float):
+    if denominator == 0:
+        return fallback
+    return numerator / denominator
 
 #2. manage SL pulls and TPs for whole position
 def calculate_all(trade: Trade):
@@ -380,7 +385,7 @@ def evaluate_trade(trade):
 def evaluate_tranche(tranche):
   t = tranche
   t.tranche_parameters.rel_asset_gain_at_TP = tranche.tranche_parameters.tp_delta / tranche.entry_level.price
-  t.tranche_parameters.rrr = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.sl_delta
+  t.tranche_parameters.rrr = safe_div(tranche.tranche_parameters.tp_delta, tranche.tranche_parameters.sl_delta, 0.0)
   t.tranche_parameters.potential_profit = tranche.tranche_parameters.risk * t.tranche_parameters.rrr
   t.tranche_parameters.equity = calculate_tranche_equity(tranche)
 
