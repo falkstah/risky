@@ -265,36 +265,32 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
                 # 2. Widgets über den Key steuern
-                tranche.entry_level.price = st.number_input(
-                    f"Tranche {index + 1} Entry Preis:",
+                st.number_input(
+                    f"Tranche {index + 1} Entry Price [$]:",
                     min_value=0.01,
                     step=0.01,
                     key=price_key
                 )
                 
-                tranche.entry_level.position_share = st.number_input(
-                    f"Tranche {index + 1} Share:",
+                st.number_input(
+                    f"Tranche {index + 1} Share [%]:",
                     min_value=0.01,
                     step=0.01,
                     key=share_key
                 )
-            
-                # 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
-                tranche.entry_level.price = st.session_state[price_key]
-                tranche.entry_level.position_share = st.session_state[share_key]
 
             elif mode == "tranche_bound_TPs":
                 tp_price_key = f"tp_price_{index}"
                 tp_percent_key = f"tp_close_percent_{index}"
 
-                tranche.tp_target.price = st.number_input(
+                st.number_input(
                     f"TP {index + 1} Preis:",
                     min_value=0.01,
                     step = 0.01,
                     key = tp_price_key
                 )
     
-                tranche.tp_target.close_percent = st.number_input(
+                st.number_input(
                     f"TP {index + 1} Schließung (%):",
                     min_value=0.0,
                     max_value=100.0,
@@ -328,15 +324,15 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                         st.session_state[global_share_key] = max(0.01, float(tranche.entry_level.position_share))
 
                     # 2. Widgets über den Key steuern
-                    tp.price = st.number_input(
+                    st.number_input(
                         f" {index + 1}. TP target:",
                         min_value = 0.01,
                         step = 0.01,
                         key = global_price_key
                     )
                     
-                    tp.close_percent = st.number_input(
-                        f"TP{index + 1} Share:",
+                    st.number_input(
+                        f"TP{index + 1} Share [%]:",
                         min_value = 0.01,
                         step = 0.01,
                         key = global_share_key
@@ -402,7 +398,6 @@ def overview_table():
 def visualize_trade():
     tranche1 = st.session_state.input_trade.tranches[0]
     st.title("Trade Visualizer")
-    st.write(f"Direction: {tranche1.tranche_parameters.current_direction.capitalize()}" if tranche1.tranche_parameters.current_direction else "Direction unknown")
 
     # --- 2. DIE LOGIK & DER BALKEN (Nutzt einfach die Variablen von oben) ---
     try:

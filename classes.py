@@ -16,7 +16,7 @@ class Take_Profit_Target:
 @dataclass
 class Entry_Level:
     price: float = 0.01
-    position_share: float = 100.0
+    position_share: float = 1.0
 
 @dataclass
 class Tranche_Parameters:
