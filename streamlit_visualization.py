@@ -228,7 +228,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     #ladder:
     with st.expander(f"Ladder {mode}", expanded = is_Entries):
         #mode menu
-        if mode == "global_TPs" or "tranche_bound_TPs":
+        if mode == "global_TPs" or mode == "tranche_bound_TPs":
             st.radio(
                 "Choose TP mode:",
                 options = ["global_TPs", "tranche_bound_TPs"],
