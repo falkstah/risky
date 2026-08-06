@@ -83,7 +83,7 @@ def calculate_tranche_allocations(trade, tranche):
 
 #Sharing rule (Trade -> Tranches):
 def fair_share(tranche, pool): 
-    return tranche.tranche_parameters.position_share * pool #(="risk- and potential-share")
+    return tranche.entry_level.position_share * pool #(="risk- and potential-share")
 
 def calculate_initial_risk(trade: Trade, tranche):
 
@@ -93,7 +93,7 @@ def calculate_initial_risk(trade: Trade, tranche):
     return trade
 
   try:
-      tranche.tranche_parameters.price = float(tranche.tranche_parameters.price)
+      tranche.entry_level.price = float(tranche.entry_level.price)
       tranche.tranche_parameters.p_SL = float(tranche.tranche_parameters.p_SL)
   except (TypeError, ValueError):
       raise TypeError("Entry price and Stop Loss price must be numeric values.")
@@ -128,7 +128,7 @@ def calculate_dynamic_state(trade: Trade, tranche):
   tranche.tranche_parameters.rel_maintainance_margin = calculate_rel_maintainance_margin(tranche)
   tranche.tranche_parameters.isolated_margin = tranche.tranche_parameters.max_margin
 
-  tranche.tranche_parameters.rel_asset_gain_at_TP, tranche.tranche_parameters.rrr, tranche.tranche_parameters.potential_profit, tranche.tranche_parameters.equity = evaluate_trade(trade)
+  tranche = evaluate_trade(trade)
   return trade
 
 #margins
@@ -221,7 +221,7 @@ def get_trade_direction(trade, tranche):
   return None
 
 def calculate_rel_risk(trade, tranche):
-  return abs(tranche.tranche_parameters.sl_delta) / tranche.tranche_parameters.price
+  return abs(tranche.tranche_parameters.sl_delta) / tranche.entry_level.price
 
 def calculate_initial_margin(trade, tranche):
   return tranche.tranche_parameters.risk / (tranche.tranche_parameters.rel_risk * tranche.tranche_parameters.lvg) # initial margin >= maintainance_margin (immer)
@@ -282,8 +282,11 @@ def calculate_maintainance_margin(tranche):
 
 def calculate_rel_maintainance_margin(tranche):
   #only useful during the trade, because margin changes and rel_maintainance_margin may no longer equal MMR
-  return tranche.tranche_parameters.maintainance_margin / abs(tranche.tranche_parameters.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
-
+  if tranche.tranche_parameters.n_pos_value != 0:
+    return tranche.tranche_parameters.maintainance_margin / abs(tranche.tranche_parameters.n_pos_value) # = maintainance_margin_rate if maintainance_margin_deduction == 0
+  else:
+    return 0.0  #avoids div by 0
+  
 def p_liq_exchange_forced(tranche):
   return tranche.entry_level.price * (1 - tranche.tranche_parameters.maintainance_margin)
 
@@ -358,12 +361,22 @@ def check_rrr(rrr):
 
 #safety calculus
 #evaluating trading setups
-def evaluate_trade(tranche):
-  rel_asset_gain_at_TP = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.price
-  rrr = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.sl_delta
-  potential_profit = tranche.tranche_parameters.risk * rrr
-  equity = calculate_equity(tranche.tranche_parameters)
-  return rel_asset_gain_at_TP, rrr, potential_profit, equity
+
+def evaluate_trade(trade):
+  for tranche in trade.tranches:
+    tranche = evaluate_tranche(tranche)
+
+  #still missing: global evaluation (evaluating cumulated effect of all tranches)
+  return trade
+
+def evaluate_tranche(tranche):
+  t = tranche
+  t.tranche_parameters.rel_asset_gain_at_TP = tranche.tranche_parameters.tp_delta / tranche.entry_level.price
+  t.tranche_parameters.rrr = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.sl_delta
+  t.tranche_parameters.potential_profit = tranche.tranche_parameters.risk * t.tranche_parameters.rrr
+  t.tranche_parameters.equity = calculate_equity(tranche.tranche_parameters)
+
+  return t
 
 def calulate_tranche_profit_at_price_p(tranche, p):
   entry = tranche.entry_level.price
