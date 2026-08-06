@@ -374,7 +374,7 @@ def evaluate_tranche(tranche):
   t.tranche_parameters.rel_asset_gain_at_TP = tranche.tranche_parameters.tp_delta / tranche.entry_level.price
   t.tranche_parameters.rrr = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.sl_delta
   t.tranche_parameters.potential_profit = tranche.tranche_parameters.risk * t.tranche_parameters.rrr
-  t.tranche_parameters.equity = calculate_tranche_equity(tranche.tranche_parameters)
+  t.tranche_parameters.equity = calculate_tranche_equity(tranche)
 
   return t
 
