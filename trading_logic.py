@@ -374,7 +374,7 @@ def evaluate_tranche(tranche):
   t.tranche_parameters.rel_asset_gain_at_TP = tranche.tranche_parameters.tp_delta / tranche.entry_level.price
   t.tranche_parameters.rrr = tranche.tranche_parameters.tp_delta / tranche.tranche_parameters.sl_delta
   t.tranche_parameters.potential_profit = tranche.tranche_parameters.risk * t.tranche_parameters.rrr
-  t.tranche_parameters.equity = calculate_equity(tranche.tranche_parameters)
+  t.tranche_parameters.equity = calculate_tranche_equity(tranche.tranche_parameters)
 
   return t
 
@@ -418,8 +418,13 @@ def calculate_avg_entry_price(trade):
   avg_entry_price = weighted_sum / number_of_entries
   return avg_entry_price
 
-
-def calculate_equity(tranche):
+def calculate_equity(trade):
+  t = trade
+  for tranche in t.tranches:
+    tranche.tranche_parameters.equity = calculate_tranche_equity(tranche)
+  return t
+    
+def calculate_tranche_equity(tranche):
   return tranche.tranche_parameters.initial_margin - tranche.tranche_parameters.loss
 
 '''
