@@ -239,8 +239,10 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
         with entry_col1:
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
                 if mode == "Entries" or mode == "tranche_bound_TPs":
+                    st.write(len(st.session_state.input_trade.tranches))
                     add_tranche()
                 elif tm == "global_TPs":
+                    st.write(len(st.session_state.input_trade.global_tp_targets))
                     add_global_tp_target()
 
         with entry_col2:
@@ -374,6 +376,17 @@ def sync_input_trade_to_items():
             tranche.entry_level.price = st.session_state[f"input_entry_price_{index}"]
         if f"input_position_share_{index}" in st.session_state:
             tranche.entry_level.position_share = st.session_state[f"input_position_share_{index}"]
+
+    # NEU: Synchronisation der globalen TPs
+    if st.session_state.input_trade.trade_parameters.tp_mode == "global_TPs":
+        for index, tp in enumerate(st.session_state.input_trade.global_tp_targets):
+            price_key = f"input_global_entry_price_{index}"
+            share_key = f"input_global_position_share_{index}"
+            
+            if price_key in st.session_state:
+                tp.price = float(st.session_state[price_key])
+            if share_key in st.session_state:
+                tp.position_share = float(st.session_state[share_key])
 
 def update_session_state(trade):
     st.session_state["trade"] = trade
