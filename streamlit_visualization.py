@@ -30,7 +30,8 @@ def get_trade_inputs_from_ui():
     get_trade_parameters()
     render_ladder(st.session_state.input_trade, "Entries")
     #evtl. hier schon fast order table anzeigen
-    render_ladder(st.session_state.input_trade, "global_TPs")
+    st.toast(f"TP Mode: {st.session_state.input_trade.trade_parameters.tp_mode}")
+    render_ladder(st.session_state.input_trade, st.session_state.input_trade.trade_parameters.tp_mode) #tranche_bound_TPs or global_TPs
 
     #synch -> completes input_trade params with current ui input values
     sync_input_trade_to_items()
@@ -217,45 +218,48 @@ def fast_order_table():
 
 
 def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
-    tm = st.session_state.input_trade.trade_parameters.tp_mode
+    m = mode
+    st.toast(m)
     #for quick trade entry Entry ladder is always expanded at beginning
-    if mode == "Entries":
+    if m == "Entries":
         is_Entries = True
     else:
         is_Entries = False
 
     #ladder:
-    with st.expander(f"Ladder {mode}", expanded = is_Entries):
+    with st.expander(f"Ladder {m}", expanded = is_Entries):
         #mode menu
-        if mode == "global_TPs" or mode == "tranche_bound_TPs":
+        if m == "global_TPs" or m == "tranche_bound_TPs":
             st.radio(
                 "Choose TP mode:",
                 options = ["global_TPs", "tranche_bound_TPs"],
-                key = f"{mode}radio"    #every radio need unique key
+                key = "input_tp_mode",   #every radio needs unique key
+                #linking this radio to the tp_mode parameter
+                index=0 if st.session_state.input_trade.trade_parameters.tp_mode == "global_TPs" else 1
             )    
 
         #Managing ladder size for each mode
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
-            if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
-                if mode == "Entries" or mode == "tranche_bound_TPs":
+            if st.button(f"Weitere {m} hinzufügen", key= f"add_{m}_button"):   
+                if m == "Entries" or m == "tranche_bound_TPs":
                     st.toast(len(st.session_state.input_trade.tranches))
                     add_tranche()
-                elif tm == "global_TPs":
+                elif m == "global_TPs":
                     st.toast(len(st.session_state.input_trade.global_tp_targets))
                     add_global_tp_target()
 
         with entry_col2:
-            if st.button(f"{mode} entfernen", key = f"remove_{mode}_button"):
-                if mode == "Entries" or mode == "tranche_bound_TPs":
+            if st.button(f"{m} entfernen", key = f"remove_{m}_button"):
+                if m == "Entries" or m == "tranche_bound_TPs":
                     remove_tranche()
-                elif tm == "global_TPs":
+                elif m == "global_TPs":
                     remove_global_tp_target()
         
         #buildung input fields for each mode
-        if mode == "Entries" or mode == "tranche_bound_TPs":    
+        if m == "Entries" or m == "tranche_bound_TPs":    
             for index, tranche in enumerate(st.session_state.input_trade.tranches):
-                if mode == "Entries":
+                if m == "Entries":
                     price_key = f"input_entry_price_{index}"
                     share_key = f"input_position_share_{index}"
                     
@@ -281,7 +285,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                         key=share_key
                     )
 
-                elif mode == "tranche_bound_TPs":
+                elif m == "tranche_bound_TPs":
                     tp_price_key = f"tp_price_{index}"
                     tp_percent_key = f"tp_close_percent_{index}"
 
@@ -301,14 +305,14 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     )
                 
                     #visualize:
-                    st.markdown(f"**{mode} Levels:**")
+                    st.markdown(f"**{m} Levels:**")
                     for tranche in st.session_state.input_trade.tranches:
-                        if mode == "Entries":
+                        if m == "Entries":
                             st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
-                        elif mode == "TPs":
+                        elif m == "TPs":
                             st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
 
-        elif tm == "global_TPs":
+        elif m == "global_TPs":
             for index, tp in enumerate(st.session_state.input_trade.global_tp_targets):
                 global_price_key = f"input_global_entry_price_{index}"
                 global_share_key = f"input_global_position_share_{index}"
@@ -340,7 +344,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                 #tp.close_percent = st.session_state[global_share_key]
                     
                 #visualize:
-                st.markdown(f"**{mode} Levels:**")
+                st.markdown(f"**{m} Levels:**")
                 for tp in st.session_state.input_trade.global_tp_targets:
                     st.write(f"Closing {tp.position_share}% of the full position size at {tp.price}$.")
 
