@@ -239,10 +239,10 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
         with entry_col1:
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
                 if mode == "Entries" or mode == "tranche_bound_TPs":
-                    st.write(len(st.session_state.input_trade.tranches))
+                    st.toast(len(st.session_state.input_trade.tranches))
                     add_tranche()
                 elif tm == "global_TPs":
-                    st.write(len(st.session_state.input_trade.global_tp_targets))
+                    st.toast(len(st.session_state.input_trade.global_tp_targets))
                     add_global_tp_target()
 
         with entry_col2:
