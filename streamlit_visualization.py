@@ -238,113 +238,109 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
-                if tm == "Entries" or tm == "tranche_bound_TPs":
+                if mode == "Entries" or mode == "tranche_bound_TPs":
                     add_tranche()
                 elif tm == "global_TPs":
                     add_global_tp_target()
 
         with entry_col2:
             if st.button(f"{mode} entfernen", key = f"remove_{mode}_button"):
-                if tm == "global_TPs":
-                    remove_global_tp_target()
-                elif tm == "Entries" or tm == "tranche_bound_TPs":
+                if mode == "Entries" or mode == "tranche_bound_TPs":
                     remove_tranche()
+                elif tm == "global_TPs":
+                    remove_global_tp_target()
         
         #buildung input fields for each mode
-        for index, tranche in enumerate(trade.tranches):
-            if mode == "Entries":
-                price_key = f"input_entry_price_{index}"
-                share_key = f"input_position_share_{index}"
-                
-                # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
-                if price_key not in st.session_state or st.session_state[price_key] < 0.01:
-                    st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
-                    
-                if share_key not in st.session_state or st.session_state[share_key] < 0.01:
-                    st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
-
-                # 2. Widgets über den Key steuern
-                st.number_input(
-                    f"Tranche {index + 1} Entry Price [$]:",
-                    min_value=0.01,
-                    step=0.01,
-                    key=price_key
-                )
-                
-                st.number_input(
-                    f"Tranche {index + 1} Share [%]:",
-                    min_value=0.01,
-                    step=0.01,
-                    key=share_key
-                )
-
-            elif mode == "tranche_bound_TPs":
-                tp_price_key = f"tp_price_{index}"
-                tp_percent_key = f"tp_close_percent_{index}"
-
-                st.number_input(
-                    f"TP {index + 1} Preis:",
-                    min_value=0.01,
-                    step = 0.01,
-                    key = tp_price_key
-                )
-    
-                st.number_input(
-                    f"TP {index + 1} Schließung (%):",
-                    min_value=0.0,
-                    max_value=100.0,
-                    step = 1.0,
-                    key = tp_percent_key
-                )
-
-                #useless:
-                #tranche.tp_target.price = st.session_state[tp_price_key]
-                #tranche.tp_target.close_percent = st.session_state[tp_percent_key]
-            
-                #visualize:
-                st.markdown(f"**{mode} Levels:**")
-                for tranche in trade.tranches:
-                    if mode == "Entries":
-                        st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
-                    elif mode == "TPs":
-                        st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
-
-
-            elif tm == "global_TPs":
-                for index, tp in enumerate(trade.global_tp_targets):
-                    global_price_key = f"input_global_entry_price_{index}"
-                    global_share_key = f"input_global_position_share_{index}"
+        if mode == "Entries" or mode == "tranche_bound_TPs":    
+            for index, tranche in enumerate(st.session_state.input_trade.tranches):
+                if mode == "Entries":
+                    price_key = f"input_entry_price_{index}"
+                    share_key = f"input_position_share_{index}"
                     
                     # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
-                    if global_price_key not in st.session_state or st.session_state[global_price_key] < 0.01:
-                        st.session_state[global_price_key] = max(0.01, float(tranche.entry_level.price))
+                    if price_key not in st.session_state or st.session_state[price_key] < 0.01:
+                        st.session_state[price_key] = max(0.01, float(tranche.entry_level.price))
                         
-                    if global_share_key not in st.session_state or st.session_state[global_share_key] < 0.01:
-                        st.session_state[global_share_key] = max(0.01, float(tranche.entry_level.position_share))
+                    if share_key not in st.session_state or st.session_state[share_key] < 0.01:
+                        st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
                     # 2. Widgets über den Key steuern
                     st.number_input(
-                        f" {index + 1}. TP target:",
-                        min_value = 0.01,
-                        step = 0.01,
-                        key = global_price_key
+                        f"Tranche {index + 1} Entry Price [$]:",
+                        min_value=0.01,
+                        step=0.01,
+                        key=price_key
                     )
                     
                     st.number_input(
-                        f"TP{index + 1} Share [%]:",
-                        min_value = 0.01,
+                        f"Tranche {index + 1} Share [%]:",
+                        min_value=0.01,
+                        step=0.01,
+                        key=share_key
+                    )
+
+                elif mode == "tranche_bound_TPs":
+                    tp_price_key = f"tp_price_{index}"
+                    tp_percent_key = f"tp_close_percent_{index}"
+
+                    st.number_input(
+                        f"TP {index + 1} Preis:",
+                        min_value=0.01,
                         step = 0.01,
-                        key = global_share_key
+                        key = tp_price_key
+                    )
+        
+                    st.number_input(
+                        f"TP {index + 1} Schließung (%):",
+                        min_value=0.0,
+                        max_value=100.0,
+                        step = 1.0,
+                        key = tp_percent_key
                     )
                 
-                    # now useless: 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
-                    #tp.price = st.session_state[global_price_key]
-                    #tp.close_percent = st.session_state[global_share_key]
-                        
                     #visualize:
                     st.markdown(f"**{mode} Levels:**")
-                    for tp in trade.global_tp_targets:
-                        st.write(f"Closing {tp.position_share}% of the full position size at {tp.price}$.")
+                    for tranche in st.session_state.input_trade.tranches:
+                        if mode == "Entries":
+                            st.write(f"- entering with {tranche.entry_level.position_share}% of the full position size at {tranche.entry_level.price}$.")
+                        elif mode == "TPs":
+                            st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
+
+        elif tm == "global_TPs":
+            for index, tp in enumerate(st.session_state.input_trade.global_tp_targets):
+                global_price_key = f"input_global_entry_price_{index}"
+                global_share_key = f"input_global_position_share_{index}"
+                
+                # 1. Sicherstellen, dass der Wert existiert und min. den min_value (0.01) hat
+                if global_price_key not in st.session_state or st.session_state[global_price_key] < 0.01:
+                    st.session_state[global_price_key] = max(0.01, float(tp.price))
+                    
+                if global_share_key not in st.session_state or st.session_state[global_share_key] < 0.01:
+                    st.session_state[global_share_key] = max(0.01, float(tp.position_share))
+
+                # 2. Widgets über den Key steuern
+                st.number_input(
+                    f" {index + 1}. TP target:",
+                    min_value = 0.01,
+                    step = 0.01,
+                    key = global_price_key
+                )
+                
+                st.number_input(
+                    f"TP{index + 1} Share [%]:",
+                    min_value = 0.01,
+                    step = 0.01,
+                    key = global_share_key
+                )
+            
+                # now useless: 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
+                #tp.price = st.session_state[global_price_key]
+                #tp.close_percent = st.session_state[global_share_key]
+                    
+                #visualize:
+                st.markdown(f"**{mode} Levels:**")
+                for tp in st.session_state.input_trade.global_tp_targets:
+                    st.write(f"Closing {tp.position_share}% of the full position size at {tp.price}$.")
 
     return st.session_state.input_trade
 
