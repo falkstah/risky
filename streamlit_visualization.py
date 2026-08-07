@@ -44,24 +44,20 @@ def intro():
 
 #last list element (hence tp/entry) will be popped, as is intuitiv
 def add_tranche():
-    trade = st.session_state.input_trade
-    trade.tranches.append(Tranche())
+    st.session_state.input_trade.tranches.append(Tranche())
     #tranche bound entry und TP created by tranche appendix as well
 
 def remove_tranche():
-    if len(st.session_state.trade.tranches) > 1:
-        trade = st.session_state.input_trade
-        trade.tranches.pop()
+    if len(st.session_state.input_trade.tranches) > 1:
+        st.session_state.input_trade.tranches.pop()
         #tranche bound entry and tp get popped with the tranche pop as well
 
 def add_global_tp_target():
-    trade = st.session_state.input_trade
-    trade.global_tp_targets.append(Take_Profit_Target())
+    st.session_state.input_trade.global_tp_targets.append(Take_Profit_Target())
 
 def remove_global_tp_target():
-    if len(st.session_state.global_tp_targets) > 1:
-        trade = st.session_state.input_trade
-        trade.global_tp_targets.pop()
+    if len(st.session_state.input_trade.global_tp_targets) > 1:
+        st.session_state.input_trade.global_tp_targets.pop()
     
 
 def update_input_keys():
@@ -221,6 +217,7 @@ def fast_order_table():
 
 
 def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
+    tm = st.session_state.input_trade.trade_parameters.tp_mode
     #for quick trade entry Entry ladder is always expanded at beginning
     if mode == "Entries":
         is_Entries = True
@@ -241,16 +238,16 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
             if st.button(f"Weitere {mode} hinzufügen", key= f"add_{mode}_button"):   
-                if st.session_state.input_trade.trade_parameters.tp_mode == "Entries" or st.session_state.input_trade.trade_parameters.tp_mode == "tranche_bound_TPs":
+                if tm == "Entries" or tm == "tranche_bound_TPs":
                     add_tranche()
-                elif st.session_state.input_trade.trade_parameters.tp_mode == "global_TPs":
+                elif tm == "global_TPs":
                     add_global_tp_target()
 
         with entry_col2:
             if st.button(f"{mode} entfernen", key = f"remove_{mode}_button"):
-                if st.session_state.input_trade.trade_parameters.tp_mode == "global_TPs":
+                if tm == "global_TPs":
                     remove_global_tp_target()
-                elif st.session_state.input_trade.trade_parameters.tp_mode == "Entries" or "tranche_bound_TPs":
+                elif tm == "Entries" or tm == "tranche_bound_TPs":
                     remove_tranche()
         
         #buildung input fields for each mode
@@ -313,7 +310,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                         st.write(f"Closing {tranche.tp_target.close_percent}% of the position at {tranche.tp_target.price}$.")
 
 
-            elif st.session_state.input_trade.trade_parameters.tp_mode == "global_TPs":
+            elif tm == "global_TPs":
                 for index, tp in enumerate(trade.global_tp_targets):
                     global_price_key = f"input_global_entry_price_{index}"
                     global_share_key = f"input_global_position_share_{index}"
