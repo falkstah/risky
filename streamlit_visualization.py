@@ -32,6 +32,8 @@ def get_trade_inputs_from_ui():
     #evtl. hier schon fast order table anzeigen
     render_ladder(st.session_state.input_trade, "global_TPs")
 
+    #synch -> completes input_trade params with current ui input values
+    sync_input_trade_to_items()
     #send session state to object
     return get_trade_object_from_session_state()
 
@@ -352,6 +354,33 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
 def get_trade_object_from_session_state():
     #st.session_state is global object
     return st.session_state.get("input_trade")
+
+from dataclasses import fields
+
+#st inputs lay on keys, now we need to sync them back to the session state input_trade object, so that the object can be used for calculations
+def sync_input_trade_to_items():
+    trade = st.session_state.input_trade
+    t = trade.trade_parameters
+
+    # Automatisches Durchgehen aller Felder in Trade_Parameters
+    for field in fields(t):
+        key = f"input_{field.name}"
+        if key in st.session_state:
+            setattr(t, field.name, st.session_state[key])
+
+    # Das Gleiche für die Tranchen
+    for index, tranche in enumerate(trade.tranches):
+        tp = tranche.tranche_parameters
+        for field in fields(tp):
+            key = f"input_tranche_{index}_{field.name}"
+            if key in st.session_state:
+                setattr(tp, field.name, st.session_state[key])
+                
+        # Entry-Werte separat holen
+        if f"input_entry_price_{index}" in st.session_state:
+            tranche.entry_level.price = st.session_state[f"input_entry_price_{index}"]
+        if f"input_position_share_{index}" in st.session_state:
+            tranche.entry_level.position_share = st.session_state[f"input_position_share_{index}"]
 
 def update_session_state(trade):
     st.session_state["trade"] = trade
