@@ -26,7 +26,7 @@ def init_session_state():
 def get_trade_inputs_from_ui():
     #Collect Trade Inputs in streamlit session state
     update_input_keys()
-
+    st.toast(f"TP Mode: {st.session_state.input_trade.trade_parameters.tp_mode}")
     get_trade_parameters()
     render_ladder(st.session_state.input_trade, "Entries")
     #evtl. hier schon fast order table anzeigen
@@ -72,6 +72,16 @@ def update_input_keys():
         ("input_total_max_margin", t.total_max_margin),
         ("input_trailing_sl_percent", t.trailing_SL_percent),
         ("input_pull_SL", t.pull_SL),
+
+        ("input_order_type", t.order_type),
+        ("input_buffer_SL", t.buffer_SL),
+        ("input_current_sl_price", t.current_sl_price),
+        ("input_current_asset_price", t.current_asset_price),
+        ("input_total_risk", t.total_risk),
+        ("input_p_SL", t.p_SL),
+
+        #radio_inputs:
+        ("input_tp_mode", t.tp_mode)
     ]:
         st.session_state[key] = attr
 
@@ -219,7 +229,7 @@ def fast_order_table():
 
 def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     m = mode
-    st.toast(m)
+    st.toast(f"mode: {m}")
     #for quick trade entry Entry ladder is always expanded at beginning
     if m == "Entries":
         is_Entries = True
@@ -234,8 +244,6 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                 "Choose TP mode:",
                 options = ["global_TPs", "tranche_bound_TPs"],
                 key = "input_tp_mode",   #every radio needs unique key
-                #linking this radio to the tp_mode parameter
-                index=0 if st.session_state.input_trade.trade_parameters.tp_mode == "global_TPs" else 1
             )    
 
         #Managing ladder size for each mode
@@ -246,7 +254,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     st.toast(len(st.session_state.input_trade.tranches))
                     add_tranche()
                 elif m == "global_TPs":
-                    st.toast(len(st.session_state.input_trade.global_tp_targets))
+                    st.toast(f"TP Targets: {len(st.session_state.input_trade.global_tp_targets)}")
                     add_global_tp_target()
 
         with entry_col2:
