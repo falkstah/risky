@@ -3,6 +3,7 @@ import streamlit as st
 import altair as alt
 
 import pandas as pd
+from typing import get_args
 
 #logic functions
 from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
@@ -238,13 +239,19 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
 
     #ladder:
     with st.expander(f"Ladder {m}", expanded = is_Entries):
-        #mode menu
+        #tp_mode menu
         if m == "global_TPs" or m == "tranche_bound_TPs":
+            # Bestimme den aktuellen Index basierend auf dem Trade-Objekt
+            current_mode = st.session_state.input_trade.trade_parameters.tp_mode
+            modes_list = list(get_args(Trade_Parameters.__annotations__["tp_mode"]))    #classes.py as tp_mode single source of truth
+            default_index = modes_list.index(current_mode) if current_mode in modes_list else 0
+
             st.radio(
                 "Choose TP mode:",
-                options = ["global_TPs", "tranche_bound_TPs"],
-                key = "input_tp_mode",   #every radio needs unique key
-            )    
+                options = modes_list,
+                index = default_index,
+                key="input_tp_mode",   # Sichert die Anbindung an die sync-Logik
+            )
 
         #Managing ladder size for each mode
         entry_col1, entry_col2 = st.columns(2)
