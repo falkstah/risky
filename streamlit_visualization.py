@@ -27,11 +27,11 @@ def init_session_state():
 def get_trade_inputs_from_ui():
     #Collect Trade Inputs in streamlit session state
     update_input_keys()
-    st.toast(f"TP Mode: {st.session_state.input_trade.trade_parameters.tp_mode}")
+
     get_trade_parameters()
     render_ladder(st.session_state.input_trade, "Entries")
     #evtl. hier schon fast order table anzeigen
-    st.toast(f"TP Mode: {st.session_state.input_trade.trade_parameters.tp_mode}")
+
     render_ladder(st.session_state.input_trade, st.session_state.input_trade.trade_parameters.tp_mode) #tranche_bound_TPs or global_TPs
 
     #synch -> completes input_trade params with current ui input values
@@ -242,7 +242,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
         #tp_mode menu
         if m == "global_TPs" or m == "tranche_bound_TPs":
             # Bestimme den aktuellen Index basierend auf dem Trade-Objekt
-            current_mode = st.session_state.input_trade.trade_parameters.tp_mode
+            current_mode = st.session_state.input_trade.trade_parameters.tp_mode    #könnte falsch sein, wenn tp_mode aus vorherigerem überschrieben wird
             modes_list = list(get_args(Trade_Parameters.__annotations__["tp_mode"]))    #classes.py as tp_mode single source of truth
             default_index = modes_list.index(current_mode) if current_mode in modes_list else 0
 
@@ -258,10 +258,9 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
         with entry_col1:
             if st.button(f"Weitere {m} hinzufügen", key= f"add_{m}_button"):   
                 if m == "Entries" or m == "tranche_bound_TPs":
-                    st.toast(len(st.session_state.input_trade.tranches))
                     add_tranche()
+                    
                 elif m == "global_TPs":
-                    st.toast(f"TP Targets: {len(st.session_state.input_trade.global_tp_targets)}")
                     add_global_tp_target()
 
         with entry_col2:
