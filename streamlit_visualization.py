@@ -337,7 +337,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     st.session_state[global_price_key] = max(0.01, float(tp.price))
                     
                 if global_share_key not in st.session_state or st.session_state[global_share_key] < 0.01:
-                    st.session_state[global_share_key] = max(0.01, float(tp.position_share))
+                    st.session_state[global_share_key] = max(0.01, float(tp.close_percent))
 
                 # 2. Widgets über den Key steuern
                 st.number_input(
@@ -353,15 +353,11 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     step = 0.01,
                     key = global_share_key
                 )
-            
-                # now useless: 3. Direkt in die Tranche-Objekte zurückschreiben (Punktschreibweise)
-                #tp.price = st.session_state[global_price_key]
-                #tp.close_percent = st.session_state[global_share_key]
                     
-                #visualize:
-                st.markdown(f"**{m} Levels:**")
-                for tp in st.session_state.input_trade.global_tp_targets:
-                    st.write(f"Closing {tp.position_share}% of the full position size at {tp.price}$.")
+            #visualize:
+            st.markdown(f"**{m} Levels:**")
+            for tp in st.session_state.input_trade.global_tp_targets:
+                st.write(f"Closing {tp.close_percent}% of the full position size at {tp.price}$.")
 
     return st.session_state.input_trade
 
@@ -405,7 +401,7 @@ def sync_input_trade_to_items():
             if price_key in st.session_state:
                 tp.price = float(st.session_state[price_key])
             if share_key in st.session_state:
-                tp.position_share = float(st.session_state[share_key])
+                tp.close_percent = float(st.session_state[share_key])
 
 def update_session_state(trade):
     st.session_state["trade"] = trade

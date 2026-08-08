@@ -68,12 +68,7 @@ def clean_value(value):
     if isinstance(value, numbers.Real):
         return float(value)
     if isinstance(value, str):
-        if not value.strip():
-            return 0.0
-        try:
-            return float(value.strip())
-        except ValueError:
-            return 0.0
+        return value  #changes nothing at the moment
     return 0.0
 
 
