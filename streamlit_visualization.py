@@ -7,6 +7,7 @@ from typing import get_args
 
 #logic functions
 from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
+from dataclasses import fields
 from trading_logic import calculate_buffered_tp1_close_percent
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
@@ -35,7 +36,7 @@ def get_trade_inputs_from_ui():
     render_ladder(st.session_state.input_trade, st.session_state.input_trade.trade_parameters.tp_mode) #tranche_bound_TPs or global_TPs
 
     #synch -> completes input_trade params with current ui input values
-    sync_input_trade_to_items()
+    load_ui_into_trade()
     #send session state to object
     return get_trade_object_from_session_state()
 
@@ -92,7 +93,7 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
         with st.expander("Main Inputs"):
             #rendering and assigning keys, giving inputs to trade_parameters
            
-            st.number_input(
+            build_number_input(
                 "liq_delta_to_SL_delta_ratio: ", 
                 min_value = 0.0, step = 0.25, 
                 key = "input_liq_delta_to_SL_delta_ratio")
@@ -101,19 +102,19 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                 st.warning("⚠️ Warning: liq_delta_to_SL_delta_ratio should be >= 1.5 for safe trading.")
                 st.stop()
 
-            st.number_input(
+            build_number_input(
                 "maintainance_margin_rate", 
                 min_value = 0.0, 
                 step = 0.001, 
                 key = "input_maintainance_margin_rate")
 
-            st.number_input(
+            build_number_input(
                 "maintainance_deduction: ", 
                 min_value = 0.0, 
                 step = 0.001, 
                 key = "input_maintainance_deduction")
 
-            st.number_input(
+            build_number_input(
                 "total_max_lvg", 
                 key = "input_total_max_lvg")
             #guard clause:
@@ -121,27 +122,27 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                 st.warning("⚠️ Warning: No degenerate gambling, lions!")
                 st.stop()
 
-            st.number_input(
+            build_number_input(
                 "total_max_margin: ", 
                 min_value = 0.0, 
                 step = 0.1, 
                 key ="input_total_max_margin")
 
-            st.number_input(
+            build_number_input(
                 "Trailing SL (%):",
                 min_value=0.0,
                 step=0.1,
                 key="input_trailing_SL_percent",
             )
 
-            st.number_input(
+            build_number_input(
                 "Pull SL Preis:",
                 min_value = 0.0,
                 step = 0.01,
                 key = "input_pull_SL",
             )
             
-            st.number_input(
+            build_number_input(
                 "Aktueller Asset-Preis:",
                 min_value = 0.0,
                 step = 0.01,
@@ -154,14 +155,14 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
                 key="input_order_type",
             )
 
-            st.number_input(
-                "Buffer SL Preis:",
+            build_number_input(
+                "Buffer_SL:",
                 min_value = 0.0,
                 step = 0.01,
                 key = "input_buffer_SL",
             )
 
-            st.number_input(
+            build_number_input(
                 "Aktueller SL Preis:",
                 min_value = 0.0,
                 step = 0.01,
@@ -171,13 +172,13 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
     with st.container(border=True):
         st.subheader("🎯 Fast Order")
         with st.expander("Fast Inputs", expanded = True):
-            st.number_input(
+            build_number_input(
                 "total risk: ",
                 min_value = 0.0, 
                 step = 1.0, 
                 key = "input_total_risk")
             
-            st.number_input(
+            build_number_input(
                 "SL: ", 
                 min_value = 0.0, 
                 step = 0.01, 
@@ -284,38 +285,17 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                         st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
 
                     # 2. Widgets über den Key steuern
-                    st.number_input(
-                        f"Tranche {index + 1} Entry Price [$]:",
-                        min_value=0.01,
-                        step=0.01,
-                        key=price_key
-                    )
+                    build_number_input(f"Tranche {index + 1} Entry Price [$]:", min_value=0.01, step=0.01, key= price_key)
                     
-                    st.number_input(
-                        f"Tranche {index + 1} Share [%]:",
-                        min_value=0.01,
-                        step=0.01,
-                        key=share_key
-                    )
+                    build_number_input(f"Tranche {index + 1} Share [%]:", min_value=0.01, step=0.01, key=share_key)
 
                 elif m == "tranche_bound_TPs":
                     tp_price_key = f"tp_price_{index}"
                     tp_percent_key = f"tp_close_percent_{index}"
 
-                    st.number_input(
-                        f"TP {index + 1} Preis:",
-                        min_value=0.01,
-                        step = 0.01,
-                        key = tp_price_key
-                    )
+                    build_number_input(f"TP {index + 1} Preis:", min_value=0.01, step = 0.01, key = tp_price_key)
         
-                    st.number_input(
-                        f"TP {index + 1} Schließung (%):",
-                        min_value=0.0,
-                        max_value=100.0,
-                        step = 1.0,
-                        key = tp_percent_key
-                    )
+                    build_number_input(f"TP {index + 1} Schließung (%):", min_value=0.0, max_value=100.0, step = 1.0, key = tp_percent_key )
                 
                     #visualize:
                     st.markdown(f"**{m} Levels:**")
@@ -338,19 +318,9 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     st.session_state[global_share_key] = max(0.01, float(tp.close_percent))
 
                 # 2. Widgets über den Key steuern
-                st.number_input(
-                    f" {index + 1}. TP target:",
-                    min_value = 0.01,
-                    step = 0.01,
-                    key = global_price_key
-                )
+                build_number_input(f" {index + 1}. TP target:", min_value = 0.01, step = 0.01, key = global_price_key)
                 
-                st.number_input(
-                    f"TP{index + 1} Share [%]:",
-                    min_value = 0.01,
-                    step = 0.01,
-                    key = global_share_key
-                )
+                build_number_input(f"TP{index + 1} Share [%]:", min_value = 0.01, step = 0.01, key = global_share_key)
                     
             #visualize:
             st.markdown(f"**{m} Levels:**")
@@ -363,10 +333,42 @@ def get_trade_object_from_session_state():
     #st.session_state is global object
     return st.session_state.get("input_trade")
 
-from dataclasses import fields
+
+#Callback wrappers for user st numbr_inputs:
+#"**kwargs" allows for additional demands on the input, p.ex. specific max_value for a parameter
+
+#label_cleaner for key generation:
+def clean_label(label):
+    # Remove special characters and spaces for key generation; replaces are executed after one another, so order can matter
+    return label.lower().replace(" ", "_").replace(":", "_").replace("-", "").lower()
+
+def build_number_input(label, key=None, **kwargs):
+    # Wenn KEIN Key übergeben wurde (key ist None), bauen wir einen Standard-Key
+    if key is None:
+        key = f"input_{clean_label(label)}"
+    
+    return build_number_input(label, key=key, on_change=load_ui_into_trade, **kwargs)
+
+def build_selectbox(label, options, key=None, **kwargs):
+    if key is None:
+        key = f"input_{clean_label(label)}"
+        
+    return st.selectbox(label, options=options, key=key, on_change=load_ui_into_trade, **kwargs)
+
+def build_radio(label, options, key=None, **kwargs):
+    if key is None:
+        key = f"input_{clean_label(label)}"
+        
+    return st.radio(label, options=options, key=key, on_change=load_ui_into_trade, **kwargs)
+
+
+# Verwendung im UI:
+#build_number_input("Total Risk", "input_total_risk")
+#build_number_input("SL Price", "input_current_sl_price")
+
 
 #st inputs lay on keys, now we need to sync them back to the session state input_trade object, so that the object can be used for calculations
-def sync_input_trade_to_items():
+def load_ui_into_trade():
     trade = st.session_state.input_trade
     t = trade.trade_parameters
 
