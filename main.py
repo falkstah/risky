@@ -7,6 +7,10 @@ from classes import Trade
 from trading_logic import calculate_all
 import streamlit_visualization
 
+#for debugging:
+import streamlit as st
+import json
+
 
 def main():
     #Init:
@@ -21,6 +25,7 @@ def main():
     trade: Trade = raw
 
     #Do the Math
+    st.json(json.dumps(vars(trade), default = str))
     trade = calculate_all(trade)
     
     

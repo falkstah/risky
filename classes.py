@@ -62,7 +62,7 @@ class Tranche:
 class Trade_Parameters:
     #static trade specific variables
     total_max_lvg: float = 10.0
-    total_risk: float = 0.0
+    total_risk: float = 10.0
     total_max_margin: float  = 0.0
     liq_delta_to_SL_delta_ratio: float = 4.0
     maintainance_margin_rate: float = 0.02

@@ -230,7 +230,6 @@ def fast_order_table():
 
 def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     m = mode
-    st.toast(f"mode: {m}")
     #for quick trade entry Entry ladder is always expanded at beginning
     if m == "Entries":
         is_Entries = True
@@ -501,6 +500,6 @@ def visualize_trade():
         chart = alt.layer(area, rule, text).properties(height=500, width=200)
 
         # In Streamlit anzeigen
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width='stretch')
     except Exception as exc:
         st.warning(f"Error in visualizing trade: {exc}")
