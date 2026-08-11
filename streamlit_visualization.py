@@ -61,7 +61,7 @@ def add_global_tp_target():
     st.session_state.input_trade.global_tp_targets.append(Take_Profit_Target())
 
 def remove_global_tp_target():
-    if len(st.session_state.input_trade.global_tp_targets) > 1:
+    if len(st.session_state.input_trade.global_tp_targets) > 0:
         st.session_state.input_trade.global_tp_targets.pop()
     
 
