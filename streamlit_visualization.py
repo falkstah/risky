@@ -268,37 +268,6 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     return st.session_state.input_trade
 
 
-#Callback wrappers for user st numbr_inputs:
-#"**kwargs" allows for additional demands on the input, p.ex. specific max_value for a parameter
-
-#label_cleaner for key generation:
-def clean_label(label):
-    # Remove special characters and spaces for key generation; replaces are executed after one another, so order can matter
-    return label.lower().replace(" ", "_").replace(":", "").replace("-", "").lower()
-
-def build_number_input(label, key = None, min_value = 0.0, step = 0.01, **kwargs):
-    # Wenn KEIN Key übergeben wurde (key ist None), bauen wir einen Standard-Key
-    if key is None:
-        key = f"input_{clean_label(label)}"
-    
-    return build_number_input(label, key = key, min_value = min_value, step = step, on_change = load_ui_into_trade, **kwargs)
-
-def build_selectbox(label, options, key=None, **kwargs):
-    if key is None:
-        key = f"input_{clean_label(label)}"
-        
-    return st.selectbox(label, options=options, key=key, on_change=load_ui_into_trade, **kwargs)
-
-def build_radio(label, options, key=None, **kwargs):
-    if key is None:
-        key = f"input_{clean_label(label)}"
-        
-    return st.radio(label, options=options, key=key, on_change=load_ui_into_trade, **kwargs)
-
-
-# Verwendung im UI:
-#build_number_input("Total Risk", "input_total_risk")
-#build_number_input("SL Price", "input_current_sl_price")
 
 
 #st inputs lay on keys, now we need to sync them back to the session state input_trade object, so that the object can be used for calculations
@@ -336,6 +305,35 @@ def load_ui_into_trade():
                 tp.price = float(st.session_state[price_key])
             if share_key in st.session_state:
                 tp.close_percent = float(st.session_state[share_key])
+
+
+#Callback wrappers for user st numbr_inputs:
+#"**kwargs" allows for additional demands on the input, p.ex. specific max_value for a parameter
+
+#label_cleaner for key generation:
+def clean_label(label):
+    # Remove special characters and spaces for key generation; replaces are executed after one another, so order can matter
+    return label.lower().replace(" ", "_").replace(":", "").replace("-", "").lower()
+
+def build_number_input(label, key = None, min_value = 0.0, step = 0.01, on_change = load_ui_into_trade, **kwargs):
+    # Wenn KEIN Key übergeben wurde (key ist None), bauen wir einen Standard-Key
+    if key is None:
+        key = f"input_{clean_label(label)}"
+    
+    return build_number_input(label, key = key, min_value = min_value, step = step, on_change = on_change, **kwargs)
+
+def build_selectbox(label, options, key=None, on_change = load_ui_into_trade, **kwargs):
+    if key is None:
+        key = f"input_{clean_label(label)}"
+        
+    return st.selectbox(label, options=options, key=key, on_change = load_ui_into_trade, **kwargs)
+
+def build_radio(label, options, key=None, on_change = load_ui_into_trade,**kwargs):
+    if key is None:
+        key = f"input_{clean_label(label)}"
+        
+    return st.radio(label, options=options, key=key, on_change = load_ui_into_trade, **kwargs)
+
 
 def update_session_state(trade):
     st.session_state["trade"] = trade
