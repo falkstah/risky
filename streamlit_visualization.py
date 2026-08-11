@@ -320,7 +320,7 @@ def build_number_input(label, key = None, min_value = 0.0, step = 0.01, on_chang
     if key is None:
         key = f"input_{clean_label(label)}"
     
-    return build_number_input(label, key = key, min_value = min_value, step = step, on_change = on_change, **kwargs)
+    return st.number_input(label, key = key, min_value = min_value, step = step, on_change = on_change, **kwargs)
 
 def build_selectbox(label, options, key=None, on_change = load_ui_into_trade, **kwargs):
     if key is None:
