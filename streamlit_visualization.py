@@ -25,9 +25,12 @@ def init_session_state():
             st.session_state["key"] = 0
     #generiert fehler bei variablen mit min_value > 0, oder?
 
+    #for first run, we need to update the session state keys with the default values from the Trade object
+    update_input_items()
+
 def get_trade_inputs_from_ui():
     #Collect Trade Inputs in streamlit session state
-    update_input_keys()
+    update_input_items()
 
     get_trade_parameters()
     render_ladder(st.session_state.input_trade, "Entries")
@@ -35,10 +38,9 @@ def get_trade_inputs_from_ui():
 
     render_ladder(st.session_state.input_trade, st.session_state.input_trade.trade_parameters.tp_mode) #tranche_bound_TPs or global_TPs
 
-    #synch -> completes input_trade params with current ui input values
+    #loads ui inputs into trade object, so that it can be used for calculations; is used when widgets are not set yet, otherwse callback
     load_ui_into_trade()
     #send session state to object
-    return get_trade_object_from_session_state()
 
 #Start Info
 def intro():
@@ -63,7 +65,7 @@ def remove_global_tp_target():
         st.session_state.input_trade.global_tp_targets.pop()
     
 
-def update_input_keys():
+def update_input_items():
     # Update session state keys for trade parameters
     t = st.session_state.input_trade.trade_parameters
     for key, attr in [
@@ -111,11 +113,9 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
             build_number_input("Trailing SL percent:", min_value=0.0)
             build_number_input("Pull SL price:", min_value = 0.0)
             build_number_input("Current Asset Price:", min_value = 0.0)
-            st.selectbox(
-                "Order Type:",
-                options = st.session_state.input_trade.trade_parameters.order_type,
-                key="input_order_type",
-            )
+
+            build_selectbox("Order Type:", options = st.session_state.input_trade.trade_parameters.order_type)
+
             build_number_input("Buffer_SL:", min_value = 0.0)
             build_number_input("Current SL price:", min_value = 0.0)
 
@@ -266,10 +266,6 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                 st.write(f"Closing {tp.close_percent}% of the full position size at {tp.price}$.")
 
     return st.session_state.input_trade
-
-def get_trade_object_from_session_state():
-    #st.session_state is global object
-    return st.session_state.get("input_trade")
 
 
 #Callback wrappers for user st numbr_inputs:
