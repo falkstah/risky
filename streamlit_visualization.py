@@ -95,36 +95,36 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
         with st.expander("Main Inputs"):
             #rendering and assigning keys, giving inputs to trade_parameters
            
-            build_number_input("liq_delta_to_SL_delta_ratio: ", min_value = 0.0, step = 0.25)
+            build_number_input("liq_delta_to_SL_delta_ratio: ", step = 0.25)
             #guard clause:
             if st.session_state.input_trade.trade_parameters.liq_delta_to_SL_delta_ratio < 1.5:
                 st.warning("⚠️ Warning: liq_delta_to_SL_delta_ratio should be >= 1.5 for safe trading.")
                 st.stop()
 
-            build_number_input("maintainance_margin_rate", min_value = 0.0, step = 0.001)
-            build_number_input("maintainance_deduction: ", min_value = 0.0,  step = 0.001)
+            build_number_input("maintainance_margin_rate", step = 0.001)
+            build_number_input("maintainance_deduction: ", step = 0.001)
             build_number_input("total_max_lvg:")
             #guard clause:
             if st.session_state.input_trade.trade_parameters.total_max_lvg > 15:
                 st.warning("⚠️ Warning: No degenerate gambling, lions!")
                 st.stop()
 
-            build_number_input("total_max_margin: ", min_value = 0.0)
+            build_number_input("total_max_margin: ")
             build_number_input("Trailing SL percent:", min_value=0.0)
-            build_number_input("Pull SL price:", min_value = 0.0)
-            build_number_input("Current Asset Price:", min_value = 0.0)
+            build_number_input("Pull SL price:", )
+            build_number_input("Current Asset Price:")
 
             build_selectbox("Order Type:", options = st.session_state.input_trade.trade_parameters.order_type)
 
-            build_number_input("Buffer_SL:", min_value = 0.0)
-            build_number_input("Current SL price:", min_value = 0.0)
+            build_number_input("Buffer_SL:")
+            build_number_input("Current SL price:", )
 
     with st.container(border=True):
         st.subheader("🎯 Fast Order")
         with st.expander("Fast Inputs", expanded = True):
-            build_number_input("total risk:", min_value = 0.0, step = 1.0)
+            build_number_input("total risk:",  step = 1.0)
             
-            build_number_input("p_SL:", min_value = 0.0)
+            build_number_input("p_SL:", )
           
             #description
             st.write(rf"- loosing {st.session_state.input_total_risk}\$ if price goes to {st.session_state.input_p_SL}\$.")
@@ -256,9 +256,9 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     st.session_state[global_share_key] = max(0.01, float(tp.close_percent))
 
                 # 2. Widgets über den Key steuern
-                build_number_input(f" {index + 1}. TP target:", min_value = 0.01, key = global_price_key)
+                build_number_input(f" {index + 1}. TP target:", key = global_price_key)
                 
-                build_number_input(f"TP{index + 1} Share [%]:", min_value = 0.01, key = global_share_key)
+                build_number_input(f"TP{index + 1} Share [%]:", key = global_share_key)
                     
             #visualize:
             st.markdown(f"**{m} Levels:**")
@@ -276,12 +276,12 @@ def clean_label(label):
     # Remove special characters and spaces for key generation; replaces are executed after one another, so order can matter
     return label.lower().replace(" ", "_").replace(":", "").replace("-", "").lower()
 
-def build_number_input(label, key=None, step = 0.01, **kwargs):
+def build_number_input(label, key = None, min_value = 0.0, step = 0.01, **kwargs):
     # Wenn KEIN Key übergeben wurde (key ist None), bauen wir einen Standard-Key
     if key is None:
         key = f"input_{clean_label(label)}"
     
-    return build_number_input(label, key=key, on_change=load_ui_into_trade, step=step, **kwargs)
+    return build_number_input(label, key = key, on_change = load_ui_into_trade, min_value = min_value, step = step, **kwargs)
 
 def build_selectbox(label, options, key=None, **kwargs):
     if key is None:
