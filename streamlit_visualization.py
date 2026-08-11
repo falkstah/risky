@@ -93,96 +93,38 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
         with st.expander("Main Inputs"):
             #rendering and assigning keys, giving inputs to trade_parameters
            
-            build_number_input(
-                "liq_delta_to_SL_delta_ratio: ", 
-                min_value = 0.0, step = 0.25, 
-                key = "input_liq_delta_to_SL_delta_ratio")
+            build_number_input("liq_delta_to_SL_delta_ratio: ", min_value = 0.0, step = 0.25)
             #guard clause:
             if st.session_state.input_trade.trade_parameters.liq_delta_to_SL_delta_ratio < 1.5:
                 st.warning("⚠️ Warning: liq_delta_to_SL_delta_ratio should be >= 1.5 for safe trading.")
                 st.stop()
 
-            build_number_input(
-                "maintainance_margin_rate", 
-                min_value = 0.0, 
-                step = 0.001, 
-                key = "input_maintainance_margin_rate")
-
-            build_number_input(
-                "maintainance_deduction: ", 
-                min_value = 0.0, 
-                step = 0.001, 
-                key = "input_maintainance_deduction")
-
-            build_number_input(
-                "total_max_lvg", 
-                key = "input_total_max_lvg")
+            build_number_input("maintainance_margin_rate", min_value = 0.0, step = 0.001)
+            build_number_input("maintainance_deduction: ", min_value = 0.0,  step = 0.001)
+            build_number_input("total_max_lvg:")
             #guard clause:
             if st.session_state.input_trade.trade_parameters.total_max_lvg > 15:
                 st.warning("⚠️ Warning: No degenerate gambling, lions!")
                 st.stop()
 
-            build_number_input(
-                "total_max_margin: ", 
-                min_value = 0.0, 
-                step = 0.1, 
-                key ="input_total_max_margin")
-
-            build_number_input(
-                "Trailing SL (%):",
-                min_value=0.0,
-                step=0.1,
-                key="input_trailing_SL_percent",
-            )
-
-            build_number_input(
-                "Pull SL Preis:",
-                min_value = 0.0,
-                step = 0.01,
-                key = "input_pull_SL",
-            )
-            
-            build_number_input(
-                "Aktueller Asset-Preis:",
-                min_value = 0.0,
-                step = 0.01,
-                key = "input_current_asset_price",
-            )
-
+            build_number_input("total_max_margin: ", min_value = 0.0)
+            build_number_input("Trailing SL percent:", min_value=0.0)
+            build_number_input("Pull SL price:", min_value = 0.0)
+            build_number_input("Current Asset Price:", min_value = 0.0)
             st.selectbox(
                 "Order Type:",
                 options = st.session_state.input_trade.trade_parameters.order_type,
                 key="input_order_type",
             )
-
-            build_number_input(
-                "Buffer_SL:",
-                min_value = 0.0,
-                step = 0.01,
-                key = "input_buffer_SL",
-            )
-
-            build_number_input(
-                "Aktueller SL Preis:",
-                min_value = 0.0,
-                step = 0.01,
-                key = "input_current_sl_price",
-            )
+            build_number_input("Buffer_SL:", min_value = 0.0)
+            build_number_input("Current SL price:", min_value = 0.0)
 
     with st.container(border=True):
         st.subheader("🎯 Fast Order")
         with st.expander("Fast Inputs", expanded = True):
-            build_number_input(
-                "total risk: ",
-                min_value = 0.0, 
-                step = 1.0, 
-                key = "input_total_risk")
+            build_number_input("total risk:", min_value = 0.0, step = 1.0)
             
-            build_number_input(
-                "SL: ", 
-                min_value = 0.0, 
-                step = 0.01, 
-                key = "input_p_SL")
+            build_number_input("p_SL:", min_value = 0.0)
           
             #description
             st.write(rf"- loosing {st.session_state.input_total_risk}\$ if price goes to {st.session_state.input_p_SL}\$.")
@@ -246,11 +188,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
             modes_list = list(get_args(Trade_Parameters.__annotations__["tp_mode"]))    #classes.py as tp_mode single source of truth
             default_index = modes_list.index(current_mode) if current_mode in modes_list else 0
 
-            st.radio(
-                "Choose TP mode:",
-                options = modes_list,
-                index = default_index,
-                key="input_tp_mode",   # Sichert die Anbindung an die sync-Logik
+            build_radio("Choose TP mode:", options = modes_list, index = default_index, key="input_tp_mode",   # Sichert die Anbindung an die sync-Logik
             )
 
         #Managing ladder size for each mode
@@ -293,7 +231,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     tp_price_key = f"tp_price_{index}"
                     tp_percent_key = f"tp_close_percent_{index}"
 
-                    build_number_input(f"TP {index + 1} Preis:", min_value=0.01, step = 0.01, key = tp_price_key)
+                    build_number_input(f"TP {index + 1} Preis:", min_value=0.01, key = tp_price_key)
         
                     build_number_input(f"TP {index + 1} Schließung (%):", min_value=0.0, max_value=100.0, step = 1.0, key = tp_percent_key )
                 
@@ -318,9 +256,9 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     st.session_state[global_share_key] = max(0.01, float(tp.close_percent))
 
                 # 2. Widgets über den Key steuern
-                build_number_input(f" {index + 1}. TP target:", min_value = 0.01, step = 0.01, key = global_price_key)
+                build_number_input(f" {index + 1}. TP target:", min_value = 0.01, key = global_price_key)
                 
-                build_number_input(f"TP{index + 1} Share [%]:", min_value = 0.01, step = 0.01, key = global_share_key)
+                build_number_input(f"TP{index + 1} Share [%]:", min_value = 0.01, key = global_share_key)
                     
             #visualize:
             st.markdown(f"**{m} Levels:**")
@@ -340,14 +278,14 @@ def get_trade_object_from_session_state():
 #label_cleaner for key generation:
 def clean_label(label):
     # Remove special characters and spaces for key generation; replaces are executed after one another, so order can matter
-    return label.lower().replace(" ", "_").replace(":", "_").replace("-", "").lower()
+    return label.lower().replace(" ", "_").replace(":", "").replace("-", "").lower()
 
-def build_number_input(label, key=None, **kwargs):
+def build_number_input(label, key=None, step = 0.01, **kwargs):
     # Wenn KEIN Key übergeben wurde (key ist None), bauen wir einen Standard-Key
     if key is None:
         key = f"input_{clean_label(label)}"
     
-    return build_number_input(label, key=key, on_change=load_ui_into_trade, **kwargs)
+    return build_number_input(label, key=key, on_change=load_ui_into_trade, step=step, **kwargs)
 
 def build_selectbox(label, options, key=None, **kwargs):
     if key is None:
