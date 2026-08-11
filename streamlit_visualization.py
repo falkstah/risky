@@ -61,6 +61,7 @@ def add_global_tp_target():
     st.session_state.input_trade.global_tp_targets.append(Take_Profit_Target())
 
 def remove_global_tp_target():
+    #removing even the last global tp is allowed, bc you don't have to set a tp immediately
     if len(st.session_state.input_trade.global_tp_targets) > 0:
         st.session_state.input_trade.global_tp_targets.pop()
     
