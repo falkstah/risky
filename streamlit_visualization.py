@@ -296,7 +296,7 @@ def load_ui_into_trade():
         if f"input_entry_price_{index}" in st.session_state:
             tranche.entry_level.price = st.session_state[f"input_entry_price_{index}"]
         if f"input_position_share_{index}" in st.session_state:
-            tranche.entry_level.position_share = st.session_state[f"input_position_share_{index}"]
+            tranche.entry_level.position_share = st.session_state[f"input_position_share_{index}"] / 100 #bc %-input
 
     # NEU: Synchronisation der globalen TPs
     if st.session_state.input_trade.trade_parameters.tp_mode == "global_TPs":
@@ -307,7 +307,7 @@ def load_ui_into_trade():
             if price_key in st.session_state:
                 tp.price = float(st.session_state[price_key])
             if share_key in st.session_state:
-                tp.close_percent = float(st.session_state[share_key])
+                tp.close_percent = float(st.session_state[share_key]) / 100
 
 
 #Callback wrappers for user st numbr_inputs:
@@ -341,43 +341,58 @@ def build_radio(label, options, key=None, on_change = load_ui_into_trade,**kwarg
 def update_session_state(trade):
     st.session_state["trade"] = trade
 
+def overview_tables():
+    global_table()
+    tranches_tables()
 
-def overview_table():
+def global_table():
+    p = st.session_state.input_trade.trade_parameters
+    with st.container(border=True):
+        st.subheader("📊 Global Overview")
+        # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("total risk", f"{round(p.total_risk, 2)} $")
+        col2.metric("total potential profit", f"{round(p.total_potential_trade_profit, 2)} $")
+        col3.metric("total cumulated profit", f"{round(p.total_cumulated_profit, 2)} $")
+        col4.metric("total pos size", f"{round(p.total_pos_size, 2)} $")
+
+    st.divider() # Visuelle Trennlinie zwischen den Abschnitten
+
+def tranches_tables():
   tranche1 = st.session_state.input_trade.tranches[0]
   #table1, currently for tranche 1
   with st.container(border=True):
 
-      st.subheader("📊 Overview")
-      
-      # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
-      col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("SL Delta", f"{round(tranche1.tranche_parameters.sl_delta, 2)} $")
-      col2.metric("Risk", f"{round(tranche1.tranche_parameters.risk, 2)} $")
-      col3.metric("Relative Risk", f"{round(tranche1.tranche_parameters.rel_risk, 2)} $")
-      col4.metric("Initial Margin", f"{round(tranche1.tranche_parameters.initial_margin, 2)} $")
-      col5.metric("potential_profit", f"{round(tranche1.tranche_parameters.potential_profit, 2)} $")
+    st.subheader("📊 Tranche Overview")
+    #tranches:
+    # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
+    columns = st.columns(len(st.session_state.input_trade.tranches))
+    for index, tranche in st.session_state.input_trade.tranches:
+        col = columns[index]
+        col.metric(f"Risk: ", f"{round(tranche.tranche_parameters.risk, 2)} $")
+        col.metric("SL Delta", f"{round(tranche1.tranche_parameters.sl_delta, 2)} $")
+        col.metric("Relative Risk", f"{round(tranche1.tranche_parameters.rel_risk*100, 2)} %")
+        col.metric("Initial Margin", f"{round(tranche1.tranche_parameters.initial_margin, 2)} $")
+        col.metric("potential_profit", f"{round(tranche1.tranche_parameters.potential_profit, 2)} $")
 
-  st.divider() # Visuelle Trennlinie zwischen den Abschnitten
+        st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
-  #table2:
-  with st.container(border=True):
-      st.subheader("💰 Risk Feedback")
-      
-      col1, col2, col3, col4, col5 = st.columns(5)
-      col1.metric("Risiko", f"{round(tranche1.tranche_parameters.risk, 2)} €")
-      col2.metric("rrr", f"{round(tranche1.tranche_parameters.rrr, 1)}")
-      col3.metric("relative Gain", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
-      col4.metric("Wartungsmarge", f"{round(tranche1.tranche_parameters.maintainance_margin, 2)} €")
-      col5.metric("rel asset gain at TP", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
+        #tranche risk feedback:
+        with st.expander("💰 Tranche Risk Feedback", expanded = False):            
+            col.metric("rrr", f"{round(tranche1.tranche_parameters.rrr, 1)}")
+            col.metric("relative Gain", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
+            col.metric("Wartungsmarge", f"{round(tranche1.tranche_parameters.maintainance_margin, 2)} €")
+            col.metric("rel asset gain at TP", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
 
-  if tranche1.tp_target:
-      with st.container(border=True):
-          st.subheader("🎯 TP-Status")
-          for tranche in st.session_state.input_trade.tranches:
-              status = "✅ Erreicht" if tranche.tp_target.triggered else "- offen"
-              st.write(f"- TP bei {tranche.tp_target.price} | {tranche.tp_target.close_percent}% Schließung | {status}")
+        if tranche.tp_target:
+            with st.container(border=True):
+                st.subheader("🎯 TP-Status")
+                for tranche in st.session_state.input_trade.tranches:
+                    status = "✅ Erreicht" if tranche.tp_target.triggered else "- offen"
+                    st.write(f"- TP bei {tranche.tp_target.price} | {tranche.tp_target.close_percent}% Schließung | {status}")
 
-  st.divider()
+    st.divider() # Visuelle Trennlinie zwischen den Abschnitten
+
 
 
 def visualize_trade():

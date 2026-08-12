@@ -89,6 +89,17 @@ def calculate_tranche_allocations(trade, tranche):
 
   return tranche
 
+  def share_unused_risk(trade):
+    #calculate unused risk from all tranches and share it to the (not fully realised) tranches according to their position_share
+    total_used_risk = sum(tranche.tranche_parameters.risk for tranche in trade.tranches)
+    unused_risk = trade.trade_parameters.total_risk - total_used_risk
+
+    for tranche in trade.tranches:
+        tranche.tranche_parameters.risk += fair_share(tranche, unused_risk)
+
+    return trade
+  #-> tranches with now new risk potential have to be recalced somehow?
+
 #Sharing rule (Trade -> Tranches):
 def fair_share(tranche, pool): 
     return tranche.entry_level.position_share * pool #(="risk- and potential-share")
