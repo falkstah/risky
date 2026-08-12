@@ -363,17 +363,18 @@ def tranches_tables():
   #table1, currently for tranche 1
   with st.container(border=True):
 
-    st.subheader("📊 Tranche Overview")
+    st.subheader("📊 Tranches Overview")
     #tranches:
     # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
     columns = st.columns(len(st.session_state.input_trade.tranches))
-    for index, tranche in st.session_state.input_trade.tranches:
-        col = columns[index]
-        col.metric(f"Risk: ", f"{round(tranche.tranche_parameters.risk, 2)} $")
-        col.metric("SL Delta", f"{round(tranche1.tranche_parameters.sl_delta, 2)} $")
-        col.metric("Relative Risk", f"{round(tranche1.tranche_parameters.rel_risk*100, 2)} %")
-        col.metric("Initial Margin", f"{round(tranche1.tranche_parameters.initial_margin, 2)} $")
-        col.metric("potential_profit", f"{round(tranche1.tranche_parameters.potential_profit, 2)} $")
+    for index, tranche in enumerate(st.session_state.input_trade.tranches):
+        with st.expander(f"### Tranche {index + 1}", expanded = True):
+            col = columns[index]
+            col.metric(f"Risk: ", f"{round(tranche.tranche_parameters.risk, 2)} $")
+            col.metric("SL Delta", f"{round(tranche1.tranche_parameters.sl_delta, 2)} $")
+            col.metric("Relative Risk", f"{round(tranche1.tranche_parameters.rel_risk*100, 2)} %")
+            col.metric("Initial Margin", f"{round(tranche1.tranche_parameters.initial_margin, 2)} $")
+            col.metric("potential_profit", f"{round(tranche1.tranche_parameters.potential_profit, 2)} $")
 
         st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
