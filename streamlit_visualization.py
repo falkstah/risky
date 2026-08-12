@@ -42,6 +42,8 @@ def get_trade_inputs_from_ui():
     load_ui_into_trade()
     #send session state to object
 
+    return st.session_state.input_trade
+
 #Start Info
 def intro():
     st.title("Too_Risky - Crypto live lvg and liquidation manager")
