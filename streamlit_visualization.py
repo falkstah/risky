@@ -179,6 +179,11 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     #for quick trade entry Entry ladder is always expanded at beginning
     if m == "Entries":
         is_Entries = True
+        if build_button("Enable fib entries"):
+            st.session_state.fibs_enabled = not st.session_state.get("fibs_enabled", False) #switches between True and False when clicked
+            if st.session_state.get("fibs_enabled", False):
+                build_number_input("Fib high:", key = "fib_high")
+                build_number_input("Fib low:", key = "fib_low")
     else:
         is_Entries = False
 
@@ -197,7 +202,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
         #Managing ladder size for each mode
         entry_col1, entry_col2 = st.columns(2)
         with entry_col1:
-            if st.button(f"Weitere {m} hinzufügen", key= f"add_{m}_button"):   
+            if build_button(f"Weitere {m} hinzufügen", key= f"add_{m}_button"):   
                 if m == "Entries" or m == "tranche_bound_TPs":
                     add_tranche()
                     
@@ -205,7 +210,7 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                     add_global_tp_target()
 
         with entry_col2:
-            if st.button(f"{m} entfernen", key = f"remove_{m}_button"):
+            if build_button(f"{m} entfernen", key = f"remove_{m}_button"):
                 if m == "Entries" or m == "tranche_bound_TPs":
                     remove_tranche()
                 elif m == "global_TPs":
@@ -224,6 +229,18 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
                         
                     if share_key not in st.session_state or st.session_state[share_key] < 0.01:
                         st.session_state[share_key] = max(0.01, float(tranche.entry_level.position_share))
+
+                    if st.session_state.get("fibs_enabled", False):
+                        build_selectbox(f"Fib Level{index + 1}", [0.236, 0.382, 0.5, 0.618, 0.786], key=f"input_fib_{index}")
+                        high = st.session_state["fib_high"]
+                        low = st.session_state["fib_high"]
+                        delta = abs(high - low)
+                        fib_lvl = st.session_state["fib_level_{index + 1}"]
+
+                        if high > low:
+                            st.session_state[f"input_entry_price_{index + 1}"] = high - delta * fib_lvl  #uses same key as st.-entry input to override it when fub is chosen
+                        elif high < low:
+                            st.session_state[f"input_entry_price_{index + 1}"] = low + delta * fib_lvl
 
                     # 2. Widgets über den Key steuern
                     build_number_input(f"Tranche {index + 1} Entry Price [$]:", min_value=0.01, step=0.01, key= price_key)
@@ -337,6 +354,11 @@ def build_radio(label, options, key=None, on_change = load_ui_into_trade,**kwarg
         
     return st.radio(label, options=options, key=key, on_change = load_ui_into_trade, **kwargs)
 
+def build_button(label, key=None, on_click = load_ui_into_trade, **kwargs):
+    if key is None:
+        key = f"input_{clean_label(label)}"
+    return st.button(label, key, on_click = load_ui_into_trade, **kwargs)
+
 
 def update_session_state(trade):
     st.session_state["trade"] = trade
@@ -368,7 +390,12 @@ def tranches_tables():
     # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
 
     for index, tranche in enumerate(st.session_state.input_trade.tranches):
-        with st.expander(f"### Tranche {index + 1}", expanded = True):
+        #tranche1 is always expanded, for quick access
+        expand = False
+        if index == 0:
+            expand = True
+
+        with st.expander(f"### Tranche {index + 1}", expand):
             columns = st.columns(len(st.session_state.input_trade.tranches))
             col = columns[index]
             t = tranche.tranche_parameters
