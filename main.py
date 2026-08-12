@@ -22,7 +22,7 @@ def main():
     #prevent crash if raw is Any / None
     if raw is None:
         raise ValueError("Trade object is None. Cannot perform calculations.")
-    trade: Trade = raw
+    trade = raw
 
     #Do the Math
     st.json(json.dumps(vars(trade), default = str))
