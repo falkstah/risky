@@ -179,16 +179,18 @@ def render_ladder(trade, mode): #modes: Entries, tranche_bound_TPs, global_TPs
     #for quick trade entry Entry ladder is always expanded at beginning
     if m == "Entries":
         is_Entries = True
-        if build_button("Enable fib entries"):
-            st.session_state.fibs_enabled = not st.session_state.get("fibs_enabled", False) #switches between True and False when clicked
-            if st.session_state.get("fibs_enabled", False):
-                build_number_input("Fib high:", key = "fib_high")
-                build_number_input("Fib low:", key = "fib_low")
     else:
         is_Entries = False
 
     #ladder:
     with st.expander(f"Ladder {m}", expanded = is_Entries):
+
+        if is_Entries and build_button("Enable fib entries"):
+            st.session_state.fibs_enabled = not st.session_state.get("fibs_enabled", False) #switches between True and False when clicked
+            if st.session_state.get("fibs_enabled", False):
+                build_number_input("Fib high:", key = "fib_high")
+                build_number_input("Fib low:", key = "fib_low")
+                
         #tp_mode menu
         if m == "global_TPs" or m == "tranche_bound_TPs":
             # Bestimme den aktuellen Index basierend auf dem Trade-Objekt
