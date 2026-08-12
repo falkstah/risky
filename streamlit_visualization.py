@@ -366,31 +366,32 @@ def tranches_tables():
     st.subheader("📊 Tranches Overview")
     #tranches:
     # Wir nutzen Spalten für eine saubere Anordnung nebeneinander
-    columns = st.columns(len(st.session_state.input_trade.tranches))
+
     for index, tranche in enumerate(st.session_state.input_trade.tranches):
         with st.expander(f"### Tranche {index + 1}", expanded = True):
+            columns = st.columns(len(st.session_state.input_trade.tranches))
             col = columns[index]
-            col.metric(f"Risk: ", f"{round(tranche.tranche_parameters.risk, 2)} $")
-            col.metric("SL Delta", f"{round(tranche1.tranche_parameters.sl_delta, 2)} $")
-            col.metric("Relative Risk", f"{round(tranche1.tranche_parameters.rel_risk*100, 2)} %")
-            col.metric("Initial Margin", f"{round(tranche1.tranche_parameters.initial_margin, 2)} $")
-            col.metric("potential_profit", f"{round(tranche1.tranche_parameters.potential_profit, 2)} $")
+            t = tranche.tranche_parameters
 
-        st.divider() # Visuelle Trennlinie zwischen den Abschnitten
+            col.metric(f"Risk: ", f"{round(t.risk, 2)} $")
+            col.metric("SL Delta", f"{round(t.sl_delta, 2)} $")
+            col.metric("Relative Risk", f"{round(t.rel_risk*100, 2)} %")
+            col.metric("Initial Margin", f"{round(t.initial_margin, 2)} $")
+            col.metric("potential_profit", f"{round(t.potential_profit, 2)} $")
 
-        #tranche risk feedback:
-        with st.expander("💰 Tranche Risk Feedback", expanded = False):            
-            col.metric("rrr", f"{round(tranche1.tranche_parameters.rrr, 1)}")
-            col.metric("relative Gain", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
-            col.metric("Wartungsmarge", f"{round(tranche1.tranche_parameters.maintainance_margin, 2)} €")
-            col.metric("rel asset gain at TP", f"{round(tranche1.tranche_parameters.rel_asset_gain_at_TP * 100, 2)}%")
+            #tranche risk feedback inside tranche expander:
+            with st.expander("💰 Tranche Risk Feedback", expanded = False):            
+                col.metric("rrr", f"{round(t.rrr, 1)}")
+                col.metric("relative Gain", f"{round(t.rel_asset_gain_at_TP * 100, 2)}%")
+                col.metric("Wartungsmarge", f"{round(t.maintainance_margin, 2)} €")
+                col.metric("rel asset gain at TP", f"{round(t.rel_asset_gain_at_TP * 100, 2)}%")
 
-        if tranche.tp_target:
-            with st.container(border=True):
-                st.subheader("🎯 TP-Status")
-                for tranche in st.session_state.input_trade.tranches:
-                    status = "✅ Erreicht" if tranche.tp_target.triggered else "- offen"
-                    st.write(f"- TP bei {tranche.tp_target.price} | {tranche.tp_target.close_percent}% Schließung | {status}")
+            if tranche.tp_target:
+                with st.container(border=True):
+                    st.subheader(f"🎯 TP{index + 1}-Status")
+                    for tranche in st.session_state.input_trade.tranches:
+                        status = "✅ filled" if tranche.tp_target.triggered else "- open"
+                        st.write(f"- TP at {tranche.tp_target.price} | {tranche.tp_target.close_percent}% Closure | {status}")
 
     st.divider() # Visuelle Trennlinie zwischen den Abschnitten
 
