@@ -124,32 +124,40 @@ def update_chart(_, timeframe):
     if df.empty:
         return go.Figure()
 
-    fig = go.Figure(
-        data=[
-            go.Candlestick(
-                x=df["t"],
-                open=df["open"],
-                high=df["high"],
-                low=df["low"],
-                close=df["close"]
-            )
-        ]
+    fig = go.Figure()
+
+    # Candles
+    fig.add_trace(
+        go.Candlestick(
+            x=df["t"],
+            open=df["open"],
+            high=df["high"],
+            low=df["low"],
+            close=df["close"],
+            name="BTCUSDT"
+        )
+    )
+
+    # Unsichtbarer Punkt für Platz rechts
+    extra_time = df["t"].max() + pd.Timedelta(minutes=5)
+
+    fig.add_trace(
+        go.Scatter(
+            x=[extra_time],
+            y=[df["close"].iloc[-1]],
+            mode="markers",
+            marker=dict(opacity=0),
+            showlegend=False,
+            hoverinfo="skip"
+        )
     )
 
     fig.update_layout(
         xaxis_rangeslider_visible=False,
         template="plotly_dark",
         height=None,
-        margin=dict(l=0, r=0, t=0, b=0),
-        autosize = True
-
-        #padding in chart, to have space for entry lines
-        xaxis=dict(
-            range=[
-                df["t"].min(),
-                df["t"].max() + pd.Timedelta(minutes=5)  # Platz rechts
-            ]
-        )
+        autosize=True,
+        margin=dict(l=0, r=0, t=0, b=0)
     )
 
     return fig
