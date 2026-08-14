@@ -142,6 +142,14 @@ def update_chart(_, timeframe):
         height=None,
         margin=dict(l=0, r=0, t=0, b=0),
         autosize = True
+
+        #padding in chart, to have space for entry lines
+        xaxis=dict(
+        range=[
+            df["t"].min(),
+            df["t"].max() + pd.Timedelta(minutes=5)  # Platz rechts
+        ]
+    )
     )
 
     return fig
