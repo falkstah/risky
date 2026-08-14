@@ -1,0 +1,24 @@
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* verhindert Scrollbars */
+}
+
+/* Container für die gesamte App */
+.app-container {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Der Plot selbst */
+#live-chart {
+    height: 100% !important; /* 60px für Dropdown */
+    width: 100% !important;
+    margin: 0;
+    padding: 0;
+}
