@@ -138,8 +138,8 @@ def update_chart(_, timeframe):
         )
     )
 
-    # Unsichtbarer Punkt für Platz rechts
-    extra_time = df["t"].max() + pd.Timedelta(minutes=5)
+    # Unsichtbarer Punkt für Platz rechts, to draw entry lines
+    extra_time = df["t"].max() + pd.Timedelta(minutes=10)
 
     fig.add_trace(
         go.Scatter(
