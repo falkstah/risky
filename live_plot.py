@@ -129,9 +129,9 @@ def update_chart(_, timeframe):
     low_range = df["low"].min()
     high_range = df["high"].max()
     entry_price = df["close"].iloc[-1]
-    tp_price = entry_price * 1.01  # optional: leicht über Entry
+    tp_price = entry_price * 1.0001  # optional: leicht über Entry
     # SL innerhalb der sichtbaren Range
-    sl_price = max(low_range, entry_price * 0.995)
+    sl_price = max(low_range, entry_price * 0.99995)
     
     fig = go.Figure()
 
