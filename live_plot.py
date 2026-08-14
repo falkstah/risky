@@ -122,8 +122,17 @@ def update_chart(_, timeframe):
         threading.Thread(target=start_ws, daemon=True).start()
 
     if df.empty:
+        # Range der letzten 30 Kerzen
         return go.Figure()
 
+    #scaling default line levels for easonable scaling
+    low_range = df["low"].min()
+    high_range = df["high"].max()
+    entry_price = df["close"].iloc[-1]
+    tp_price = entry_price * 1.01  # optional: leicht über Entry
+    # SL innerhalb der sichtbaren Range
+    sl_price = max(low_range, entry_price * 0.995)
+    
     fig = go.Figure()
 
     # Candles
@@ -166,11 +175,12 @@ def update_chart(_, timeframe):
 
         #drag menu
         shapes=[
-            # ENTRY
             dict(
                 type="line",
-                x0=df["t"].min(),
-                x1=df["t"].max() + pd.Timedelta(minutes=30),
+                xref="x",  # echte Zeitachse
+                yref="y",
+                x0=df["t"].max(),  # Start bei letzter Kerze
+                x1=df["t"].max() + pd.Timedelta(minutes=120),  # weit nach rechts
                 y0=entry_price,
                 y1=entry_price,
                 line=dict(color="blue", width=2),
@@ -179,8 +189,10 @@ def update_chart(_, timeframe):
             # TP
             dict(
                 type="line",
-                x0=df["t"].min(),
-                x1=df["t"].max() + pd.Timedelta(minutes=30),
+                xref="x",
+                yref="y",
+                x0=df["t"].max(),
+                x1=df["t"].max() + pd.Timedelta(minutes=120),
                 y0=tp_price,
                 y1=tp_price,
                 line=dict(color="green", width=2),
@@ -189,8 +201,10 @@ def update_chart(_, timeframe):
             # SL
             dict(
                 type="line",
-                x0=df["t"].min(),
-                x1=df["t"].max() + pd.Timedelta(minutes=30),
+                xref="x",
+                yref="y",
+                x0=df["t"].max(),
+                x1=df["t"].max() + pd.Timedelta(minutes=120),
                 y0=sl_price,
                 y1=sl_price,
                 line=dict(color="red", width=2),
