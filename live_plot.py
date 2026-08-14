@@ -83,23 +83,26 @@ ws_thread.start()
 # ---------------------------------------------------------
 app = Dash(__name__)
 
-app.layout = html.Div([
-    html.H2("Live BTCUSDT Candles (Binance)"),
-    dcc.Dropdown(
-        id="timeframe",
-        options=[
-            {"label": "1 Minute", "value": "1m"},
-            {"label": "5 Minuten", "value": "5m"},
-            {"label": "15 Minuten", "value": "15m"},
-            {"label": "1 Stunde", "value": "1h"},
-        ],
-        value="1m",
-        clearable=False,
-        style={"width": "200px"}
-    ),
-    dcc.Graph(id="live-chart"),
-    dcc.Interval(id="interval", interval=2000, n_intervals=0)
-])
+app.layout = html.Div(
+    className="app-container",
+    children=[
+        html.H2("Live BTCUSDT Candles (Binance)"),
+        dcc.Dropdown(
+            id="timeframe",
+            options=[
+                {"label": "1 Minute", "value": "1m"},
+                {"label": "5 Minuten", "value": "5m"},
+                {"label": "15 Minuten", "value": "15m"},
+                {"label": "1 Stunde", "value": "1h"},
+            ],
+            value="1m",
+            clearable=False,
+            style={"width": "200px", "margin": "10px"}
+        ),
+        dcc.Graph(id="live-chart"),
+        dcc.Interval(id="interval", interval=2000, n_intervals=0)
+    ]
+)
 
 # ---------------------------------------------------------
 # Callback für Timeframe-Wechsel
