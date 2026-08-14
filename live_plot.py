@@ -145,11 +145,11 @@ def update_chart(_, timeframe):
 
         #padding in chart, to have space for entry lines
         xaxis=dict(
-        range=[
-            df["t"].min(),
-            df["t"].max() + pd.Timedelta(minutes=5)  # Platz rechts
-        ]
-    )
+            range=[
+                df["t"].min(),
+                df["t"].max() + pd.Timedelta(minutes=5)  # Platz rechts
+            ]
+        )
     )
 
     return fig
