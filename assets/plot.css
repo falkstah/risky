@@ -19,7 +19,19 @@ html, body, #root {
 .chart-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    gap: 1vh;
+}
+
+.chart-title {
+    text-align: center;
+    color: white;
+    margin: 0;
+}
+
+.chart-area {
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
 .chart-header {
@@ -28,14 +40,30 @@ html, body, #root {
     padding: 1vh 1vw;          /* relative Abstände */
 }
 
+.chart-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1vw;
+
+    /* Der Trick: Chart überlappen, aber relativ */
+    margin-bottom: -6vh;      /* schiebt Controls in den Chart hinein */
+    padding: 1vh 1vw;
+    background: rgba(20,20,20,0.7);
+    border-radius: 0.5em;
+
+    /* relative Struktur bleibt erhalten */
+}
+
+.timeframe-dropdown {
+    width: 12vw;
+    min-width: 160px;
+}
+
 .toolbox {
-    background: rgba(20,20,20,0.9);
+    background: rgba(30,30,30,0.9);
     padding: 1em;
     border-radius: 0.5em;
-    border: 0.1em solid #333;
-    width: 15vw;               /* relative Breite */
-    min-width: 160px;          /* nie zu klein */
-    max-width: 260px;          /* nie zu groß */
+    min-width: 160px;
 }
 
 
