@@ -21,7 +21,7 @@ def load_initial_candles(interval):
     rows = []
     for value in data:
         rows.append({
-            "t": pd.to_datetime(value[0], unit="ms"),
+                "t": pd.to_datetime(value[0], unit="ms"),
             "open": float(value[1]),
             "high": float(value[2]),
             "low": float(value[3]),
@@ -84,6 +84,7 @@ ws_thread.start()
 app = Dash(__name__)
 
 app.layout = html.Div(
+    #timeframe selecion
     className="app-container",
     children=[
         html.H2("Live BTCUSDT Candles (Binance)"),
@@ -99,7 +100,24 @@ app.layout = html.Div(
             clearable=False,
             style={"width": "200px", "margin": "10px"}
         ),
-        dcc.Graph(id="live-chart"),
+
+        #Toolbox
+        html.Div(
+            className="content-area",
+            children=[
+                dcc.Graph(id="live-chart"),
+                html.Div(
+                    className="toolbox",
+                    children=[
+                        html.Div("Linien", className="toolbox-title"),
+                        html.Div("Entry", id="tool-entry", className="tool-item"),
+                        html.Div("TP", id="tool-tp", className="tool-item"),
+                        html.Div("SL", id="tool-sl", className="tool-item"),
+                    ]
+                )
+            ]
+        ),
+
         dcc.Interval(id="interval", interval=2000, n_intervals=0)
     ]
 )

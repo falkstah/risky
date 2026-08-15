@@ -16,6 +16,21 @@ html, body, #root {
     flex-direction: column;
 }
 
+.toolbox {
+    width: 180px;
+    background: #111;
+    color: white;
+    padding: 10px;
+    border-left: 1px solid #333;
+}
+
+.tool-item {
+    padding: 8px;
+    margin-bottom: 6px;
+    background: #222;
+    cursor: grab;
+}
+
 /* Der Plot selbst */
 #live-chart {
     flex: 1 1 auto;
@@ -23,4 +38,10 @@ html, body, #root {
     width: 100% !important;
     margin: 0;
     padding: 0;
+}
+
+.content-area {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 120px);
 }
