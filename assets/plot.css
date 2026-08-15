@@ -1,25 +1,7 @@
-html, body, #root {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* verhindert Scrollbars */
-}
-
-/* Container für die gesamte App */
-.app-container {
-    height: 100vh;
-    width: 100vw;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-}
-
 .chart-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 1vh;
+    gap: 1vh;   
 }
 
 .chart-title {
@@ -34,19 +16,14 @@ html, body, #root {
     position: relative;
 }
 
-.chart-header {
-    display: flex;
-    justify-content: flex-end; /* Toolbox nach rechts */
-    padding: 1vh 1vw;          /* relative Abstände */
-}
-
 .chart-controls {
     display: flex;
+    flex-direction:column;
     justify-content: flex-end;
     gap: 1vw;
 
     /* Der Trick: Chart überlappen, aber relativ */
-    margin-bottom: -6vh;      /* schiebt Controls in den Chart hinein */
+    margin-bottom: -25vh;      /* schiebt Controls in den Chart hinein */
     padding: 1vh 1vw;
     background: rgba(20,20,20,0.7);
     border-radius: 0.5em;
@@ -56,35 +33,12 @@ html, body, #root {
 
 .timeframe-dropdown {
     width: 12vw;
-    min-width: 160px;
+    min-width: 100px;
 }
 
 .toolbox {
     background: rgba(30,30,30,0.9);
     padding: 1em;
     border-radius: 0.5em;
-    min-width: 160px;
-}
-
-
-.tool-item {
-    padding: 8px;
-    margin-bottom: 6px;
-    background: #222;
-    cursor: grab;
-}
-
-/* Der Plot selbst */
-#live-chart {
-    flex: 1 1 auto !important;
-    height: 100% !important; /* 60px für Dropdown */
-    width: 100% !important;
-    margin: 0;
-    padding: 0;
-}
-
-.content-area {
-    display: flex;
-    flex-direction: row;
-    height: calc(100vh - 120px);
+    min-width: 100px;
 }

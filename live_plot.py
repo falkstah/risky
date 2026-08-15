@@ -86,14 +86,17 @@ app = Dash(__name__)
 app.layout = html.Div(
     className="chart-wrapper",
     children=[
+        #heading
         html.H2("Live BTCUSDT Candles (Binance)", className="chart-title"),
 
+        #chart area
         html.Div(
             className="chart-area",
             children=[
                 html.Div(
                     className="chart-controls",
                     children=[
+                        #tf-selection
                         dcc.Dropdown(
                             id="timeframe-dropdown",
                             options=[
@@ -106,6 +109,8 @@ app.layout = html.Div(
                             clearable=False,
                             className="timeframe-dropdown"
                         ),
+
+                        #toolbox
                         html.Div(
                             className="toolbox",
                             children=[
@@ -117,6 +122,7 @@ app.layout = html.Div(
                         )
                     ]
                 ),
+                #candles
                 dcc.Graph(id="live-chart")
             ]
         )
@@ -130,7 +136,7 @@ app.layout = html.Div(
 @app.callback(
     Output("live-chart", "figure"),
     Input("interval", "n_intervals"),
-    Input("timeframe-dropdown", "value")
+    Input("tim^^eframe-dropdown", "value")
 )
 def update_chart(_, timeframe):
     global df, current_interval
