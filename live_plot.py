@@ -84,32 +84,28 @@ ws_thread.start()
 app = Dash(__name__)
 
 app.layout = html.Div(
-    #timeframe selecion
-    className="app-container",
+    className="chart-wrapper",
     children=[
-        #heading
-        html.H2("Live BTCUSDT Candles (Binance)"),
+        html.H2("Live BTCUSDT Candles (Binance)", className="chart-title"),
 
-        #timeframe selection
-        dcc.Dropdown(
-            id="timeframe-dropdown",
-            options=[
-                {"label": "1 Minute", "value": "1m"},
-                {"label": "5 Minuten", "value": "5m"},
-                {"label": "15 Minuten", "value": "15m"},
-                {"label": "1 Stunde", "value": "1h"},
-            ],
-            value = "1m",
-            clearable = False,
-        ),
-
-        #Toolbox
         html.Div(
-            className="chart-wrapper",
+            className="chart-area",
             children=[
                 html.Div(
-                    className="chart-header",
+                    className="chart-controls",
                     children=[
+                        dcc.Dropdown(
+                            id="timeframe-dropdown",
+                            options=[
+                                {"label": "1 Minute", "value": "1m"},
+                                {"label": "5 Minuten", "value": "5m"},
+                                {"label": "15 Minuten", "value": "15m"},
+                                {"label": "1 Stunde", "value": "1h"},
+                            ],
+                            value="1m",
+                            clearable=False,
+                            className="timeframe-dropdown"
+                        ),
                         html.Div(
                             className="toolbox",
                             children=[
@@ -123,11 +119,10 @@ app.layout = html.Div(
                 ),
                 dcc.Graph(id="live-chart")
             ]
-        ),
-
-        dcc.Interval(id="interval", interval=2000, n_intervals=0)
+        )
     ]
 )
+
 
 # ---------------------------------------------------------
 # Callback für Timeframe-Wechsel
@@ -135,7 +130,7 @@ app.layout = html.Div(
 @app.callback(
     Output("live-chart", "figure"),
     Input("interval", "n_intervals"),
-    Input("timeframe", "value")
+    Input("timeframe-dropdown", "value")
 )
 def update_chart(_, timeframe):
     global df, current_interval
