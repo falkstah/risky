@@ -87,34 +87,41 @@ app.layout = html.Div(
     #timeframe selecion
     className="app-container",
     children=[
+        #heading
         html.H2("Live BTCUSDT Candles (Binance)"),
+
+        #timeframe selection
         dcc.Dropdown(
-            id="timeframe",
+            id="timeframe-dropdown",
             options=[
                 {"label": "1 Minute", "value": "1m"},
                 {"label": "5 Minuten", "value": "5m"},
                 {"label": "15 Minuten", "value": "15m"},
                 {"label": "1 Stunde", "value": "1h"},
             ],
-            value="1m",
-            clearable=False,
-            style={"width": "200px", "margin": "10px"}
+            value = "1m",
+            clearable = False,
         ),
 
         #Toolbox
         html.Div(
-            className="content-area",
+            className="chart-wrapper",
             children=[
-                dcc.Graph(id="live-chart"),
                 html.Div(
-                    className="toolbox",
+                    className="chart-header",
                     children=[
-                        html.Div("Linien", className="toolbox-title"),
-                        html.Div("Entry", id="tool-entry", className="tool-item"),
-                        html.Div("TP", id="tool-tp", className="tool-item"),
-                        html.Div("SL", id="tool-sl", className="tool-item"),
+                        html.Div(
+                            className="toolbox",
+                            children=[
+                                html.Div("Linien", className="toolbox-title"),
+                                html.Div("Entry", id="tool-entry", className="tool-item"),
+                                html.Div("TP", id="tool-tp", className="tool-item"),
+                                html.Div("SL", id="tool-sl", className="tool-item"),
+                            ]
+                        )
                     ]
-                )
+                ),
+                dcc.Graph(id="live-chart")
             ]
         ),
 

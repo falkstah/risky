@@ -16,13 +16,28 @@ html, body, #root {
     flex-direction: column;
 }
 
-.toolbox {
-    width: 180px;
-    background: #111;
-    color: white;
-    padding: 10px;
-    border-left: 1px solid #333;
+.chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
+
+.chart-header {
+    display: flex;
+    justify-content: flex-end; /* Toolbox nach rechts */
+    padding: 1vh 1vw;          /* relative Abstände */
+}
+
+.toolbox {
+    background: rgba(20,20,20,0.9);
+    padding: 1em;
+    border-radius: 0.5em;
+    border: 0.1em solid #333;
+    width: 15vw;               /* relative Breite */
+    min-width: 160px;          /* nie zu klein */
+    max-width: 260px;          /* nie zu groß */
+}
+
 
 .tool-item {
     padding: 8px;
@@ -33,7 +48,7 @@ html, body, #root {
 
 /* Der Plot selbst */
 #live-chart {
-    flex: 1 1 auto;
+    flex: 1 1 auto !important;
     height: 100% !important; /* 60px für Dropdown */
     width: 100% !important;
     margin: 0;
