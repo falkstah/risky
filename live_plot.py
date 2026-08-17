@@ -94,7 +94,10 @@ app.layout = html.Div(
             className="chart-area",
             children=[
                 #candles
-                dcc.Graph(id="live-chart"),
+                dcc.Graph(
+                    id="live-chart",
+                    config = {"editable": True, "scrollZoom": True}
+                ),
 
                 #toolbox
                 html.Div(
@@ -118,10 +121,9 @@ app.layout = html.Div(
                         html.Div(
                             className="drag-menu",
                             children=[
-                                html.Div("Linien", className="drag-title"),
-                                html.Div("Entry", id="tool-entry", className="tool-item"),
-                                html.Div("TP", id="tool-tp", className="tool-item"),
-                                html.Div("SL", id="tool-sl", className="tool-item"),
+                                html.Div("Entry", id="tool-entry", className="tool-item", draggable= "true"),
+                                html.Div("TP", id="tool-tp", className="tool-item", draggable= "true"),
+                                html.Div("SL", id="tool-sl", className="tool-item", draggable= "true"),
                             ]
                         )
                     ]
@@ -144,11 +146,19 @@ app.layout = html.Div(
     #input-list:
     [
         Input("interval", "n_intervals"),
-        Input("timeframe-dropdown", "value")
-    ]
+        Input("timeframe-dropdown", "value"),
+
+        #chat interaction inputs:
+        #Buttons:
+        Input("live-chart", "relayoutData"),
+        Input("tool-entry", "n_clicks"),
+        Input("tool-tp", "n_clicks"),
+        Input("tool-sl", "n_clicks"),
+    ],
+    prevent_initial_call= True
 )
 
-def update_chart(_, timeframe):
+def update_chart(_, timeframe, relayoutData, entry_clicks, tp_clicks, sl_clicks):
     global df, current_interval
 
     # Wenn Timeframe geändert wurde → neuen Stream starten
@@ -197,13 +207,62 @@ def update_chart(_, timeframe):
         )
     )
 
+    #line buttons clicks.
+    shapes = []
+
+    # Wenn Entry geklickt wurde
+    if entry_clicks and entry_clicks > 0:
+        shapes.append(dict(
+            type="line",
+            xref="x",
+            yref="y",
+            x0=df["t"].max(),
+            x1=df["t"].max() + pd.Timedelta(minutes=120),
+            y0=df["close"].iloc[-1],
+            y1=df["close"].iloc[-1],
+            line=dict(color="blue", width=2),
+            editable=True
+        ))
+
+    # Wenn TP geklickt wurde
+    if tp_clicks and tp_clicks > 0:
+        shapes.append(dict(
+            type="line",
+            xref="x",
+            yref="y",
+            x0=df["t"].max(),
+            x1=df["t"].max() + pd.Timedelta(minutes=120),
+            y0=df["close"].iloc[-1] * 1.01,
+            y1=df["close"].iloc[-1] * 1.01,
+            line=dict(color="green", width=2),
+            editable=True
+        ))
+
+    # Wenn SL geklickt wurde
+    if sl_clicks and sl_clicks > 0:
+        shapes.append(dict(
+            type="line",
+            xref="x",
+            yref="y",
+            x0=df["t"].max(),
+            x1=df["t"].max() + pd.Timedelta(minutes=120),
+            y0=df["close"].iloc[-1] * 0.99,
+            y1=df["close"].iloc[-1] * 0.99,
+            line=dict(color="red", width=2),
+            editable=True
+        ))
+
+
     fig.update_layout(
         xaxis_rangeslider_visible=False,
         template="plotly_dark",
         height=None,
         autosize=True,
-        margin=dict(l=0, r=0, t=0, b=0)
+        margin=dict(l=0, r=0, t=0, b=0),
+        shapes = shapes
     )
+
+
 
     return fig
 
