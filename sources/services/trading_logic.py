@@ -3,8 +3,8 @@ import math
 import numbers
 from typing import Any
 from dataclasses import dataclass, is_dataclass, fields
-import pandas as pd
-from plot_app.domain.trades import Calculation_Error, Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
+#import pandas as pd
+from sources.domain.trades import Calculation_Error, Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 #import ccxt
 #import pandas_ta as ta
 

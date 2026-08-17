@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+'''
 import streamlit as st
 import altair as alt
 
@@ -6,9 +7,9 @@ import pandas as pd
 from typing import get_args
 
 #logic functions
-from plot_app.domain.trades import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
+from sources.domain.trades import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 from dataclasses import fields
-from plot_app.services.trading_logic import calculate_buffered_tp1_close_percent
+from sources.services.trading_logic import calculate_buffered_tp1_close_percent
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
 st.text("Optimized for execution speed.")
@@ -130,7 +131,7 @@ def get_trade_parameters(): #forces Object of Type Trade_Parameters as Output
             build_number_input("p_SL:", )
           
             #description
-            st.write(rf"- loosing {st.session_state.input_total_risk}\$ if price goes to {st.session_state.input_p_SL}\$.")
+            st.write(rf"- loosing {st.session_state.input_total_risk} if price goes to {st.session_state.input_p_SL}.")
 
 
 def current_direction_label():
@@ -486,3 +487,5 @@ def visualize_trade():
         st.altair_chart(chart, width='stretch')
     except Exception as exc:
         st.warning(f"Error in visualizing trade: {exc}")
+
+        '''
