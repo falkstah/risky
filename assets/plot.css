@@ -33,10 +33,11 @@ html, body {
     flex: 4; /* Chart selbst füllt chart-area */
     height: 100%;
     z-index : 1;
+    pointer-events: none /* Chart ignoriert Maus, to let js cope with mouse */
 }
 
 .chart-controls {
-    /*for overlay:*/
+    /*for overlay: to move with js, position has to be abs*/
     position: absolute;
     z-index: 10; /* overlay degree */
 
@@ -61,6 +62,9 @@ html, body {
 
     /*allows to move chat-controls with mouse*/
     cursor: move;
+    top: 20px;
+    left: 20px;
+    pointer-events: auto; /* Panel reagiert auf Maus */
 }
 
 .timeframe-dropdown {
