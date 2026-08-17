@@ -138,7 +138,7 @@ app.layout = html.Div(
 @app.callback(
     Output("live-chart", "figure"),
     Input("interval", "n_intervals"),
-    Input("tim^^eframe-dropdown", "value")
+    Input("timeframe-dropdown", "value")
 )
 def update_chart(_, timeframe):
     global df, current_interval

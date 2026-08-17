@@ -27,13 +27,20 @@ html, body {
 
 /*chart fills chart area*/
 #live-chart {
-    flex: 1; /* Chart selbst füllt chart-area */
+    flex: 4; /* Chart selbst füllt chart-area */
+    height: 100%;
 }
 
 .chart-controls {
+    flex: 1; /*-> full height in chart wrapper*/
     display: flex;
     flex-direction:column;
-    justify-content: flex-end;
+    justify-content: center;
+    align-items: stretch;
+    flex-shrink: 0;
+    width: 12vw;
+    min-width: 120px;
+    height: 80%; /* feste Basis für relative Verteilung */
     gap: 1vw;
 
     /* Der Trick: Chart überlappen, aber relativ */
@@ -46,8 +53,8 @@ html, body {
 }
 
 .timeframe-dropdown {
-    width: 12vw;
     min-width: 100px;
+    flex: 1
 }
 
 .drag-menu {
@@ -55,4 +62,5 @@ html, body {
     padding: 1em;
     border-radius: 0.5em;
     min-width: 100px;
+    flex: 4
 }
