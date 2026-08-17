@@ -132,7 +132,7 @@ app.layout = html.Div(
         ),
 
         #dummy:
-        #dcc.Store(id="dummy-store")
+        dcc.Store(id="dummy-store"),
 
 
         #timer to stat callback every 2 scnds:
@@ -160,7 +160,7 @@ app.layout = html.Div(
     ],
 )
 
-def update_chart(_, timeframe, relayoutData, entry_clicks, tp_clicks, sl_clicks):
+def update_chart(_, timeframe, entry_clicks, tp_clicks, sl_clicks):
     global df, current_interval
 
     # Wenn Timeframe geändert wurde → neuen Stream starten
@@ -274,7 +274,7 @@ def update_chart(_, timeframe, relayoutData, entry_clicks, tp_clicks, sl_clicks)
     Input("live-chart", "relayoutData")
 )
 
-def handle_drop(data, relayoutData):
+def handle_drop(relayoutData):
     return relayoutData
 
 # ---------------------------------------------------------
