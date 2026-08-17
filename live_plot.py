@@ -186,11 +186,6 @@ def update_chart(_, timeframe):
     # Unsichtbarer Punkt für Platz rechts, to draw entry lines
     extra_time = df["t"].max() + pd.Timedelta(minutes=10)
 
-    #drag and drop menu:
-    entry_price = df["close"].iloc[-1]
-    tp_price = entry_price * 1.01
-    sl_price = entry_price * 0.99
-
     fig.add_trace(
         go.Scatter(
             x=[extra_time],
@@ -207,46 +202,7 @@ def update_chart(_, timeframe):
         template="plotly_dark",
         height=None,
         autosize=True,
-        margin=dict(l=0, r=0, t=0, b=0),
-
-        #drag menu
-        shapes=[
-            dict(
-                type="line",
-                xref="x",  # echte Zeitachse
-                yref="y",
-                x0=df["t"].max(),  # Start bei letzter Kerze
-                x1=df["t"].max() + pd.Timedelta(minutes=120),  # weit nach rechts
-                y0=entry_price,
-                y1=entry_price,
-                line=dict(color="blue", width=2),
-                editable=True
-            ),
-            # TP
-            dict(
-                type="line",
-                xref="x",
-                yref="y",
-                x0=df["t"].max(),
-                x1=df["t"].max() + pd.Timedelta(minutes=120),
-                y0=tp_price,
-                y1=tp_price,
-                line=dict(color="green", width=2),
-                editable=True
-            ),
-            # SL
-            dict(
-                type="line",
-                xref="x",
-                yref="y",
-                x0=df["t"].max(),
-                x1=df["t"].max() + pd.Timedelta(minutes=120),
-                y0=sl_price,
-                y1=sl_price,
-                line=dict(color="red", width=2),
-                editable=True
-            )
-        ]
+        margin=dict(l=0, r=0, t=0, b=0)
     )
 
     return fig
