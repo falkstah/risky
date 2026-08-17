@@ -93,6 +93,10 @@ app.layout = html.Div(
         html.Div(
             className="chart-area",
             children=[
+                #candles
+                dcc.Graph(id="live-chart"),
+
+                #toolbox
                 html.Div(
                     className="chart-controls",
                     children=[
@@ -110,20 +114,18 @@ app.layout = html.Div(
                             className="timeframe-dropdown"
                         ),
 
-                        #toolbox
+                        #drag-menu
                         html.Div(
-                            className="toolbox",
+                            className="drag-menu",
                             children=[
-                                html.Div("Linien", className="toolbox-title"),
+                                html.Div("Linien", className="drag-title"),
                                 html.Div("Entry", id="tool-entry", className="tool-item"),
                                 html.Div("TP", id="tool-tp", className="tool-item"),
                                 html.Div("SL", id="tool-sl", className="tool-item"),
                             ]
                         )
                     ]
-                ),
-                #candles
-                dcc.Graph(id="live-chart")
+                )
             ]
         )
     ]
