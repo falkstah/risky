@@ -60,6 +60,12 @@ html, body {
 
     /* relative Struktur bleibt erhalten */
 
+    /*for text in chart-controls*/
+    container-type: inline-size; /* moderne Browser: erlaubt @container Regeln */
+    font-size: clamp(80px, 1.6vw, 20px); /* responsive container font */
+    line-height: 1.25;
+    text-align: center;
+
     /*allows to move chat-controls with mouse*/
     cursor: move;
     top: 20px;
@@ -67,17 +73,31 @@ html, body {
     pointer-events: auto; /* Panel reagiert auf Maus */
 }
 
-.timeframe-dropdown {
-    min-width: 100px;
-    flex: 1
+/* Buttons proportional zur Schrift, füllen Höhe ihrer Zeile */
+.chart-controls .timeframe-dropdown, .tool-item,
+.chart-controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  padding: 0.5em 0.8em;   /* skaliert mit font-size */
+  min-height: 2.6em;      /* verhindert zu kleine Buttons */
+  max-height: 6em;        /* schützt vor übergroßen Buttons */
+  box-sizing: border-box;
 }
+
+
+/*.timeframe-dropdown {
+}*/
 
 .drag-menu {
     background: rgba(30,30,30,0.9);
     padding: 1em;
     border-radius: 0.5em;
     min-width: 100px;
-    flex: 4
+    flex: 1
 }
 
 .tool-item {
