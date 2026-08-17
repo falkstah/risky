@@ -1,13 +1,12 @@
 /*outer brower viewpoint container has to be fitted to window size */
 html, body {
     height: 100%;
-    display: flex;
     margin: 0;
     padding: 0;
 }
 
 .chart-wrapper {
-    flex: 1;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     gap: 1vh;   
@@ -20,8 +19,15 @@ html, body {
 }
 
 .chart-area {
+    flex: 1;
     display: flex;
-    position: relative;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+/*chart fills chart area*/
+#live-chart {
+    flex: 1; /* Chart selbst füllt chart-area */
 }
 
 .chart-controls {
