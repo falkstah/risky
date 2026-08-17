@@ -131,6 +131,10 @@ app.layout = html.Div(
             ]
         ),
 
+        #dummy:
+        #dcc.Store(id="dummy-store")
+
+
         #timer to stat callback every 2 scnds:
         dcc.Interval(id="interval", interval=2000, n_intervals=0)
     ]
@@ -150,12 +154,10 @@ app.layout = html.Div(
 
         #chat interaction inputs:
         #Buttons:
-        Input("live-chart", "relayoutData"),
         Input("tool-entry", "n_clicks"),
         Input("tool-tp", "n_clicks"),
         Input("tool-sl", "n_clicks"),
     ],
-    prevent_initial_call= True
 )
 
 def update_chart(_, timeframe, relayoutData, entry_clicks, tp_clicks, sl_clicks):
@@ -265,6 +267,15 @@ def update_chart(_, timeframe, relayoutData, entry_clicks, tp_clicks, sl_clicks)
 
 
     return fig
+
+
+@app.callback(
+    Output("dummy-store", "data"),
+    Input("live-chart", "relayoutData")
+)
+
+def handle_drop(data, relayoutData):
+    return relayoutData
 
 # ---------------------------------------------------------
 # Starten
