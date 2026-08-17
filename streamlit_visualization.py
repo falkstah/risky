@@ -6,7 +6,7 @@ import pandas as pd
 from typing import get_args
 
 #logic functions
-from classes import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
+from plot_app.domain.trades import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 from dataclasses import fields
 from trading_logic import calculate_buffered_tp1_close_percent
 
