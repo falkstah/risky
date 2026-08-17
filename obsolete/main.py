@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from plot_app.domain.trades import Trade
 from plot_app.services.trading_logic import calculate_all
-import plot_app.domain.obsolete.streamlit_visualization as streamlit_visualizatione.streamlit_visualization as streamlit_visualization
+import obsolete.streamlit_visualization as streamlit_visualizatione.streamlit_visualization as streamlit_visualization
 
 #for debugging:
 import streamlit as st
