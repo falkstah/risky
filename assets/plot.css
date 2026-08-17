@@ -23,15 +23,23 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
+
+    /*for overlay:*/
+    position: relative;
 }
 
 /*chart fills chart area*/
 #live-chart {
     flex: 4; /* Chart selbst füllt chart-area */
     height: 100%;
+    z-index : 1;
 }
 
 .chart-controls {
+    /*for overlay:*/
+    position: absolute;
+    z-index: 10; /* overlay degree */
+
     flex: 1; /*-> full height in chart wrapper*/
     display: flex;
     flex-direction:column;
@@ -50,6 +58,9 @@ html, body {
     border-radius: 0.5em;
 
     /* relative Struktur bleibt erhalten */
+
+    /*allows to move chat-controls with mouse*/
+    cursor: move;
 }
 
 .timeframe-dropdown {
@@ -63,4 +74,18 @@ html, body {
     border-radius: 0.5em;
     min-width: 100px;
     flex: 4
+}
+
+.tool-item {
+    background: #2b2b2b;          /* dunkles Grau mit Kontrast */
+    color: #fff;                  /* weiße Schrift */
+    border: 1px solid #555;       /* dezenter Rahmen */
+    padding: 6px 10px;
+    margin: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.tool-item:hover {
+    background: #444;             /* leicht heller beim Hover */
 }
