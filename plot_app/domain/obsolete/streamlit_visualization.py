@@ -8,7 +8,7 @@ from typing import get_args
 #logic functions
 from plot_app.domain.trades import Trade, Trade_Parameters, Tranche, Tranche_Parameters, Take_Profit_Target, Entry_Level
 from dataclasses import fields
-from trading_logic import calculate_buffered_tp1_close_percent
+from plot_app.services.trading_logic import calculate_buffered_tp1_close_percent
 
 st.title("Too_Risky - Crypto live lvg and liquidation manager")
 st.text("Optimized for execution speed.")
