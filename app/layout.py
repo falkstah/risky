@@ -1,37 +1,72 @@
 from dash import html, dcc
 from config.settings import APP_TITLE
-from sources.services.loader import load_data
+from sources.services.loader import load_initial_candles
 from sources.services.processor import process_data
 from sources.services.plotter import create_plot
 
 def create_layout():
-    df = load_data()
+    # ---------------------------------------------------------
+    # Globale Variablen
+    # ---------------------------------------------------------
+    current_interval = "1m"  # Standard-Timeframe
+    df = load_initial_candles(current_interval)
     df_processed = process_data(df)
     fig = create_plot(df_processed)
 
+
     return html.Div(
-        children=[
-            dcc.Graph(id="live-plot", figure=fig, style={"height": "100vh"}),
-            html.Div(
-                id="chat-controls",
-                className="chart-controls",
-                children=[
-                    html.Div(APP_TITLE, style={"fontWeight": "600", "marginBottom": "6px"}),
-                    html.Button("Action", id="control-btn"),
-                ],
-                style={
-                    "width": "150px",
-                    "height": "80px",
-                    "backgroundColor": "#333",
-                    "color": "white",
-                    "padding": "10px",
-                    "borderRadius": "8px",
-                    "position": "absolute",
-                    "top": "20px",
-                    "left": "20px",
-                    "zIndex": "9999",
-                    "cursor": "grab"
-                }
-            )
-        ]
+        className="chart-wrapper",
+            children=[
+                #heading
+                html.H2("Live BTCUSDT Candles (Binance)", className="chart-title"),
+        
+                #chart area
+                html.Div(
+                    className="chart-area",
+                    children=[
+                        #candles
+                        dcc.Graph(
+                            id="live-chart",
+                            config = {"editable": True, "scrollZoom": True}
+                        ),
+        
+                        #toolbox
+                        html.Div(
+                            className="chart-controls",
+                            children=[
+                                #tf-selection
+                                dcc.Dropdown(
+                                    id="timeframe-dropdown",
+                                    options=[
+                                        {"label": "1 Minute", "value": "1m"},
+                                        {"label": "5 Minuten", "value": "5m"},
+                                        {"label": "15 Minuten", "value": "15m"},
+                                        {"label": "1 Stunde", "value": "1h"},
+                                    ],
+                                    value="1m",
+                                    clearable=False,
+                                    className="timeframe-dropdown"
+                                ),
+        
+                                #drag-menu
+                                html.Div(
+                                    className="drag-menu",
+                                    children=[
+                                        html.Div("Entry", id="tool-entry", className="tool-item", draggable= "true"),
+                                        html.Div("TP", id="tool-tp", className="tool-item", draggable= "true"),
+                                        html.Div("SL", id="tool-sl", className="tool-item", draggable= "true"),
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                ),
+        
+                #dummy:
+                dcc.Store(id="dummy-store"),
+        
+        
+                #timer to stat callback every 2 scnds:
+                dcc.Interval(id="interval", interval=2000, n_intervals=0)
+            ]
     )
