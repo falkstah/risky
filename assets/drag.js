@@ -1,7 +1,10 @@
-// script.js
 // Optimiertes Dragging für .chart-controls
 // Features: Pointer API (Maus/Touch/Stift), robust gegen transformierte Eltern,
 // Begrenzung auf Viewport, Persistenz (localStorage), keyboard support, comments.
+
+//test:
+console.log("drag.js wurde geladen!");
+
 
 (function () {
   "use strict";
