@@ -8,85 +8,83 @@ class Calculation_Error(Exception):
 
 @dataclass
 class Take_Profit_Target:
-    price: float = 0.01
-    profit: float = 0.0
-    close_percent: float = 50.0
-    triggered: bool = False
+    price: float | None = None
+    profit: float | None = None
+    close_percent: float | None = None
+    triggered: bool | None = None
 
 @dataclass
 class Entry_Level:
-    price: float = 0.01
-    position_share: float = 1.0
+    price: float | None = None
+    position_share: float | None = None
 
 @dataclass
 class Tranche_Parameters:
     # Inputs
-    liq_delta_to_SL_delta_ratio: float = 4.0
-    risk: float = 10.0
-    maintainance_margin_rate: float = 0.02
-    maintainance_deduction: float = 0.00
-    p_SL: float = 0.00
-    max_lvg: float = 10.0
-    max_margin: float = 100.0   #trading logik nutzt nur 80% anteil davon, um Überbesicherung zu erzwingen
-    isolated_margin: float = 0.0
-    p_liquidation: float = 0.0
-    p: float = 0.0
-    risiko_euro: float = 0.0
-    rel_risk: float = 0.0
+    liq_delta_to_SL_delta_ratio: float | None = None
+    risk: float | None = None
+    maintainance_margin_rate: float | None = None
+    maintainance_deduction: float | None = None
+    p_SL: float | None = None
+    max_lvg: float | None = None
+    max_margin: float | None = None  #trading logik nutzt nur 80% anteil davon, um Überbesicherung zu erzwingen
+    isolated_margin: float | None = None
+    p_liquidation: float | None = None
+    p: float | None = None
+    risiko_euro: float  | None = None
+    rel_risk: float  | None = None
 
     # Calculated Values
-    sl_delta: float = 0.0
-    tp_delta: float = 0.0
-    dirsign: float = 0.0
-    n_pos_value: float = 0.0
-    lvg: float = 0.0
-    initial_margin: float = 0.0
-    maintainance_margin: float = 0.0
-    rel_maintainance_margin: float = 0.0
-    rel_asset_gain_at_TP: float = 0.0
-    rrr: float = 0.0
-    potential_profit: float = 0.0
+    sl_delta: float  | None = None
+    tp_delta: float  | None = None
+    dirsign: float  | None = None
+    n_pos_value: float  | None = None
+    lvg: float  | None = None
+    initial_margin: float  | None = None
+    maintainance_margin: float  | None = None
+    rel_maintainance_margin: float  | None = None
+    rel_asset_gain_at_TP: float  | None = None
+    rrr: float  | None = None
+    potential_profit: float  | None = None
     current_direction: Literal['long', 'short'] | None = None
     tp_active: bool = False
-    loss: float = 0.0
-    equity: float = 0.0
+    loss: float  | None = None
+    equity: float  | None = None
 
 @dataclass
 class Tranche:
     #classes
-    tranche_parameters: Tranche_Parameters = field(default_factory = Tranche_Parameters)
-    tp_target: Take_Profit_Target = field(default_factory = Take_Profit_Target)
-    entry_level: Entry_Level = field(default_factory = Entry_Level)
+    tranche_parameters: Tranche_Parameters | None = None
+    tp_target: Take_Profit_Target | None = None
+    entry_level: Entry_Level | None = None
 
 @dataclass
 class Trade_Parameters:
     #static trade specific variables
-    total_max_lvg: float = 10.0
-    total_risk: float = 10.0
+    total_max_lvg: float  | None = None
+    total_risk: float  | None = None
     total_max_margin: float  = 0.0
-    liq_delta_to_SL_delta_ratio: float = 4.0
-    maintainance_margin_rate: float = 0.02
-    maintainance_deduction: float = 0.00
-    current_asset_price: float = 0.0
-    buffer_SL: float = 0.0
-    pull_SL: float = 0.0
+    liq_delta_to_SL_delta_ratio: float  | None = None
+    maintainance_margin_rate: float  | None = None
+    maintainance_deduction: float  | None = None
+    current_asset_price: float  | None = None
+    buffer_SL: float  | None = None
+    pull_SL: float  | None = None
     order_type: Literal["single limit", "single market", "single post only", "k1m6a box"] = "single limit"
-    trailing_SL_percent: float = 0.0
+    trailing_SL_percent: float  | None = None
     trailing_sl_enabled: bool = False
-    current_sl_price: float = 0.0
-    p_SL: float = 0.0
-    total_potential_trade_profit: float = 0.0
-    total_pos_size: float = 0.0
+    current_sl_price: float  | None = None
+    p_SL: float  | None = None
+    total_potential_trade_profit: float  | None = None
+    total_pos_size: float  | None = None
     tp_mode: Literal["global_TPs", "tranche_bound_TPs"] = "global_TPs"
-    potential_total_trade_profit: float = 0.0
+    potential_total_trade_profit: float  | None = None
     #dynamic
-    total_cumulated_profit: float = 0.0
-
-    #test: max_lvg: float = 10.0
+    total_cumulated_profit: float  | None = None
 
 @dataclass
 class Trade:
     #classes
-    trade_parameters: Trade_Parameters = field(default_factory = Trade_Parameters)
-    tranches: list[Tranche] = field(default_factory = lambda : [Tranche()])     #calable function lambda guarantees a minimum of one tranche, since every trade needs at least one entry-level (which is linked to a tranche)
-    global_tp_targets: list[Take_Profit_Target] = field(default_factory = list)
+    trade_parameters: Trade_Parameters | None = None
+    tranches: list[Tranche] | None = None
+    global_tp_targets: list[Take_Profit_Target] | None = None

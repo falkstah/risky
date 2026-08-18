@@ -45,10 +45,54 @@ INTERACTION = {
 }
 
 # ---------------------------------------------------------
-# Risiko‑Parameter (Processor)
+# Fachliche Default-values (Processor)
 # ---------------------------------------------------------
-RISK = {
-    "risk_reward_default": 2.0,
-    "max_risk_percent": 1.0,
-    "min_position_size": 0.001,
+
+# ---------------------------------------------------------
+# Fachliche Defaults für Entry-Level
+# ---------------------------------------------------------
+ENTRY_DEFAULTS = {
+    "price": 0.01,            # fachlicher Startpreis
+    "position_share": 1.0,    # 100% der Tranche
+}
+
+# ---------------------------------------------------------
+# Fachliche Defaults für Take-Profit-Targets
+# ---------------------------------------------------------
+TP_DEFAULTS = {
+    "price": 0.01,            # TP-Level
+    "close_percent": 50.0,    # 50% schließen
+}
+
+# ---------------------------------------------------------
+# Fachliche Defaults für Tranche-Parameter (Inputs)
+# ---------------------------------------------------------
+TRANCHE_INPUT_DEFAULTS = {
+    "liq_delta_to_SL_delta_ratio": 4.0,
+    "risk": 10.0,
+    "maintainance_margin_rate": 0.02,
+    "maintainance_deduction": 0.00,
+    "max_lvg": 10.0,
+    "max_margin": 100.0,      # deine Logik nutzt später 80% davon
+}
+
+# ---------------------------------------------------------
+# Fachliche Defaults für Trade-Parameter
+# ---------------------------------------------------------
+TRADE_DEFAULTS = {
+    "total_max_lvg": 10.0,
+    "total_risk": 10.0,
+    "liq_delta_to_SL_delta_ratio": 4.0,
+    "maintainance_margin_rate": 0.02,
+    "maintainance_deduction": 0.00,
+    "order_type": "single limit",
+    "tp_mode": "global_TPs",
+}
+
+# ---------------------------------------------------------
+# Struktur-Defaults (Anzahl Objekte)
+# ---------------------------------------------------------
+TRADE_STRUCTURE_DEFAULTS = {
+    "initial_tranches": 1,            # jeder Trade hat mind. 1 Tranche
+    "initial_global_tp_targets": 0,   # optional
 }
