@@ -1,6 +1,8 @@
 import plotly.graph_objects as go
 import pandas as pd
 
+from sources.services import stream
+from sources.services import loader
 
 from dash import Input, Output
 
@@ -16,7 +18,7 @@ def register_callbacks(app, socketio=None):
         from sources.services.processor import process_data
         from sources.services.plotter import create_plot
 
-        df = load_initial_candles(current_interval)
+        df = load_initial_candles(stream.get_interval)
         df_processed = process_data(df)
         fig = create_plot(df_processed)
         return fig
@@ -43,12 +45,14 @@ def register_callbacks(app, socketio=None):
     )
 
     def update_chart(_, timeframe, entry_clicks, tp_clicks, sl_clicks):
-        global df, current_interval
+        #inherit values from stream.py
+        current_interval = stream.get_interval()
+        df = stream.df
 
         # Wenn Timeframe geändert wurde → neuen Stream starten
         if timeframe != current_interval:
             current_interval = timeframe
-            df = load_initial_candles(current_interval)  # <-- historische Kerzen laden
+            df = loader.load_initial_candles(current_interval)  # <-- historische Kerzen laden
             threading.Thread(target=start_ws, daemon=True).start()
 
         if df.empty:

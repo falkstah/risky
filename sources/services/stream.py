@@ -3,8 +3,16 @@ import pandas as pd
 from flask_socketio import emit
 from app.ui_init import socketio
 
+#lobals:
 current_interval = "1m"
 df = pd.DataFrame()
+
+def get_interval():
+    return current_interval
+
+def set_interval(interval):
+    global current_interval
+    current_interval = interval
 
 def update_df_from_binance(k):
     global df
