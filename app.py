@@ -11,6 +11,7 @@ from config.settings import APP_TITLE
 
 # --- Dash App initialisieren ---
 app = Dash(__name__)
+server = app.server
 
 # --- Datenpipeline ---
 df = load_data()
