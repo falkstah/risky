@@ -20,23 +20,20 @@ fig = create_plot(df_processed)
 
 # --- Layout ---
 app.layout = html.Div(
-    children=[
-        html.H1(APP_TITLE),
-        className="chart-controls",
-        style={
-            "width": "150px",
-            "height": "80px",
-            "backgroundColor": "#333",
-            "color": "white",
-            "padding": "10px",
-            "borderRadius": "8px",
-            "position": "absolute",
-            "top": "20px",
-            "left": "20px",
-            "zIndex": "9999"
-        }
-    ],
-    style={"padding": "20px"}
+    html.H1(APP_TITLE),
+    className="chart-controls",
+    style={
+        "width": "150px",
+        "height": "80px",
+        "backgroundColor": "#333",
+        "color": "white",
+        "padding": "10px",
+        "borderRadius": "8px",
+        "position": "absolute",
+        "top": "20px",
+        "left": "20px",
+        "zIndex": "9999"
+    }
 )
 
 # --- Serverstart für Render ---
