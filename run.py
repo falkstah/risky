@@ -18,4 +18,9 @@ register_callbacks(app, socketio)
 
 if __name__ == "__main__":
     # socketio.run damit Dash + SocketIO zusammen laufen
-    socketio.run(server, host="0.0.0.0", port=int(__import__("os").environ.get("PORT", 8050)), debug=True)
+    socketio.run(
+        server, 
+        host="0.0.0.1", 
+        port=int(__import__("os").environ.get("PORT", 8050),), 
+        debug=True
+    )
