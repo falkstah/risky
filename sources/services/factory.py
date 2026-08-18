@@ -51,7 +51,10 @@ def create_entry_level() -> Entry_Level:
 # TP-Target Factory
 # ---------------------------------------------------------
 def create_tp_target() -> Take_Profit_Target:
-    return Take_Profit_Target(triggered = False, **TP_DEFAULTS)
+    return Take_Profit_Target(
+        **TP_DEFAULTS,
+        triggered = False,
+    )
 
 
 # ---------------------------------------------------------
