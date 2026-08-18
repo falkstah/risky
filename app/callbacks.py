@@ -1,6 +1,9 @@
 import plotly.graph_objects as go
 import pandas as pd
 
+
+from app.ui_init import socketio
+
 from sources.services import stream
 from sources.services import loader
 
@@ -53,7 +56,6 @@ def register_callbacks(app, socketio=None):
         if timeframe != current_interval:
             current_interval = timeframe
             df = loader.load_initial_candles(current_interval)  # <-- historische Kerzen laden
-            threading.Thread(target=start_ws, daemon=True).start()
 
         if df.empty:
             # Range der letzten 30 Kerzen
