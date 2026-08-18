@@ -3,10 +3,11 @@ from dash import Dash, html, dcc
 import plotly.graph_objs as go
 
 # --- Eigene Module laden ---
-from sources.loader import load_data
-from sources.processor import process_data
-from sources.plotter import create_plot
+from sources.services.loader import load_data
+from sources.services.processor import process_data
+from sources.services.plotter import create_plot
 from config.settings import APP_TITLE
+
 
 # --- Dash App initialisieren ---
 app = Dash(__name__)
