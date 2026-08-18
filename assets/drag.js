@@ -5,6 +5,20 @@
 //test:
 console.log("drag.js wurde geladen!");
 
+function waitForPanel() {
+  const panel = document.querySelector(".chart-controls");
+  if (panel) {
+    console.log("Panel gefunden – starte erweitertes Drag-System");
+    initDrag(panel);  // deine bestehende Funktion
+    return;
+  }
+  console.log("Panel noch nicht da...");
+  setTimeout(waitForPanel, 200);
+}
+
+document.addEventListener("DOMContentLoaded", waitForPanel);
+
+
 //dra.js shall only work if used
 function initDrag(panel) {
   console.log("initDrag gestartet für:", panel);
