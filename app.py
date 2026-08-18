@@ -20,7 +20,6 @@ fig = create_plot(df_processed)
 
 # --- Layout ---
 app.layout = html.Div(
-    html.H1(APP_TITLE),
     className="chart-controls",
     style={
         "width": "150px",
