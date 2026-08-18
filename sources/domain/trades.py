@@ -70,14 +70,14 @@ class Trade_Parameters:
     current_asset_price: float  | None = None
     buffer_SL: float  | None = None
     pull_SL: float  | None = None
-    order_type: Literal["single limit", "single market", "single post only", "k1m6a box"] = "single limit"
+    order_type: Literal["single limit", "single market", "single post only", "k1m6a box"]  | None = None
     trailing_SL_percent: float  | None = None
     trailing_sl_enabled: bool = False
     current_sl_price: float  | None = None
     p_SL: float  | None = None
     total_potential_trade_profit: float  | None = None
     total_pos_size: float  | None = None
-    tp_mode: Literal["global_TPs", "tranche_bound_TPs"] = "global_TPs"
+    tp_mode: Literal["global_TPs", "tranche_bound_TPs"]  | None = None
     potential_total_trade_profit: float  | None = None
     #dynamic
     total_cumulated_profit: float  | None = None
