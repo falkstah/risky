@@ -2,74 +2,38 @@
 // Features: Pointer API (Maus/Touch/Stift), robust gegen transformierte Eltern,
 // Begrenzung auf Viewport, Persistenz (localStorage), keyboard support, comments.
 
-//test:
+// test:
 console.log("drag.js wurde geladen!");
 
+// Wait-for-panel helper (versucht sofort und bei DOMContentLoaded)
 function waitForPanel() {
   const panel = document.querySelector(".chart-controls");
   if (panel) {
     console.log("Panel gefunden – starte erweitertes Drag-System");
-    initDrag(panel);  // deine bestehende Funktion
+    if (typeof window.__startAdvancedDragSystem === "function") {
+      window.__startAdvancedDragSystem(panel);
+    } else {
+      console.warn("Advanced Drag System nicht verfügbar.");
+    }
     return;
   }
+  // Wenn noch nicht da, erneut versuchen
   console.log("Panel noch nicht da...");
   setTimeout(waitForPanel, 200);
 }
 
 document.addEventListener("DOMContentLoaded", waitForPanel);
+waitForPanel(); // sofortiger Versuch, falls Script nach DOMContentLoaded geladen wurde
 
-
-//dra.js shall only work if used
-function initDrag(panel) {
-  console.log("initDrag gestartet für:", panel);
-
-  // Sicherstellen, dass das Panel positionierbar ist
-  panel.style.position = "absolute";
-  panel.style.cursor = "grab";
-
-  let startX, startY, startLeft, startTop;
-
-  panel.addEventListener("mousedown", (e) => {
-    e.preventDefault();
-    panel.style.cursor = "grabbing";
-
-    startX = e.clientX;
-    startY = e.clientY;
-
-    const rect = panel.getBoundingClientRect();
-    startLeft = rect.left;
-    startTop = rect.top;
-
-    function move(ev) {
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
-      panel.style.left = startLeft + dx + "px";
-      panel.style.top = startTop + dy + "px";
-    }
-
-    function up() {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-      panel.style.cursor = "grab";
-    }
-
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-  });
-}
-
-
+// Großes IIFE, jetzt als startbare Funktion exportiert
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "chartControlsPosition_v1";
+  // Exportierte Startfunktion — wird mit dem bereits vorhandenen panel aufgerufen
+  window.__startAdvancedDragSystem = function(panel) {
+    console.log("Advanced Drag System gestartet für:", panel);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const panel = document.querySelector(".chart-controls");
-    if (!panel) {
-      console.warn("Kein .chart-controls Element gefunden.");
-      return;
-    }
+    const STORAGE_KEY = "chartControlsPosition_v1";
 
     // Ensure panel is positioned absolutely so left/top wirken
     const cs = getComputedStyle(panel);
@@ -102,6 +66,8 @@ function initDrag(panel) {
       startLeft = rect.left + window.scrollX;
       startTop = rect.top + window.scrollY;
       document.body.style.userSelect = "none";
+      panel.style.cursor = "grabbing";
+      panel.classList.add("dragging");
     }
 
     // Move drag: compute new left/top and clamp to viewport
@@ -118,17 +84,17 @@ function initDrag(panel) {
 
     // End drag: persist and cleanup
     function endDrag(pointerId) {
-      // If pointerId provided, ensure it matches the active pointer (defensive)
       if (pointerId != null && activePointerId != null && pointerId !== activePointerId) return;
       dragging = false;
       activePointerId = null;
       document.body.style.userSelect = "";
+      panel.style.cursor = "grab";
+      panel.classList.remove("dragging");
       savePosition(panel);
     }
 
     // Pointer event handlers
     panel.addEventListener("pointerdown", (e) => {
-      // Only left mouse button or any pointer type
       if (e.pointerType === "mouse" && e.button !== 0) return;
       startDrag(e.clientX, e.clientY, e.pointerId);
       try { panel.setPointerCapture(e.pointerId); } catch (err) {}
@@ -150,8 +116,9 @@ function initDrag(panel) {
 
     // Keyboard accessibility: move with arrow keys, save with Enter/Escape
     panel.setAttribute("tabindex", panel.getAttribute("tabindex") || "0");
+    panel.style.cursor = "grab";
     panel.addEventListener("keydown", (e) => {
-      const step = e.shiftKey ? 20 : 8; // larger step with Shift
+      const step = e.shiftKey ? 20 : 8;
       let changed = false;
       let left = parseFloat(getComputedStyle(panel).left) || 0;
       let top = parseFloat(getComputedStyle(panel).top) || 0;
@@ -164,7 +131,7 @@ function initDrag(panel) {
         case "Home": left = 0; top = 0; changed = true; break;
         case "End": left = window.innerWidth - panel.offsetWidth; top = window.innerHeight - panel.offsetHeight; changed = true; break;
         case "Enter": savePosition(panel); break;
-        case "Escape": // optional: restore saved position
+        case "Escape":
           const s = loadPosition();
           if (s) applyPosition(panel, s.left, s.top);
           break;
@@ -223,7 +190,6 @@ function initDrag(panel) {
         if (!raw) return null;
         const obj = JSON.parse(raw);
         if (typeof obj.left === "number" && typeof obj.top === "number") {
-          // ensure still in viewport
           const clamped = clampToViewport(panel, obj.left, obj.top);
           return { left: clamped.left, top: clamped.top };
         }
@@ -255,5 +221,7 @@ function initDrag(panel) {
       applyPosition(panel, clamped.left, clamped.top);
       savePosition(panel);
     });
-  });
-})();
+
+    // Ende der startbaren Funktion
+  }; // window.__startAdvancedDragSystem
+})(); // IIFE Ende
