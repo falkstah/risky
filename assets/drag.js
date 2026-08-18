@@ -5,6 +5,45 @@
 //test:
 console.log("drag.js wurde geladen!");
 
+//dra.js shall only work if used
+function initDrag(panel) {
+  console.log("initDrag gestartet für:", panel);
+
+  // Sicherstellen, dass das Panel positionierbar ist
+  panel.style.position = "absolute";
+  panel.style.cursor = "grab";
+
+  let startX, startY, startLeft, startTop;
+
+  panel.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    panel.style.cursor = "grabbing";
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const rect = panel.getBoundingClientRect();
+    startLeft = rect.left;
+    startTop = rect.top;
+
+    function move(ev) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      panel.style.left = startLeft + dx + "px";
+      panel.style.top = startTop + dy + "px";
+    }
+
+    function up() {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+      panel.style.cursor = "grab";
+    }
+
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  });
+}
+
 
 (function () {
   "use strict";
