@@ -27,6 +27,7 @@ def create_layout():
                         #candles
                         dcc.Graph(
                             id="live-chart",
+                            figure = fig,   #Plotter referenz
                             config = {"editable": True, "scrollZoom": True}
                         ),
         
