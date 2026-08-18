@@ -1,0 +1,13 @@
+import os
+from flask import Flask
+from flask_socketio import SocketIO
+from dash import Dash
+
+server = Flask(__name__)
+server.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "replace-with-secure-key")
+
+# socketio optional, falls du es brauchst
+socketio = SocketIO(server, async_mode="eventlet", cors_allowed_origins="*")
+
+# Dash app gebunden an Flask server
+app = Dash(__name__, server=server, suppress_callback_exceptions=True)
