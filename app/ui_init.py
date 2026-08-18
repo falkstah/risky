@@ -10,4 +10,5 @@ server.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "replace-with-secure-
 socketio = SocketIO(server, async_mode="eventlet", cors_allowed_origins="*")
 
 # Dash app gebunden an Flask server
-app = Dash(__name__, server=server, suppress_callback_exceptions=True)
+#the type ignore is used to ignore th arg error that is a bug?
+app = Dash(__name__, server, suppress_callback_exceptions = True) # type: ignore[arg-type]
