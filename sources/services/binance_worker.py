@@ -12,8 +12,12 @@ class SSLAdapter(HTTPAdapter):
         super().__init__(**kwargs)
 
     def init_poolmanager(self, *args, **kwargs):
-        kwargs['ssl_context'] = self.ssl_context
+        kwargs["ssl_context"] = self.ssl_context
         return super().init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs["ssl_context"] = self.ssl_context
+        return super().proxy_manager_for(*args, **kwargs)
 
 # SSL‑Kontext mit niedrigerem Security‑Level
 tls = ssl.create_default_context()
