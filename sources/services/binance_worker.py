@@ -20,14 +20,16 @@ class SSLAdapter(HTTPAdapter):
         return super().proxy_manager_for(*args, **kwargs)
 
 # SSL‑Kontext mit niedrigerem Security‑Level
-tls = ssl.create_default_context()
-tls.set_ciphers("DEFAULT@SECLEVEL=1")
+def create_session():
+    tls = ssl.create_default_context()
+    tls.set_ciphers("DEFAULT@SECLEVEL=1")
 
-# Session mit angepasstem Adapter
-session = requests.Session()
-session.mount("https://", SSLAdapter(ssl_context=tls))
+    session = requests.Session()
+    session.mount("https://", SSLAdapter(ssl_context=tls))
+    return session
 
-def fetch_latest_candle(interval="1m"):
+
+def fetch_latest_candle(session, interval="1m"):
     url = "https://api.binance.com/api/v3/klines"
     params = {"symbol": "BTCUSDT", "interval": interval, "limit": 1}
     response = session.get(url, params=params, timeout=5)
@@ -35,9 +37,15 @@ def fetch_latest_candle(interval="1m"):
     return response.json()[0]
 
 def start_binance_polling(interval="1m"):
+    print("Binance Worker (polling) wurde gestartet")
+
+    session = create_session()
+
     while True:
+        print("Worker Loop tick")
+
         try:
-            candle = fetch_latest_candle(interval)
+            candle = fetch_latest_candle(session, interval)
             message = {
                 "k": {
                     "t": candle[0],

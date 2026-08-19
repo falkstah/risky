@@ -8,25 +8,24 @@ from threading import Thread
 import os
 
 
-# Binance Worker starten, thread is used to not block the server
-#Thread(target=start_binance_polling, daemon=True).start()   --not used bc blocks
-socketio.start_background_task(start_binance_polling)
-
-
-
 # Layout setzen
 app.layout = create_layout()
 
 # Callbacks registrieren
 register_callbacks(app, socketio)
 
+
+
 #switches between modes if code is tested locally
 if __name__ == "__main__":
+    # Binance Worker starten, thread is used to not block the server
+    #Thread(target=start_binance_polling, daemon=True).start()   --not used bc blocks
+    socketio.start_background_task(start_binance_polling)
+
     # Lokaler Testmodus
     LOCAL_MODE = True
 
-    if LOCAL_MODE:
-        # Lokaler Server (nur für Tests)
+    if LOCAL_MODE:        
         socketio.run(
             server,
             host="127.0.0.1",
