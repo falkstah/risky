@@ -2,13 +2,17 @@ import time
 import json
 import requests
 from app.ui_init import socketio
+import ssl
 
+tls = ssl.create_default_context()
+tls.set_ciphers("DEFAULT@SECLEVEL=1")
 
 def fetch_latest_candle(interval="1m"):
     url = "https://api.binance.com/api/v3/klines"
     params = {"symbol": "BTCUSDT", "interval": interval, "limit": 1}
-    data = requests.get(url, params=params).json()
-    return data[0]
+    response = requests.get(url, params=params, timeout=5, verify=tls)
+    response.raise_for_status()
+    return response.json()[0]
 
 
 def start_binance_polling(interval="1m"):
