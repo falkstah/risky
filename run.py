@@ -8,7 +8,7 @@ from threading import Thread
 import os
 
 
-# Binance Worker starten
+# Binance Worker starten, thread is used to not block the server
 Thread(target=start_binance_polling, daemon=True).start()
 
 
