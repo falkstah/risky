@@ -165,8 +165,3 @@ def register_callbacks(app, socketio=None):
     def handle_drop(relayoutData):
         return relayoutData
 
-    # ---------------------------------------------------------
-    # Starten
-    # ---------------------------------------------------------
-    if __name__ == "__main__":
-        app.run(debug=True)
