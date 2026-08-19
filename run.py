@@ -9,7 +9,9 @@ import os
 
 
 # Binance Worker starten, thread is used to not block the server
-Thread(target=start_binance_polling, daemon=True).start()
+#Thread(target=start_binance_polling, daemon=True).start()   --not used bc blocks
+socketio.start_background_task(start_binance_polling)
+
 
 
 # Layout setzen
