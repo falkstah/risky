@@ -32,7 +32,9 @@ def create_session():
 def fetch_latest_candle(session, interval="1m"):
     url = "https://api.binance.com/api/v3/klines"
     params = {"symbol": "BTCUSDT", "interval": interval, "limit": 1}
+    print("Hole Candle von Binance…")
     response = session.get(url, params=params, timeout=5)
+    print("Antwort erhalten")
     response.raise_for_status()
     return response.json()[0]
 
