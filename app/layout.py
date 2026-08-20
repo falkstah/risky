@@ -9,7 +9,7 @@ def create_layout():
     # Globale Variablen
     # ---------------------------------------------------------
     current_interval = "1m"  # Standard-Timeframe
-    df = load_initial_candles(current_interval)
+    df = load_initial_candles(current_interval, 30)
     df_processed = process_data(df)
     fig = create_plot(df_processed)
 
