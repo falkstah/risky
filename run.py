@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Binance Worker starten, thread is used to not block the server
     #Thread(target=start_binance_polling, daemon=True).start()   --not used bc blocks
     socketio.start_background_task(start_binance_polling)
-    
+
     # Lokaler Testmodus
     LOCAL_MODE = True
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             server,
             host="127.0.0.1",
             port=8050,
-            debug=True
+            debug=False
         )
     else:
         # Produktionsmodus (z. B. Render, Heroku, etc.)

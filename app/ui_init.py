@@ -7,8 +7,9 @@ server = Flask(__name__)
 server.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "replace-with-secure-key")
 
 # socketio optional, falls du es brauchst
-#ggfs. asynch_mode = gevent erzwingen
-socketio = SocketIO(server, cors_allowed_origins="*")
+#ggfs. asynch_mode = gevent erzwingen, wenn auf render dopleyed, auf windows lokal nur threading!
+socketio = SocketIO(server, cors_allowed_origins="*", async_mode="threading")
+
 
 # Dash app gebunden an Flask server
 #the type ignore is used to ignore th arg error that is a bug?
