@@ -1,3 +1,5 @@
+/*Feinjustierung für Charts, Tooltips, Achsen*/
+
 /*outer brower viewpoint container has to be fitted to window size */
 html, body {
     height: 100%;
