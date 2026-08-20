@@ -5,6 +5,7 @@ import ssl
 from app.ui_init import socketio
 from requests.adapters import HTTPAdapter
 from urllib3 import PoolManager
+import traceback
 
 class SSLAdapter(HTTPAdapter):
     def __init__(self, ssl_context=None, **kwargs):
@@ -35,17 +36,22 @@ def fetch_latest_candle(session, interval="1m"):
 
     try:
         print("Hole Candle von Binance…")
-        #response = session.get(url, params=params, timeout=5)
-        #test:
-        response = requests.get(url, params=params, timeout=5)
+        response = session.get(url, params=params, timeout=10)
 
         print("Antwort erhalten")
         response.raise_for_status()
         return response.json()[0]
 
     except requests.exceptions.RequestException as e:
-        print("Request error:", e)
+        print("Request error:", type(e).__name__, "-", e)
         return None
+
+    #für besondere fehler:
+    except Exception as e:
+        print("Unerwarteter Fehler:", type(e).__name__, "-", e)
+        traceback.print_exc()
+        return None
+
 
 
 
@@ -59,7 +65,7 @@ def start_binance_polling(interval="1m"):
 
         candle = fetch_latest_candle(session, interval)
         if candle is None:
-            time.sleep(2)   #leaves more time for binance to fix error
+            time.sleep(15)   #leaves more time for binance to fix error
             continue
 
         message = {
@@ -73,5 +79,5 @@ def start_binance_polling(interval="1m"):
         }
 
         socketio.emit("binance_candle", json.dumps(message))
-        time.sleep(1)
+        time.sleep(10)
 
