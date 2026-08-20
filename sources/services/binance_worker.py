@@ -21,7 +21,7 @@ class SSLAdapter(HTTPAdapter):
 
 # SSL‑Kontext mit niedrigerem Security‑Level
 def create_session():
-    tls = ssl.create_default_context()
+    tls = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     tls.set_ciphers("DEFAULT@SECLEVEL=1")
 
     session = requests.Session()
@@ -35,7 +35,10 @@ def fetch_latest_candle(session, interval="1m"):
 
     try:
         print("Hole Candle von Binance…")
-        response = session.get(url, params=params, timeout=5)
+        #response = session.get(url, params=params, timeout=5)
+        #test:
+        response = requests.get(url, params=params, timeout=5)
+
         print("Antwort erhalten")
         response.raise_for_status()
         return response.json()[0]
@@ -54,18 +57,21 @@ def start_binance_polling(interval="1m"):
     while True:
         print("Worker Loop tick")
 
-        try:
-            candle = fetch_latest_candle(session, interval)
-            message = {
-                "k": {
-                    "t": candle[0],
-                    "o": candle[1],
-                    "h": candle[2],
-                    "l": candle[3],
-                    "c": candle[4]
-                }
+        candle = fetch_latest_candle(session, interval)
+        if candle is None:
+            time.sleep(2)   #leaves more time for binance to fix error
+            continue
+
+        message = {
+            "k": {
+                "t": candle[0],
+                "o": candle[1],
+                "h": candle[2],
+                "l": candle[3],
+                "c": candle[4]
             }
-            socketio.emit("binance_candle", json.dumps(message))
-        except Exception as e:
-            print("Polling error:", e)
+        }
+
+        socketio.emit("binance_candle", json.dumps(message))
         time.sleep(1)
+
