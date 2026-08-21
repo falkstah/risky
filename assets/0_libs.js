@@ -1,12 +1,19 @@
-// Socket.IO-Client laden
+// Socket.IO‑Client laden
 const socketioScript = document.createElement("script");
 socketioScript.src = "https://cdn.socket.io/4.7.2/socket.io.min.js";
-document.head.appendChild(socketioScript);
+socketioScript.onload = () => {
+  console.log("Socket.IO Client geladen");
+
+  // Jetzt socket.js laden
+  const socketScript = document.createElement("script");
+  socketScript.src = "assets/1_socket.js";
+  document.head.appendChild(socketScript);
+};
 
 // Plotly laden
 const plotlyScript = document.createElement("script");
 plotlyScript.src = "https://cdn.plot.ly/plotly-2.27.0.min.js";
-document.head.appendChild(plotlyScript);
-
 plotlyScript.onload = () => console.log("Plotly geladen");
-socketioScript.onload = () => console.log("Socket.IO‑Client geladen");
+
+document.head.appendChild(socketioScript);
+document.head.appendChild(plotlyScript);
