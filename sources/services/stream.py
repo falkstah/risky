@@ -3,8 +3,8 @@ import pandas as pd
 from flask_socketio import emit
 from app.ui_init import socketio
 
-#lobals:
-current_interval = "1m"
+#globals:
+current_interval = "30m"
 df = pd.DataFrame()
 
 def get_interval():

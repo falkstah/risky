@@ -46,7 +46,7 @@ def create_layout():
                                         {"label": "1 Minute", "value": "1m"},
                                         {"label": "5 Minuten", "value": "5m"},
                                         {"label": "15 Minuten", "value": "15m"},
-                                        {"label": "15 Minuten", "value": "30m"},
+                                        {"label": "30 Minuten", "value": "30m"},
                                         {"label": "1 Stunde", "value": "1h"},
                                         {"label": "4 Stunden", "value": "4h"},
                                         {"label": "1 Tag", "value": "1d"},

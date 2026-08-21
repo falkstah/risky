@@ -61,7 +61,7 @@ def register_callbacks(app, socketio=None):
             # Range der letzten 30 Kerzen
             return go.Figure()
 
-        #scaling default line levels for easonable scaling
+        #scaling default line levels for reasonable scaling
         low_range = df["low"].min()
         high_range = df["high"].max()
         entry_price = df["close"].iloc[-1]
