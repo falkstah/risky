@@ -24,15 +24,14 @@
     position: absolute;
     z-index: 10; /* overlay degree */
 
-    flex: 1; /*-> full height in chart wrapper*/
     display: flex;
     flex-direction:column;
+
     justify-content: center;
     align-items: stretch;
-    flex-shrink: 0;
     width: 12vw;
     min-width: 120px;
-    height: 80%; /* feste Basis für relative Verteilung */
+    height: auto; /* feste Basis für relative Verteilung */
     gap: 1vw;
 
     /* Der Trick: Chart überlappen, aber relativ */
@@ -45,14 +44,15 @@
 
     /*for text in chart-controls*/
     container-type: inline-size; /* moderne Browser: erlaubt @container Regeln */
-    font-size: clamp(80px, 1.6vw, 20px); /* responsive container font */
+    font-size: clamp(20px, 1.6vw, 50px); /* responsive container font */
     line-height: 1.25;
     text-align: center;
 
     /*allows to move chat-controls with mouse*/
-    cursor: move;
+    cursor: grab;
     top: 20px;
     left: 20px;
+
     pointer-events: auto; /* Panel reagiert auf Maus */
 }
 
@@ -64,11 +64,17 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   padding: 0.5em 0.8em;   /* skaliert mit font-size */
   min-height: 2.6em;      /* verhindert zu kleine Buttons */
   max-height: 6em;        /* schützt vor übergroßen Buttons */
   box-sizing: border-box;
+  font-size: clamp(14px, 1.2vw, 22px);
+}
+
+.chart-controls button:hover,
+.tool-item:hover {
+  background: #444;
 }
 
 

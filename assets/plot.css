@@ -1,10 +1,11 @@
 /*chart fills chart area*/
 #live-chart {
-    flex: 4; /* Chart selbst füllt chart-area */
+    flex: 4;
     height: 100%;
-    z-index : 1;
-    pointer-events: none /* Chart ignoriert Maus, to let js cope with mouse */
+    z-index: 1;
+    pointer-events: none; /* Chart ignoriert Maus → Controls können drüber bewegt werden */
 }
+
 
 /* verhindert dass Plotly Controls überlagert */
 .js-plotly-plot .plotly {
