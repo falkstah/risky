@@ -5,9 +5,8 @@ socketioScript.onload = () => {
   console.log("Socket.IO Client geladen");
 
   // Jetzt socket.js laden
-  const socketScript = document.createElement("script");
-  socketScript.src = "assets/1_socket.js";
-  document.head.appendChild(socketScript);
+  //const socketScript = document.createElement("script");
+  //document.head.appendChild(socketScript);
 };
 
 // Plotly laden
