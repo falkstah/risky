@@ -7,7 +7,7 @@ from threading import Thread
 
 import os
 
-print(">>> CSS-Dateien im assets/:", os.listdir("assets"))
+#print(">>> CSS-Dateien im assets/:", os.listdir("assets"))
 
 # Layout setzen
 app.layout = create_layout()
