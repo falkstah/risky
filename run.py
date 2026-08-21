@@ -20,9 +20,7 @@ register_callbacks(app, socketio)
 #switches between modes if code is tested locally
 if __name__ == "__main__":
 
-    # Binance Worker starten, thread is used to not block the server
-    #Thread(target=start_binance_polling, daemon=True).start()   --not used bc blocks
-    socketio.start_background_task(start_binance_polling)
+    
 
     # Lokaler Testmodus
     LOCAL_MODE = True
@@ -44,3 +42,7 @@ if __name__ == "__main__":
             debug=False,
             use_reloader = False,
         )
+
+        # Binance Worker starten, thread is used to not block the server
+        #Thread(target=start_binance_polling, daemon=True).start()   --not used bc blocks
+        socketio.start_background_task(start_binance_polling)

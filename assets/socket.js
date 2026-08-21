@@ -1,4 +1,7 @@
-const socket = io();   // automatisch korrekt verbinden
+const socket = io("http://127.0.0.1:8050", {
+  transports: ["websocket"]
+});
+
 
 let candles = [];      // hier speichern wir alle Candles
 
