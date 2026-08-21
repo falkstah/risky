@@ -5,7 +5,7 @@ socket.on("connect", () => {
     console.log("Connected to SocketIO");
 });
 
-socket.on("update_chart", (candle) => {
+socket.on("binance_candle", (candle) => {
     console.log("Neue Candle empfangen:", candle);
     // hier kannst du dein Chart aktualisieren
 });
