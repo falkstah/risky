@@ -3,10 +3,6 @@ const socketioScript = document.createElement("script");
 socketioScript.src = "https://cdn.socket.io/4.7.2/socket.io.min.js";
 socketioScript.onload = () => {
   console.log("Socket.IO Client geladen");
-
-  // Jetzt socket.js laden
-  //const socketScript = document.createElement("script");
-  //document.head.appendChild(socketScript);
 };
 
 // Plotly laden
