@@ -1,4 +1,4 @@
-// module_folder/modules.js
+// assets/module_folder/modules.js
 
 import * as Libs from './libs.js';
 import { initSocket } from './socket.js';
@@ -12,5 +12,3 @@ export async function initModules() {
     console.log('[modules] Module bereit.');
     return { libs, socket };
 }
-
-export { Libs, initSocket };
