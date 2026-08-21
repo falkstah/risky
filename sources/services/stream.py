@@ -3,7 +3,7 @@ import pandas as pd
 from flask_socketio import emit
 from app.ui_init import socketio
 import threading
-from binance_worker import fetch_latest_candle, create_session
+from sources.services.binance_worker import fetch_latest_candle, create_session
 
 current_interval = None
 worker_thread = None
