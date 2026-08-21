@@ -69,15 +69,13 @@ def start_binance_polling(interval="1m"):
             continue
 
         message = {
-            "k": {
-                "t": candle[0],
-                "o": candle[1],
-                "h": candle[2],
-                "l": candle[3],
-                "c": candle[4]
-            }
+            "t": candle[0],
+            "o": candle[1],
+            "h": candle[2],
+            "l": candle[3],
+            "c": candle[4]
         }
 
-        socketio.emit("binance_candle", json.dumps(message))
+        socketio.emit("binance_candle", message)
         time.sleep(1)
 

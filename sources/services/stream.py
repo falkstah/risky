@@ -3,7 +3,7 @@ import pandas as pd
 from flask_socketio import emit
 from app.ui_init import socketio
 import threading
-from binance_worker import fetch_latest_candle
+from binance_worker import fetch_latest_candle, create_session
 
 current_interval = None
 worker_thread = None
@@ -42,14 +42,17 @@ def restart_stream():
 
 def run_stream(interval, stop_event):
     global df
-    print(f"Starte Stream für {interval}")
+    print(f"Starte Stream für", interval)
+
+    # Session aus binance_worker holen
+    session = create_session()
 
     while not stop_event.is_set():
-        k = fetch_latest_candle(interval)
+        k = fetch_latest_candle(session, interval)
         if k is None:
             continue
 
-        # k ist ein Array → in Dict umwandeln
+        # Binance liefert ein RAW-Array → in Dict umwandeln
         candle = {
             "t": k[0],
             "o": k[1],
@@ -58,7 +61,12 @@ def run_stream(interval, stop_event):
             "c": k[4]
         }
 
+        # df aktualisieren
         update_df_from_binance(candle)
+
+        # Live-Update an UI senden
+        socketio.emit("binance_candle", candle)
+
 
 
 def update_df_from_binance(k):
@@ -85,8 +93,8 @@ def update_df_from_binance(k):
 # SocketIO Event: Binance Worker sendet neue Candle
 @socketio.on("binance_candle")
 def handle_binance_candle(message):
-    k = json.loads(message)["k"]
-    candle = update_df_from_binance(k)
+    candle = json.loads(message)
 
     # Broadcast an alle Clients
-    emit("update_chart", candle, broadcast=True)
+    emit("binance_candle", candle, broadcast=True)
+
