@@ -63,19 +63,19 @@ def start_binance_polling(interval="1m"):
     while True:
         print("Worker Loop tick")
 
-        candle = fetch_latest_candle(session, interval)
-        if candle is None:
+        c = fetch_latest_candle(session, interval)
+        if c is None:
             time.sleep(2)   #leaves more time for binance to fix error
             continue
 
-        message = {
-            "t": candle[0],
-            "o": candle[1],
-            "h": candle[2],
-            "l": candle[3],
-            "c": candle[4]
+        candle = {
+            "t": c[0],
+            "o": c[1],
+            "h": c[2],
+            "l": c[3],
+            "c": c[4]
         }
 
-        socketio.emit("binance_candle", message)
+        socketio.emit("binance_candle", candle)
         time.sleep(1)
 
