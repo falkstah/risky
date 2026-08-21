@@ -1,0 +1,60 @@
+from dash import Input, Output, State
+
+# interner Zustand für Drag-Operation
+_drag_active = False
+_last_pos = None
+
+
+def register_drag_callbacks(app):
+    """
+    Registriert alle Drag-Callbacks für die chart-controls.
+    Wird in ui_init.py aufgerufen.
+    """
+
+    @app.callback(
+        Output("chart-controls", "style"),
+        Input("controls-listener", "event"),
+        State("chart-controls", "style"),
+    )
+    def move_controls(event, style):
+        global _drag_active, _last_pos
+
+        # Keine Events → nichts tun
+        if event is None:
+            return style
+
+        event_type = event.get("type")
+        x = event.get("clientX")
+        y = event.get("clientY")
+
+        # Drag starten
+        if event_type == "pointerdown":
+            _drag_active = True
+            _last_pos = (x, y)
+            style["cursor"] = "grabbing"
+            return style
+
+        # Drag bewegen
+        if event_type == "pointermove" and _drag_active:
+            dx = x - _last_pos[0]
+            dy = y - _last_pos[1]
+
+            # aktuelle Position aus style lesen
+            left = int(style.get("left", "20px").replace("px", ""))
+            top = int(style.get("top", "20px").replace("px", ""))
+
+            # neue Position setzen
+            style["left"] = f"{left + dx}px"
+            style["top"] = f"{top + dy}px"
+
+            # letzte Position aktualisieren
+            _last_pos = (x, y)
+            return style
+
+        # Drag beenden
+        if event_type == "pointerup":
+            _drag_active = False
+            style["cursor"] = "grab"
+            return style
+
+        return style

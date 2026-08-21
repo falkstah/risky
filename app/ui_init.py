@@ -13,4 +13,13 @@ socketio = SocketIO(server, cors_allowed_origins="*", async_mode="threading")
 
 # Dash app gebunden an Flask server
 #the type ignore is used to ignore th arg error that is a bug?
-app = Dash(__name__, server, suppress_callback_exceptions = True) # type: ignore[arg-type]
+import os
+from dash import Dash
+
+app = Dash(
+    __name__,
+    server=server, # type: ignore[arg-type]
+    suppress_callback_exceptions=True,
+    assets_folder=os.path.join(os.path.dirname(__file__), "..", "assets"),
+    assets_url_path="/assets"
+)
