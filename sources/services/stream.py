@@ -40,6 +40,9 @@ def restart_stream():
         )
         worker_thread.start()
 
+    socketio.emit("timeframe_changed")
+
+
 def run_stream(interval, stop_event):
     global df
     print(f"Starte Stream für", interval)
