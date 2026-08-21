@@ -1,31 +1,40 @@
+from typing import Dict, Any
 from dash import Input, Output, State
 
-# interner Zustand für Drag-Operation
-_drag_active = False
-_last_pos = None
+_drag_active: bool = False
+_last_pos: tuple[int, int] | None = None
 
 
 def register_drag_callbacks(app):
-    """
-    Registriert alle Drag-Callbacks für die chart-controls.
-    Wird in ui_init.py aufgerufen.
-    """
-
     @app.callback(
         Output("chart-controls", "style"),
         Input("controls-listener", "event"),
         State("chart-controls", "style"),
     )
-    def move_controls(event, style):
+    def move_controls(event: Dict[str, Any] | None,
+                      style: Dict[str, Any] | None) -> Dict[str, Any]:
         global _drag_active, _last_pos
 
-        # Keine Events → nichts tun
+        # Falls style None ist → Default-Style setzen
+        if style is None:
+            style = {
+                "position": "absolute",
+                "top": "20px",
+                "left": "20px",
+                "cursor": "grab",
+            }
+
+        # Kein Event → nichts tun
         if event is None:
             return style
 
         event_type = event.get("type")
         x = event.get("clientX")
         y = event.get("clientY")
+
+        # Wenn Koordinaten fehlen → nichts tun
+        if x is None or y is None or event_type is None:
+            return style
 
         # Drag starten
         if event_type == "pointerdown":
@@ -35,19 +44,19 @@ def register_drag_callbacks(app):
             return style
 
         # Drag bewegen
-        if event_type == "pointermove" and _drag_active:
+        if event_type == "pointermove" and _drag_active and _last_pos is not None:
             dx = x - _last_pos[0]
             dy = y - _last_pos[1]
 
-            # aktuelle Position aus style lesen
-            left = int(style.get("left", "20px").replace("px", ""))
-            top = int(style.get("top", "20px").replace("px", ""))
+            left_str = str(style.get("left", "20px")).replace("px", "")
+            top_str = str(style.get("top", "20px")).replace("px", "")
 
-            # neue Position setzen
+            left = int(left_str)
+            top = int(top_str)
+
             style["left"] = f"{left + dx}px"
             style["top"] = f"{top + dy}px"
 
-            # letzte Position aktualisieren
             _last_pos = (x, y)
             return style
 
