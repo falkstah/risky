@@ -17,3 +17,8 @@ plotlyScript.onload = () => console.log("Plotly geladen");
 
 document.head.appendChild(socketioScript);
 document.head.appendChild(plotlyScript);
+
+
+export function log(msg) {
+    console.log('[libs]', msg);
+}

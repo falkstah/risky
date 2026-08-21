@@ -1,3 +1,5 @@
+import io from '/socket.io/socket.io.js';
+
 const socket = io("http://127.0.0.1:8050", {
   transports: ["websocket"]
 });
@@ -51,3 +53,14 @@ socket.on("timeframe_changed", () => {
         }
     });
 });
+
+
+export async function initSocket() {
+    const socket = io();
+    console.log('[socket] verbunden');
+    return socket;
+}
+
+export function onSocketEvent(socket, event, handler) {
+    socket.on(event, handler);
+}
