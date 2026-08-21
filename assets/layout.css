@@ -26,6 +26,7 @@
 
     /*for overlay:*/
     position: relative;
+    overflow: visible;
 }
 
 /* verhindert Plotly-Layout-Sprünge */

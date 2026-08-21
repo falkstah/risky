@@ -65,7 +65,7 @@ def start_binance_polling(interval="1m"):
 
         candle = fetch_latest_candle(session, interval)
         if candle is None:
-            time.sleep(15)   #leaves more time for binance to fix error
+            time.sleep(2)   #leaves more time for binance to fix error
             continue
 
         message = {
@@ -79,5 +79,5 @@ def start_binance_polling(interval="1m"):
         }
 
         socketio.emit("binance_candle", json.dumps(message))
-        time.sleep(10)
+        time.sleep(1)
 
