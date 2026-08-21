@@ -9,3 +9,4 @@ plotlyScript.src = "https://cdn.plot.ly/plotly-2.27.0.min.js";
 document.head.appendChild(plotlyScript);
 
 plotlyScript.onload = () => console.log("Plotly geladen");
+socketioScript.onload = () => console.log("Socket.IO‑Client geladen");
