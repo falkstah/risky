@@ -1,0 +1,34 @@
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.chart-wrapper {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;   
+}
+
+.chart-title {
+    text-align: center;
+    color: white;
+    margin: 0;
+}
+
+.chart-area {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+
+    /*for overlay:*/
+    position: relative;
+}
+
+/* verhindert Plotly-Layout-Sprünge */
+.plotly-container * {
+    transition: none !important;
+}

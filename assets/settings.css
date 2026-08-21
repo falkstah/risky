@@ -1,0 +1,26 @@
+:root {
+    /* Farben */
+    --color-bg: #111;
+    --color-panel: #222;
+    --color-accent: #0af;
+    --color-border: #555;
+    --color-text: #fff;
+
+    /* Abstände */
+    --space-xs: 4px;
+    --space-s: 8px;
+    --space-m: 16px;
+    --space-l: 24px;
+
+    /* Radius */
+    --radius-s: 4px;
+    --radius-m: 8px;
+
+    /* Z-Index Layer */
+    --z-base: 1;
+    --z-overlay: 10;
+    --z-controls: 9999;
+
+    /* Fonts */
+    --font-main: Inter, Roboto, sans-serif;
+}

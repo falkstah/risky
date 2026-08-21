@@ -1,0 +1,98 @@
+.btn {
+    background: var(--color-panel);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn:hover {
+    background: #333;
+}
+
+.panel {
+    background: var(--color-panel);
+    padding: var(--space-m);
+    border-radius: var(--radius-m);
+}
+
+
+
+.chart-controls {
+    /*for overlay: to move with js, position has to be abs*/
+    position: absolute;
+    z-index: 10; /* overlay degree */
+
+    flex: 1; /*-> full height in chart wrapper*/
+    display: flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: stretch;
+    flex-shrink: 0;
+    width: 12vw;
+    min-width: 120px;
+    height: 80%; /* feste Basis für relative Verteilung */
+    gap: 1vw;
+
+    /* Der Trick: Chart überlappen, aber relativ */
+    /*margin-bottom: -5%;      /* schiebt Controls in den Chart hinein */
+    padding: 1vh 1vw;
+    background: rgba(20,20,20,0.7);
+    border-radius: 0.5em;
+
+    /* relative Struktur bleibt erhalten */
+
+    /*for text in chart-controls*/
+    container-type: inline-size; /* moderne Browser: erlaubt @container Regeln */
+    font-size: clamp(80px, 1.6vw, 20px); /* responsive container font */
+    line-height: 1.25;
+    text-align: center;
+
+    /*allows to move chat-controls with mouse*/
+    cursor: move;
+    top: 20px;
+    left: 20px;
+    pointer-events: auto; /* Panel reagiert auf Maus */
+}
+
+/* Buttons proportional zur Schrift, füllen Höhe ihrer Zeile */
+.chart-controls .timeframe-dropdown, .tool-item,
+.chart-controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  padding: 0.5em 0.8em;   /* skaliert mit font-size */
+  min-height: 2.6em;      /* verhindert zu kleine Buttons */
+  max-height: 6em;        /* schützt vor übergroßen Buttons */
+  box-sizing: border-box;
+}
+
+
+/*.timeframe-dropdown {
+}*/
+
+.drag-menu {
+    background: rgba(30,30,30,0.9);
+    padding: 1em;
+    border-radius: 0.5em;
+    min-width: 100px;
+    flex: 1
+}
+
+.tool-item {
+    background: #2b2b2b;          /* dunkles Grau mit Kontrast */
+    color: #fff;                  /* weiße Schrift */
+    border: 1px solid #555;       /* dezenter Rahmen */
+    padding: 6px 10px;
+    margin: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.tool-item:hover {
+    background: #444;             /* leicht heller beim Hover */
+}
