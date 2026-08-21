@@ -50,6 +50,12 @@ def register_callbacks(app, socketio=None):
     def update_chart(_, timeframe, entry_clicks, tp_clicks, sl_clicks):
         #inherit values from stream.py
         current_interval = stream.get_interval()
+
+        # Wenn Timeframe geändert wurde → Restart im Stream-Modul
+        if timeframe != current_interval or current_interval is None:
+            stream.set_interval(timeframe)
+            stream.restart_stream()
+
         df = stream.df
 
         # Wenn Timeframe geändert wurde → neuen Stream starten

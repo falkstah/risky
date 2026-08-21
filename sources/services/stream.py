@@ -2,17 +2,64 @@ import json
 import pandas as pd
 from flask_socketio import emit
 from app.ui_init import socketio
+import threading
+from binance_worker import fetch_latest_candle
 
-#globals:
-current_interval = "30m"
-df = pd.DataFrame()
+current_interval = None
+worker_thread = None
+stop_event = threading.Event()
+lock = threading.Lock()
+
+df = pd.DataFrame(columns=["t", "open", "high", "low", "close"]) # wird vom Worker aktualisiert
 
 def get_interval():
     return current_interval
 
 def set_interval(interval):
     global current_interval
-    current_interval = interval
+    with lock:
+        current_interval = interval
+
+def restart_stream():
+    global worker_thread, stop_event
+
+    with lock:
+        # alten Stream stoppen
+        stop_event.set()
+        if worker_thread and worker_thread.is_alive():
+            worker_thread.join(timeout=2)
+
+        # neuen Stop-Event erzeugen
+        stop_event = threading.Event()
+
+        # neuen Worker starten
+        worker_thread = threading.Thread(
+            target=run_stream,
+            args=(current_interval, stop_event),
+            daemon=True
+        )
+        worker_thread.start()
+
+def run_stream(interval, stop_event):
+    global df
+    print(f"Starte Stream für {interval}")
+
+    while not stop_event.is_set():
+        k = fetch_latest_candle(interval)
+        if k is None:
+            continue
+
+        # k ist ein Array → in Dict umwandeln
+        candle = {
+            "t": k[0],
+            "o": k[1],
+            "h": k[2],
+            "l": k[3],
+            "c": k[4]
+        }
+
+        update_df_from_binance(candle)
+
 
 def update_df_from_binance(k):
     global df
