@@ -1,24 +1,9 @@
-// Socket.IO laden
-const socketioScript = document.createElement("script");
-socketioScript.src = "https://cdn.socket.io/4.7.2/socket.io.min.js";
-socketioScript.onload = () => {
-  console.log("Socket.IO Client geladen");
-
-  // Jetzt erst dein Socket-Code laden
-  const socketScript = document.createElement("script");
-  socketScript.src = "assets/_socket.js";
-  document.head.appendChild(socketScript);
-};
-
-// Plotly laden
-const plotlyScript = document.createElement("script");
-plotlyScript.src = "https://cdn.plot.ly/plotly-2.27.0.min.js";
-plotlyScript.onload = () => console.log("Plotly geladen");
-
-document.head.appendChild(socketioScript);
-document.head.appendChild(plotlyScript);
-
+// module_folder/libs.js
 
 export function log(msg) {
     console.log('[libs]', msg);
+}
+
+export function formatPrice(price) {
+    return parseFloat(price).toFixed(2);
 }
