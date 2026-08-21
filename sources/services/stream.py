@@ -72,6 +72,7 @@ def run_stream(interval, stop_event):
 def update_df_from_binance(k):
     global df
 
+    #to dict:
     candle = {
         "t": pd.to_datetime(k["t"], unit="ms"),
         "open": float(k["o"]),
@@ -89,12 +90,3 @@ def update_df_from_binance(k):
         df = df.tail(30)
 
     return candle
-
-# SocketIO Event: Binance Worker sendet neue Candle
-@socketio.on("binance_candle")
-def handle_binance_candle(message):
-    candle = json.loads(message)
-
-    # Broadcast an alle Clients
-    emit("binance_candle", candle, broadcast=True)
-

@@ -53,8 +53,6 @@ def fetch_latest_candle(session, interval="1m"):
         return None
 
 
-
-
 def start_binance_polling(interval="1m"):
     print("Binance Worker (polling) wurde gestartet")
 
