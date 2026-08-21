@@ -5,13 +5,17 @@ from sources.services.processor import process_data
 from sources.services.plotter import create_plot
 
 def create_layout():
-    # ---------------------------------------------------------
-    # Globale Variablen
-    # ---------------------------------------------------------
-    current_interval = "1m"  # Standard-Timeframe
-    df = load_initial_candles(current_interval, 30)
-    df_processed = process_data(df)
-    fig = create_plot(df_processed)
+
+    #vollwtige figure, die später sofort vom callback sofort ersetzt wird
+    fig = {
+    "data": [],
+    "layout": {
+        "xaxis": {"rangeslider": {"visible": False}},
+        "yaxis": {"fixedrange": False},
+        "dragmode": "pan"
+    }
+}
+
 
 
     return html.Div(
@@ -42,12 +46,13 @@ def create_layout():
                                         {"label": "1 Minute", "value": "1m"},
                                         {"label": "5 Minuten", "value": "5m"},
                                         {"label": "15 Minuten", "value": "15m"},
+                                        {"label": "15 Minuten", "value": "30m"},
                                         {"label": "1 Stunde", "value": "1h"},
                                         {"label": "4 Stunden", "value": "4h"},
                                         {"label": "1 Tag", "value": "1d"},
                                         {"label": "1 Woche", "value": "1w"},
                                     ],
-                                    value="1m",
+                                    value="30m",
                                     clearable=False,
                                     className="timeframe-dropdown"
                                 ),
