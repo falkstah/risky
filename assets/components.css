@@ -29,14 +29,14 @@
 
     justify-content: center;
     align-items: stretch;
-    width: 12vw;
-    min-width: 120px;
+    width: 20vw;
+    min-width: 200px;
     height: auto; /* feste Basis für relative Verteilung */
     gap: 1vw;
 
     /* Der Trick: Chart überlappen, aber relativ */
     /*margin-bottom: -5%;      /* schiebt Controls in den Chart hinein */
-    padding: 1vh 1vw;
+    padding: 1.2vh 1vw;
     background: rgba(20,20,20,0.7);
     border-radius: 0.5em;
 
@@ -47,6 +47,10 @@
     font-size: clamp(20px, 1.6vw, 50px); /* responsive container font */
     line-height: 1.25;
     text-align: center;
+    font-size: clamp(14px, 1.4vw, 22px); /* Schrift skaliert mit Fenster */
+
+    /*dropdown:*/
+    overflow: visible;
 
     /*allows to move chat-controls with mouse*/
     cursor: grab;
@@ -55,6 +59,12 @@
 
     pointer-events: auto; /* Panel reagiert auf Maus */
 }
+
+.timeframe-dropdown {
+    position: relative;
+    z-index: 99999;
+}
+
 
 /* Buttons proportional zur Schrift, füllen Höhe ihrer Zeile */
 .chart-controls .timeframe-dropdown, .tool-item,
