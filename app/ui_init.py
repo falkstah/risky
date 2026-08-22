@@ -33,6 +33,7 @@ app.index_string = '''
     </head>
     <body>
         {%app_entry%}
+        {%renderer%}
         <footer>
             {%config%}
             {%scripts%}
