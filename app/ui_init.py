@@ -21,3 +21,24 @@ app = Dash(
     assets_folder=os.path.join(os.path.dirname(__file__), "..", "assets"),
     assets_url_path="/assets"
 )
+
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            <!-- Lädt deine Einstiegsdatei als echten ES6 Module Entry Point -->
+            <script type="module" src="/assets/script.js"></script>
+        </footer>
+    </body>
+</html>
+'''

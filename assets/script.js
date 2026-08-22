@@ -56,6 +56,7 @@ function startApp(libs, socket, chart) {
 
     // 13. Live-Candles vom Backend direkt an den Chart weiterleiten.
     socket.on('binance_candle', candle => {
+        console.log('[DEBUG script.js] Binance Candle empfangen:', candle);
         chart.updateLiveChart(candle);
     });
 
