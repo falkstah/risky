@@ -36,7 +36,7 @@ app.index_string = '''<!DOCTYPE html>
             {%config%}
             {%scripts%}
             {%renderer%}
-            <script type="module" src="/assets/script.js"></script>
+            <script type="module" src="/assets/module_folder/script.js"></script>
         </footer>
     </body>
 </html>
