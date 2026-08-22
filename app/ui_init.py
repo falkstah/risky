@@ -3,8 +3,12 @@ from flask import Flask
 from flask_socketio import SocketIO
 from dash import Dash
 
+# Absolute Pfade definieren
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_FOLDER = os.path.join(BASE_DIR, 'static')
+
 # Flask-Server & SocketIO Initialisierung
-server = Flask(__name__)
+server = Flask(__name__, static_folder=STATIC_FOLDER)
 server.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "replace-with-secure-key")
 
 socketio = SocketIO(server, cors_allowed_origins="*", async_mode="threading")
