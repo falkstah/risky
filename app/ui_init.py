@@ -18,7 +18,9 @@ app = Dash(
     server=server,  # type: ignore[arg-type]
     suppress_callback_exceptions=True,
     assets_folder=ASSETS_PATH,
-    assets_url_path="/assets"
+    assets_url_path="/assets",
+    #assets are loaded by html script-> blocking dash:
+    assets_ignore="module_folder"  # Ignoriert den kompletten Unterordner beim Auto-Inject!
 )
 
 # Custom Index Template mit type="module" für script.js
