@@ -22,8 +22,7 @@ app = Dash(
 )
 
 # Custom Index Template mit type="module" für script.js
-app.index_string = '''
-<!DOCTYPE html>
+app.index_string = '''<!DOCTYPE html>
 <html>
     <head>
         {%metas%}
@@ -33,10 +32,10 @@ app.index_string = '''
     </head>
     <body>
         {%app_entry%}
-        {%renderer%}
         <footer>
             {%config%}
             {%scripts%}
+            {%renderer%}
             <script type="module" src="/assets/script.js"></script>
         </footer>
     </body>
